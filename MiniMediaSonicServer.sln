@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.Api", "MiniMediaSonicServer.Api\MiniMediaSonicServer.Api.csproj", "{69D7C891-28F2-4E46-8ACB-0C93566CAEE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.Application", "MiniMediaSonicServer.Application\MiniMediaSonicServer.Application.csproj", "{787BB3EC-E38A-4466-99EB-94ED0607CD3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.Tests", "MiniMediaSonicServer.Tests\MiniMediaSonicServer.Tests.csproj", "{68A51D81-D27E-4127-BB8F-67995E2ABACA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{69D7C891-28F2-4E46-8ACB-0C93566CAEE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D7C891-28F2-4E46-8ACB-0C93566CAEE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D7C891-28F2-4E46-8ACB-0C93566CAEE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D7C891-28F2-4E46-8ACB-0C93566CAEE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{787BB3EC-E38A-4466-99EB-94ED0607CD3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{787BB3EC-E38A-4466-99EB-94ED0607CD3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{787BB3EC-E38A-4466-99EB-94ED0607CD3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{787BB3EC-E38A-4466-99EB-94ED0607CD3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68A51D81-D27E-4127-BB8F-67995E2ABACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68A51D81-D27E-4127-BB8F-67995E2ABACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68A51D81-D27E-4127-BB8F-67995E2ABACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68A51D81-D27E-4127-BB8F-67995E2ABACA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
