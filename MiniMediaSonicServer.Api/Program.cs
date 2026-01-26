@@ -39,6 +39,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidator>();
 
 builder.Services.Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"));
+builder.Services.Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"));
 
 //repositories
 builder.Services.AddScoped<UserRepository>();
