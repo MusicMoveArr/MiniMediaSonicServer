@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic;
 
@@ -44,6 +45,44 @@ public static class SubsonicResults
         // Default: XML
         var xml = SerializeXml(response);
         return Results.Text(xml, "text/xml; charset=utf-8");
+    }
+
+    public static ActionResult OkActionResult(HttpContext ctx, SubsonicResponse response)
+    {
+        return WriteActionResult(ctx, response);
+    }
+
+    public static ActionResult FailActionResult(HttpContext ctx, int code, string message)
+    {
+        var r = new SubsonicResponse
+        {
+            Status = "failed",
+            Error = new Error { Code = code, Message = message }
+        };
+        return WriteActionResult(ctx, r);
+    }
+
+    private static ActionResult WriteActionResult(HttpContext ctx, SubsonicResponse response)
+    {
+        var f = (ctx.Request.Query["f"].FirstOrDefault() ?? "").ToLowerInvariant();
+
+        if (f == "json" || f == "jsonp")
+        {
+            var env = new SubsonicEnvelope { Response = response };
+            
+            return new JsonResult(env, JsonOptions)
+            {
+                StatusCode = StatusCodes.Status200OK,
+                ContentType = "application/json"
+            };
+        }
+
+        return new ContentResult
+        {
+            ContentType = "text/xml; charset=utf-8",
+            Content = SerializeXml(response),
+            StatusCode = 200
+        };
     }
 
     private static string SerializeXml(SubsonicResponse response)

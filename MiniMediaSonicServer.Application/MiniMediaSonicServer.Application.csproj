@@ -20,6 +20,9 @@
       <Reference Include="Microsoft.AspNetCore.Http.Results">
         <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\9.0.11\ref\net9.0\Microsoft.AspNetCore.Http.Results.dll</HintPath>
       </Reference>
+      <Reference Include="Microsoft.AspNetCore.Mvc.Core">
+        <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\9.0.11\ref\net9.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
+      </Reference>
       <Reference Include="Microsoft.Extensions.Options">
         <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\9.0.11\ref\net9.0\Microsoft.Extensions.Options.dll</HintPath>
       </Reference>

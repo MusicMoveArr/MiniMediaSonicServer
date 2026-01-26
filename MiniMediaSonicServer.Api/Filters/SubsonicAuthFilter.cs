@@ -28,13 +28,19 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            context.Result = new ObjectResult(SubsonicResults.Fail(ctx, 10, "Required parameter is missing"));
+            context.Result = SubsonicResults.FailActionResult(ctx, 10, "Required parameter is missing");
             return;
         }
 
         var authenticated = false;
         var user = await _userRepository.GetUserByUsernameAsync(username);
-
+        
+        if (user == null)
+        {
+            context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
+            return;
+        }
+        
         if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrWhiteSpace(salt))
         {
             authenticated = ValidateToken(username, token, salt);
@@ -46,7 +52,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (!authenticated)
         {
-            context.Result = new ObjectResult(SubsonicResults.Fail(ctx, 40, "Wrong username or password"));
+            context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
             return;
         }
 
