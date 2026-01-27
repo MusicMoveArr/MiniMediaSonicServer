@@ -36,6 +36,12 @@ public class AlbumRepository
 						     where m.albumid = al.albumid 
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
+						                
+						where (CASE 
+				             WHEN @type = 'byGenre' THEN 
+								m.genre_list ILIKE '%' || @genre || '%'
+				             ELSE true
+				         END)
  						
 						ORDER BY
 				         CASE 
@@ -60,7 +66,8 @@ public class AlbumRepository
 	        {
 		        limit = request.Size,
 		        type = request.Type,
-		        offset = request.Offset
+		        offset = request.Offset,
+		        genre = request.Genre
 	        })).ToList();
 
         foreach (var result in results)

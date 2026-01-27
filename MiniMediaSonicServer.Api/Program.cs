@@ -48,6 +48,7 @@ builder.Services.AddScoped<StreamRepository>();
 builder.Services.AddScoped<TrackCoverRepository>();
 builder.Services.AddScoped<ArtistRepository>();
 builder.Services.AddScoped<TrackRepository>();
+builder.Services.AddScoped<PlaylistRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<CoverService>();
 builder.Services.AddScoped<ArtistService>();
 builder.Services.AddScoped<TrackService>();
+builder.Services.AddScoped<PlaylistService>();
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
 

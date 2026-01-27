@@ -93,4 +93,12 @@ public class SubsonicResponse
     [XmlElement("genres")]
     [JsonPropertyName("genres")]
     public Genres? Genres { get; set; }
+    
+    [XmlElement("playlist")]
+    [JsonPropertyName("playlist")]
+    public Playlist? Playlist { get; set; }
+    
+    [XmlElement("playlists")]
+    [JsonPropertyName("playlists")]
+    public Playlists? Playlists { get; set; }
 }
