@@ -11,7 +11,7 @@ This roadmap will be ongoing as the project keeps going
 - [ ] Support for all OpenSubsonic API's
 - [ ] Support for all Navidrome API's
 - [x] Legacy Subsonic authentication (needs to be improved still)
-- [ ] Token-based Subsonic authentication
+- [x] Token-based Subsonic authentication
 - [x] Get similar tracks from Tidal
 - [ ] Redis caching
 
@@ -24,7 +24,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | ChangePassword             | Not yet |  |
 | CreateBookmark             | Not yet |  |
 | CreateInternetRadioStation | Not yet |  |
-| CreatePlaylist             | Not yet |  |
+| CreatePlaylist             | Working |  |
 | CreatePodcastChannel       | Not yet |  |
 | CreateShare                | Not yet |  |
 | CreateUser                 | Not yet |  |
@@ -49,7 +49,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetCaptions                | Not yet |  |
 | GetChatMessages            | Not yet |  |
 | GetCoverArt                | Working |  |
-| GetGenres                  | Not yet |  |
+| GetGenres                  | Working |  |
 | GetIndexes                 | Not yet |  |
 | GetInternetRadioStations   | Not yet |  |
 | GetLicense                 | Not yet |  |
@@ -60,8 +60,8 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetNewestPodcasts          | Not yet |  |
 | GetNowPlaying              | Not yet |  |
 | GetOpenSubsonicExtensions  | Not yet |  |
-| GetPlaylist                | Not yet |  |
-| GetPlaylists               | Not yet |  |
+| GetPlaylist                | Working |  |
+| GetPlaylists               | Working |  |
 | GetPlayQueueByIndex        | Not yet |  |
 | GetPlayQueue               | Not yet |  |
 | GetPodcastEpisode          | Not yet |  |
@@ -90,7 +90,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | SavePlayQueue              | Not yet |  |
 | Scrobble                   | Not yet |  |
 | Search2                    | Not yet |  |
-| Search3                    | Not yet |  |
+| Search3                    | Working |  |
 | Search                     | Not yet |  |
 | SetRating                  | Not yet |  |
 | Star                       | Not yet |  |
@@ -99,7 +99,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | TokenInfo                  | Not yet |  |
 | Unstar                     | Not yet |  |
 | UpdateInternetRadioStation | Not yet |  |
-| UpdatePlaylist             | Not yet |  |
+| UpdatePlaylist             | Working |  |
 | UpdateShare                | Not yet |  |
 | UpdateUser                 | Not yet |  |
                              
