@@ -19,6 +19,11 @@ public class StreamController : SonicControllerBase
     public async Task<IResult> Get([FromQuery] StreamRequest request)
     {
         var path = await _streamService.GetTrackPathByIdResponseAsync(request.Id);
+
+        if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
+        {
+            return SubsonicResults.Fail(HttpContext, 0, "Track not found");
+        }
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));
         return Results.File(path, contentType, enableRangeProcessing: true);
