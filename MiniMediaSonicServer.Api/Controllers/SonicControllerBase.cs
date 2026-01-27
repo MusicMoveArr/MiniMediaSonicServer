@@ -7,13 +7,13 @@ namespace MiniMediaSonicServer.Api.Controllers;
 
 public abstract class SonicControllerBase : ControllerBase
 {
+    protected UserModel User => HttpContext.Items["user"] as UserModel;
+    
     protected User GetUserModel()
     {
-        var dbuser = HttpContext.Items["user"] as UserModel;
-
         return new User
         {
-            Username = dbuser.Username
+            Username = User.Username
         };
     }
 }
