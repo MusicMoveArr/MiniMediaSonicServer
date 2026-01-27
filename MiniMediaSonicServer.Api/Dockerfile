@@ -7,10 +7,11 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MiniMediaSonicServer/MiniMediaSonicServer.Api.csproj", "MiniMediaSonicServer.Api/"]
-RUN dotnet restore "MiniMediaSonicServer/MiniMediaSonicServer.Api.csproj"
+COPY ["MiniMediaSonicServer.Api/MiniMediaSonicServer.Api.csproj", "MiniMediaSonicServer.Api/"]
+COPY ["MiniMediaSonicServer.Application/MiniMediaSonicServer.Application.csproj", "MiniMediaSonicServer.Application/"]
+RUN dotnet restore "MiniMediaSonicServer.Api/MiniMediaSonicServer.Api.csproj"
 COPY . .
-WORKDIR "/src/MiniMediaSonicServer"
+WORKDIR "/src/MiniMediaSonicServer.Api"
 RUN dotnet build "./MiniMediaSonicServer.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
