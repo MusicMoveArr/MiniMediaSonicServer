@@ -101,4 +101,8 @@ public class SubsonicResponse
     [XmlElement("playlists")]
     [JsonPropertyName("playlists")]
     public Playlists? Playlists { get; set; }
+    
+    [XmlElement("searchResult3")]
+    [JsonPropertyName("searchResult3")]
+    public SearchResult3? SearchResult3 { get; set; }
 }

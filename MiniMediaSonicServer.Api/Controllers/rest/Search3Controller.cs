@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
+using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Controllers.rest;
 
@@ -7,9 +10,23 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 [Route("/rest/[controller].view")]
 public class Search3Controller : SonicControllerBase
 {
-    [HttpGet, HttpPost]
-    public async Task<IResult> Get()
+    private readonly SearchService _searchService;
+    public Search3Controller(SearchService searchService)
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel()));
+        _searchService = searchService;
+    }
+    
+    [HttpGet, HttpPost]
+    public async Task<IResult> Get([FromQuery] Search3Request request)
+    {
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        {
+            SearchResult3 = new SearchResult3
+            {
+                Artists = await _searchService.SearchArtistsAsync(request.Query, request.ArtistCount),
+                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount),
+                Tracks = await _searchService.SearchTracksAsync(request.Query, request.SongCount),
+            }
+        });
     }
 }

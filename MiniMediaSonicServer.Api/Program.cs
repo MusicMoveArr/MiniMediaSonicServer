@@ -49,6 +49,7 @@ builder.Services.AddScoped<TrackCoverRepository>();
 builder.Services.AddScoped<ArtistRepository>();
 builder.Services.AddScoped<TrackRepository>();
 builder.Services.AddScoped<PlaylistRepository>();
+builder.Services.AddScoped<SearchRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
@@ -57,6 +58,7 @@ builder.Services.AddScoped<CoverService>();
 builder.Services.AddScoped<ArtistService>();
 builder.Services.AddScoped<TrackService>();
 builder.Services.AddScoped<PlaylistService>();
+builder.Services.AddScoped<SearchService>();
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
 
@@ -77,6 +79,5 @@ app.UseSwaggerUI();
 app.UseRouting();
 app.UseCors();
 app.UseEndpoints(endpoints => endpoints.MapControllers());
-
 
 app.Run();
