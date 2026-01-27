@@ -18,6 +18,7 @@ public class CoverService
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
             .DistinctBy(dir => dir.Name)
+            .Where(dir => dir.Exists)
             .SelectMany(dir => dir.GetFiles("*.jpg", SearchOption.TopDirectoryOnly))
             .Select(dir => dir)
             .FirstOrDefault();
@@ -28,7 +29,7 @@ public class CoverService
             return File.ReadAllBytes(coverFileInfo.FullName);
         }
         
-        foreach (string trackPath in trackPaths)
+        foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
         {
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
@@ -48,6 +49,7 @@ public class CoverService
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory.Parent)
             .DistinctBy(dir => dir.Name)
+            .Where(dir => dir.Exists)
             .SelectMany(dir => dir.GetFiles("*.jpg", SearchOption.TopDirectoryOnly))
             .Select(dir => dir)
             .FirstOrDefault();
@@ -58,7 +60,7 @@ public class CoverService
             return File.ReadAllBytes(coverFileInfo.FullName);
         }
         
-        foreach (string trackPath in trackPaths)
+        foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
         {
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
