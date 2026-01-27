@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
@@ -17,5 +18,10 @@ public class TrackService
     public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count)
     {
         return await _trackRepository.GetSimilarTracksAsync(trackId, count);
+    }
+
+    public async Task<List<GenreCountModel>> GetAllGenresAsync()
+    {
+        return await _trackRepository.GetAllGenresAsync();
     }
 }

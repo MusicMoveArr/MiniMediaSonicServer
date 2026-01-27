@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
-using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using Npgsql;
 
 namespace MiniMediaSonicServer.Application.Repositories;
@@ -11,6 +10,7 @@ namespace MiniMediaSonicServer.Application.Repositories;
 public class TrackRepository
 {
     private readonly DatabaseConfiguration _databaseConfiguration;
+    
     public TrackRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
     {
         _databaseConfiguration = databaseConfiguration.Value;
@@ -106,4 +106,26 @@ public class TrackRepository
 
         return results;
     }
+    
+    
+    public async Task<List<GenreCountModel>> GetAllGenresAsync()
+    {
+        string query = @"SELECT
+						     TRIM(t.genre) AS Genre,
+						     COUNT(*) AS SongCount,
+    						 COUNT(DISTINCT m.albumid) AS AlbumCount
+						 FROM metadata m
+						 JOIN LATERAL unnest(string_to_array(m.genre_list, ';')) AS t(genre) ON TRUE
+						 WHERE m.genre_list is not null
+						 GROUP BY TRIM(t.genre)";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+        
+
+        return (await conn
+		        .QueryAsync<GenreCountModel>(query))
+				.ToList();
+    }
+    
+    
 }

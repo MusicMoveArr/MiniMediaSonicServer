@@ -89,4 +89,8 @@ public class SubsonicResponse
     [XmlElement("similarSongs2")]
     [JsonPropertyName("similarSongs2")]
     public SimilarSongsList2Response? SimilarSongsList2 { get; set; }
+    
+    [XmlElement("genres")]
+    [JsonPropertyName("genres")]
+    public Genres? Genres { get; set; }
 }
