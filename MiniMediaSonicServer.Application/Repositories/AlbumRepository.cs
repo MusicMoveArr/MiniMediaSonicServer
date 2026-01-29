@@ -40,7 +40,7 @@ public class AlbumRepository
 						where al.record_id > @offset and al.record_id < @offset + @limit
 							 and (CASE 
 					             WHEN @type = 'byGenre' THEN 
-									m.genre_list ILIKE '%' || @genre || '%'
+									m.computed_genre ILIKE '%' || @genre || '%'
 					             ELSE true
 					         END)
  						
@@ -130,7 +130,7 @@ public class AlbumRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
-							regexp_substr(t.tags->>'bpm', '[0-9]+(\.[0-9]+)?') as BPM,
+							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
 							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,

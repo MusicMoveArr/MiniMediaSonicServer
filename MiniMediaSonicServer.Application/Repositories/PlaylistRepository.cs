@@ -94,7 +94,7 @@ public class PlaylistRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
-							regexp_substr(t.tags->>'bpm', '[0-9]+(\.[0-9]+)?') as BPM,
+							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
 							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,

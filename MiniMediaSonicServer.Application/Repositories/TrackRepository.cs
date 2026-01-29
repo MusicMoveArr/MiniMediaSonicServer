@@ -29,7 +29,7 @@ public class TrackRepository
  							sim_ta.Name as Artist,
  							sim_m.Tag_Track as TrackNumber,
  							sim_m.Tag_Year as Year,
- 							'' as Genre,
+ 							sim_m.computed_genre as Genre,
  							9999 as Size,
  							case 
  								when sim_m.Path ilike '%.mp3' then 'audio/mpeg'
@@ -59,7 +59,7 @@ public class TrackRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
-							regexp_substr(t.tags->>'bpm', '[0-9]+(\.[0-9]+)?') as BPM,
+							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
 							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,
@@ -115,8 +115,8 @@ public class TrackRepository
 						     COUNT(*) AS SongCount,
     						 COUNT(DISTINCT m.albumid) AS AlbumCount
 						 FROM metadata m
-						 JOIN LATERAL unnest(string_to_array(m.genre_list, ';')) AS t(genre) ON TRUE
-						 WHERE m.genre_list is not null
+						 JOIN LATERAL unnest(string_to_array(m.computed_genre, ';')) AS t(genre) ON TRUE
+						 WHERE m.computed_genre is not null
 						 GROUP BY TRIM(t.genre)";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
