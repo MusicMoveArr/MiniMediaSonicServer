@@ -6,7 +6,7 @@ There is a lot of work to be done still, but the basics work (playing a track, s
 
 My main goal is to come as close as possible to a real service, so that means performance, features they provide (covers, similar tracks etc)
 
-# Roadmap
+## Roadmap
 This roadmap will be ongoing as the project keeps going
 - [ ] Support for all OpenSubsonic API's
 - [ ] Support for all Navidrome API's
@@ -15,7 +15,55 @@ This roadmap will be ongoing as the project keeps going
 - [x] Get similar tracks from Tidal
 - [ ] Redis caching
 
-# Implemented API's
+## Docker Compose
+```
+services:
+  main_app:
+    container_name: MiniMediaSonicServer
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    hostname: MiniMediaSonicServer
+    image: musicmovearr/minimediasonicserver:latest
+    ports:
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    restart: always
+    volumes:
+      - type: bind
+        source: /DATA/AppData/MiniMediaSonicServer/appsettings.json
+        target: /app/appsettings.json
+      - ~/Music:~/Music:ro
+```
+
+## Example Configuration
+It's important you bind this file to /app/appsettings.json as above in the docker example
+
+Change the connectionstring to your own postgres database
+
+Change the "aaaaaaa" with a random 64character string, for example on linux you can run, openssl rand -hex 32
+
+```
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "DatabaseConfiguration":{
+    "ConnectionString": "Host=192.168.1.1;Username=postgres;Password=postgres;Database=minimedia;Pooling=true;MinPoolSize=5;MaxPoolSize=100;"
+  },
+  "EncryptionKeys": {
+    "UserPasswordKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}
+```
+
+## Implemented API's
 A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind you with missing API implementations
 
 | API | Implemented | Status | 
