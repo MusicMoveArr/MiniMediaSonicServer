@@ -105,4 +105,12 @@ public class SubsonicResponse
     [XmlElement("searchResult3")]
     [JsonPropertyName("searchResult3")]
     public SearchResult3? SearchResult3 { get; set; }
+
+    [XmlElement("artistInfo2")]
+    [JsonPropertyName("artistInfo2")]
+    public ArtistInfo2? ArtistInfo2 { get; set; }
+
+    [XmlElement("song")]
+    [JsonPropertyName("song")]
+    public TrackID3? Song { get; set; }
 }

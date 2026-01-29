@@ -24,4 +24,9 @@ public class TrackService
     {
         return await _trackRepository.GetAllGenresAsync();
     }
+
+    public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId)
+    {
+        return await _trackRepository.GetTrackByIdAsync(trackId);
+    }
 }
