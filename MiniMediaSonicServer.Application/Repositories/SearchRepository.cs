@@ -16,10 +16,10 @@ public class SearchRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<ArtistID3>> SearchArtistsAsync(string searchquery, int count)
+    public async Task<List<ArtistID3>> SearchArtistsAsync(string searchquery, int count, int offset)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
-						 SELECT distinct on (a.ArtistId)
+						 SELECT distinct on (a.record_id)
     						a.ArtistId as Id,
     						a.Name as Name,
     						'artist_' || a.ArtistId as CoverArt,
@@ -29,7 +29,9 @@ public class SearchRepository
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
-						 where lower(a.Name) % lower(@searchquery)
+						 where 
+							a.record_id > @offset and a.record_id < @offset + @count
+							and length(@searchquery) = 0 or lower(a.Name) % lower(@searchquery)
 						 limit @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -43,7 +45,8 @@ public class SearchRepository
 		        param: new
 		        {
 			        searchquery,
-			        count
+			        count,
+			        offset
 		        },
 		        transaction: transaction)).ToList();
         }
@@ -59,7 +62,7 @@ public class SearchRepository
         return results;
     }
     
-    public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count)
+    public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count, int offset)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
 						 SELECT 
@@ -80,7 +83,9 @@ public class SearchRepository
 						     where m.albumid = al.albumid 
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
-						 where lower(al.Title) % lower(@searchquery)
+						 where 
+							al.record_id > @offset and al.record_id < @offset + @count
+							and length(@searchquery) = 0 or lower(al.Title) % lower(@searchquery)
 						 limit @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -94,7 +99,8 @@ public class SearchRepository
 			    param: new
 			    {
 				    searchquery,
-				    count
+				    count,
+				    offset
 			    },
 			    transaction: transaction)).ToList();
 	    }
@@ -110,7 +116,7 @@ public class SearchRepository
 	    return results;
     }
     
-    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count)
+    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
 						 SELECT 
@@ -154,11 +160,11 @@ public class SearchRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
-							regexp_substr(t.tags->>'bpm', '[0-9]*') as BPM,
-							regexp_substr(t.tags->>'replaygain_track_gain', '[0-9\-\.]*') as TrackGain,
-							regexp_substr(t.tags->>'replaygain_album_gain', '[0-9\-\.]*') as AlbumGain,
-							regexp_substr(t.tags->>'replaygain_track_peak', '[0-9\-\.]*') as TrackPeak,
-							regexp_substr(t.tags->>'replaygain_album_peak', '[0-9\-\.]*') as AlbumPeak,
+							regexp_substr(t.tags->>'bpm', '[0-9]+(\.[0-9]+)?') as BPM,
+							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
+							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
+							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,
+							regexp_substr(t.tags->>'replaygain_album_peak', '-?[0-9]+(\.[0-9]+)?') as AlbumPeak,
  							    
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
@@ -186,8 +192,9 @@ public class SearchRepository
 						    FROM jsonb_each_text(m.tag_alljsontags)
 						  ) t ON TRUE
 
-
-						 where lower(m.Title) % lower(@searchquery)
+						 where 
+							m.record_id > @offset and m.record_id < @offset + @count
+							and length(@searchquery) = 0 or lower(m.Title) % lower(@searchquery)
 						 limit @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -226,14 +233,14 @@ public class SearchRepository
 				    {
 					    track.Artists.Add(new NameIdEntity(extraArtist.Id, extraArtist.Name));
 				    }
-
 				    return track;
 			    },
 			    splitOn: "TrackId, TrackGain, Id",
 			    param: new
 			    {
 				    searchquery,
-				    count
+				    count,
+				    offset
 			    })).ToList();
 	    }
 	    catch (Exception ex)

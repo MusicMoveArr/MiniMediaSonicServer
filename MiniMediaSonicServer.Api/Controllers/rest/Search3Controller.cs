@@ -19,13 +19,18 @@ public class Search3Controller : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] Search3Request request)
     {
+        if (request.Query == "\"\"")
+        {
+            request.Query = string.Empty;
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
         {
             SearchResult3 = new SearchResult3
             {
-                Artists = await _searchService.SearchArtistsAsync(request.Query, request.ArtistCount),
-                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount),
-                Tracks = await _searchService.SearchTracksAsync(request.Query, request.SongCount),
+                Artists = await _searchService.SearchArtistsAsync(request.Query, request.ArtistCount, request.ArtistOffset),
+                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset),
+                Tracks = await _searchService.SearchTracksAsync(request.Query, request.SongCount, request.SongOffset),
             }
         });
     }

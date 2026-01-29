@@ -37,11 +37,12 @@ public class AlbumRepository
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
 						                
-						where (CASE 
-				             WHEN @type = 'byGenre' THEN 
-								m.genre_list ILIKE '%' || @genre || '%'
-				             ELSE true
-				         END)
+						where al.record_id > @offset and al.record_id < @offset + @limit
+							 and (CASE 
+					             WHEN @type = 'byGenre' THEN 
+									m.genre_list ILIKE '%' || @genre || '%'
+					             ELSE true
+					         END)
  						
 						ORDER BY
 				         CASE 
@@ -56,7 +57,6 @@ public class AlbumRepository
 				         CASE 
 				             WHEN @type IN ('recent', 'newest') THEN recent_m.file_creationtime
 				         END DESC
-				         offset @offset
                          limit @limit";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -130,11 +130,11 @@ public class AlbumRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
-							regexp_substr(t.tags->>'bpm', '[0-9]*') as BPM,
-							regexp_substr(t.tags->>'replaygain_track_gain', '[0-9\-\.]*') as TrackGain,
-							regexp_substr(t.tags->>'replaygain_album_gain', '[0-9\-\.]*') as AlbumGain,
-							regexp_substr(t.tags->>'replaygain_track_peak', '[0-9\-\.]*') as TrackPeak,
-							regexp_substr(t.tags->>'replaygain_album_peak', '[0-9\-\.]*') as AlbumPeak,
+							regexp_substr(t.tags->>'bpm', '[0-9]+(\.[0-9]+)?') as BPM,
+							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
+							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
+							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,
+							regexp_substr(t.tags->>'replaygain_album_peak', '-?[0-9]+(\.[0-9]+)?') as AlbumPeak,
  							    
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
@@ -199,10 +199,7 @@ public class AlbumRepository
 				    track.Artists.Add(new NameIdEntity(extraArtist.Id, extraArtist.Name));
 			    }
 			    
-			    
-			    
 			    album.Artists = [new NameIdEntity(album.ArtistId, album.Artist)];
-
 			    album.Song.Add(track);
 			    return album;
 		    },
