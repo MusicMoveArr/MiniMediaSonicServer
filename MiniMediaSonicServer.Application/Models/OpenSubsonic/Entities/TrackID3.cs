@@ -167,15 +167,15 @@ public class TrackID3
 
     [XmlElement("isrc")]
     [JsonPropertyName("isrc")]
-    public List<string> Isrc { get; set; }
+    public List<string> Isrc { get; set; } = new List<string>();
 
     [XmlElement("genres")]
     [JsonPropertyName("genres")]
-    public List<NameEntity> Genres { get; set; }
+    public List<NameEntity> Genres { get; set; } = new List<NameEntity>();
 
     [XmlElement("artists")]
     [JsonPropertyName("artists")]
-    public List<NameIdEntity> Artists { get; set; }
+    public List<NameIdEntity> Artists { get; set; } = new List<NameIdEntity>();
 
     [XmlAttribute("displayArtist")]
     [JsonPropertyName("displayArtist")]
@@ -183,7 +183,7 @@ public class TrackID3
 
     [XmlElement("albumArtists")]
     [JsonPropertyName("albumArtists")]
-    public List<NameIdEntity> AlbumArtists { get; set; }
+    public List<NameIdEntity> AlbumArtists { get; set; } = new List<NameIdEntity>();
 
     [XmlAttribute("displayAlbumArtist")]
     [JsonPropertyName("displayAlbumArtist")]
@@ -199,7 +199,7 @@ public class TrackID3
 
     [XmlElement("moods")]
     [JsonPropertyName("moods")]
-    public List<string> Moods { get; set; }
+    public List<string> Moods { get; set; } = new List<string>();
 
     [XmlElement("replayGain")]
     [JsonPropertyName("replayGain")]

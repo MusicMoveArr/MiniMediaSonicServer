@@ -213,18 +213,8 @@ public class TrackRepository
 
 			    if (!string.IsNullOrWhiteSpace(track.Isrc_Single))
 			    {
-				    if (track.Isrc == null)
-				    {
-					    track.Isrc = new List<string>();
-				    }
 				    track.Isrc.Add(track.Isrc_Single);
 			    }
-
-			    if (track.Artists == null)
-			    {
-				    track.Artists = new List<NameIdEntity>();
-			    }
-
 			    if (!track.Artists.Any(a => a.Id == track.ArtistId))
 			    {
 				    track.Artists.Add(new NameIdEntity(track.ArtistId, track.Artist));
