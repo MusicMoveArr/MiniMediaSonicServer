@@ -22,11 +22,11 @@ public class RatingRepository
 							@rating,
 							false,
 						    t.tags->>'artist',
-						    COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'),
-						    t.tags->>'artists',
-						    t.tags->>'album',
+						    COALESCE(COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'), ''),
+						    COALESCE(t.tags->>'artists', ''),
+						    COALESCE(t.tags->>'album', ''),
 						    m.Title,
-						    t.tags->>'isrc',
+						    COALESCE(t.tags->>'isrc', ''),
 						 	current_timestamp,
 						 	current_timestamp
 						 FROM metadata m
@@ -60,11 +60,11 @@ public class RatingRepository
 							0,
 							@star,
 						    t.tags->>'artist',
-						    COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'),
-						    t.tags->>'artists',
-						    t.tags->>'album',
+						    COALESCE(COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'), ''),
+						    COALESCE(t.tags->>'artists', ''),
+						    COALESCE(t.tags->>'album', ''),
 						    m.Title,
-						    t.tags->>'isrc',
+						    COALESCE(t.tags->>'isrc', ''),
 						 	current_timestamp,
 						 	current_timestamp
 						 FROM metadata m
