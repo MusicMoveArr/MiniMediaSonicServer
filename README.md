@@ -119,7 +119,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetShares                  | Not yet |  |
 | GetSimilarSongs2           | Working |  |
 | GetSimilarSongs            | Not yet |  |
-| GetSong                    | Not yet |  |
+| GetSong                    | Working |  |
 | GetSongsByGenre            | Not yet |  |
 | GetStarred2                | Not yet |  |
 | GetStarred                 | Not yet |  |
@@ -140,12 +140,12 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | Search2                    | Not yet |  |
 | Search3                    | Working |  |
 | Search                     | Not yet |  |
-| SetRating                  | Not yet |  |
-| Star                       | Not yet |  |
+| SetRating                  | Working |  |
+| Star                       | Working |  |
 | StartScan                  | Not yet |  |
 | Stream                     | Working |  |
 | TokenInfo                  | Not yet |  |
-| Unstar                     | Not yet |  |
+| Unstar                     | Working |  |
 | UpdateInternetRadioStation | Not yet |  |
 | UpdatePlaylist             | Working |  |
 | UpdateShare                | Not yet |  |
