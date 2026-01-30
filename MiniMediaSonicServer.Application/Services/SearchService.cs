@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -28,5 +29,10 @@ public class SearchService
     public async Task<List<TrackID3>> SearchTracksAsync(string query, int count, int offset)
     {
         return await _searchRepository.SearchTracksAsync(query, count, offset);
+    }
+
+    public async Task<ID3Type?> GetID3TypeAsync(Guid id)
+    {
+        return await _searchRepository.GetID3TypeAsync(id);
     }
 }

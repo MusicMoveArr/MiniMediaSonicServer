@@ -49,6 +49,7 @@ builder.Services.AddScoped<ArtistRepository>();
 builder.Services.AddScoped<TrackRepository>();
 builder.Services.AddScoped<PlaylistRepository>();
 builder.Services.AddScoped<SearchRepository>();
+builder.Services.AddScoped<RatingRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
@@ -58,6 +59,7 @@ builder.Services.AddScoped<ArtistService>();
 builder.Services.AddScoped<TrackService>();
 builder.Services.AddScoped<PlaylistService>();
 builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<RatingService>();
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
 

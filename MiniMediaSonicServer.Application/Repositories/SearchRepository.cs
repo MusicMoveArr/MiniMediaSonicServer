@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using Npgsql;
@@ -253,5 +254,25 @@ public class SearchRepository
 	    }
 
 	    return results;
+    }
+    
+    
+    public async Task<ID3Type?> GetID3TypeAsync(Guid id)
+    {
+	    string query = @"select
+						 	case 
+						 	    when exists (select 1 from artists where artistid = @id)  then 1
+						 		when exists (select 1 from albums where albumid = @id) then 2
+						 		when exists (select 1 from metadata where metadataid = @id) then 3
+						 		else 0
+						 	end";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<ID3Type>(query,
+		    param: new
+		    {
+			    id
+		    });
     }
 }
