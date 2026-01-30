@@ -90,6 +90,11 @@ public class CoverService
             .Take(4)
             .ToList();
 
+        if (!coverFileInfo.Any())
+        {
+            return null;
+        }
+
         if (coverFileInfo.Count < 4)
         {
             //todo: implement redis for caching
