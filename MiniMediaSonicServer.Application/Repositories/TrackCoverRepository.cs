@@ -47,4 +47,20 @@ public class TrackCoverRepository
                 artistId
             })).ToList();
     }
+    
+    public async Task<List<string>> GetTrackPathByPlaylistIdAsync(Guid playlistId)
+    {
+        string query = @"SELECT m.path
+						 FROM sonicserver_playlist_track track
+						 JOIN metadata m on m.MetadataId = track.TrackId
+						 where track.PlaylistId = @playlistId";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        return (await conn.QueryAsync<string>(query,
+            param: new
+            {
+                playlistId
+            })).ToList();
+    }
 }
