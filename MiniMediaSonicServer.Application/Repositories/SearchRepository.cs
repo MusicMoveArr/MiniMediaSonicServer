@@ -25,8 +25,14 @@ public class SearchRepository
     						a.Name as Name,
     						'artist_' || a.ArtistId as CoverArt,
     						'' as ArtistImageUrl,
-    						album_count.albums as AlbumCount
+    						album_count.albums as AlbumCount,
+ 							artist_rated.Rating as UserRating,
+ 							(case when artist_rated.Starred = true 
+ 							    then artist_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
 						 FROM artists a
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
@@ -74,9 +80,15 @@ public class SearchRepository
 						 	m.tag_year as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created
+							m.file_creationtime as Created,
+ 							album_rated.Rating as UserRating,
+ 							(case when album_rated.Starred = true 
+ 							    then album_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
 						 LEFT JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 LEFT JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
@@ -161,6 +173,13 @@ public class SearchRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
+
+ 							track_rated.Rating as UserRating,
+ 							(case when track_rated.Starred = true 
+ 							    then track_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+
 							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
@@ -172,6 +191,7 @@ public class SearchRepository
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
+						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  							    
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(

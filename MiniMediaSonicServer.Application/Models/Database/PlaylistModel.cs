@@ -14,5 +14,5 @@ public class PlaylistModel
     //extra
     public int SongCount { get; set; }
     public int TotalDuration { get; set; }
-    public List<TrackID3> Tracks { get; set; }
+    public List<TrackID3> Tracks { get; set; } = new List<TrackID3>();
 }

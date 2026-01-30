@@ -26,9 +26,15 @@ public class AlbumRepository
 						 	m.tag_year as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created
+							m.file_creationtime as Created,
+ 							album_rated.Rating as UserRating,
+ 							(case when album_rated.Starred = true 
+ 							    then album_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
@@ -89,6 +95,11 @@ public class AlbumRepository
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
  							m.file_creationtime as Created,
+ 							album_rated.Rating as UserRating,
+ 							(case when album_rated.Starred = true 
+ 							    then album_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
  							
  							m.MetadataId as TrackId,
  							al.AlbumId as Parent,
@@ -130,6 +141,13 @@ public class AlbumRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
+ 							    
+ 							track_rated.Rating as UserRating,
+ 							(case when track_rated.Starred = true 
+ 							    then track_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+ 							    
 							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
@@ -141,6 +159,8 @@ public class AlbumRepository
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
  							    
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(

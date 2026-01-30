@@ -113,9 +113,9 @@ public class TrackID3
     [JsonPropertyName("created")]
     public string Created { get; set; }
 
-    [XmlAttribute("starred")]
+    [XmlElement("starred")]
     [JsonPropertyName("starred")]
-    public string Starred { get; set; }
+    public DateTime? Starred { get; set; }
 
     [XmlAttribute("albumId")]
     [JsonPropertyName("albumId")]

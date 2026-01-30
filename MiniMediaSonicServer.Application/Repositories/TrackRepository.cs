@@ -59,6 +59,13 @@ public class TrackRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
+ 							
+ 							track_rated.Rating as UserRating,
+ 							(case when track_rated.Starred = true 
+ 							    then track_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+ 							
 							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
@@ -68,6 +75,7 @@ public class TrackRepository
 						  FROM artists a
 						  JOIN albums al ON al.artistid = a.artistid
 						  JOIN metadata m on m.albumid = al.albumid
+ 							    
 						  --find track in tidal data
 						  join tidal_artist ta on ta.name = a.name 
 						  join tidal_album ta2 on ta2.artistid = ta.artistid and ta2.title = al.title 
@@ -82,6 +90,7 @@ public class TrackRepository
 						  JOIN albums sim_al ON sim_al.artistid = sim_ta.artistid
 						  JOIN metadata sim_m on sim_m.albumid = sim_al.albumid and similarity((tsim_tt.title || ' ' || tsim_tt.version), sim_m.title) > 0.90
 						  
+ 						  left join sonicserver_track_rated track_rated on track_rated.TrackId = sim_m.MetadataId
  						  LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(sim_m.tag_alljsontags)
@@ -171,6 +180,13 @@ public class TrackRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
+ 							    
+ 							track_rated.Rating as UserRating,
+ 							(case when track_rated.Starred = true 
+ 							    then track_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+ 							    
 							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
@@ -182,7 +198,7 @@ public class TrackRepository
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
- 							    
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
 							        replace(replace(

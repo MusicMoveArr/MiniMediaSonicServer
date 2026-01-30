@@ -94,6 +94,13 @@ public class PlaylistRepository
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
+ 							    
+ 							track_rated.Rating as UserRating,
+ 							(case when track_rated.Starred = true 
+ 							    then track_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+ 							    
 							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
 							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
 							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
@@ -108,6 +115,7 @@ public class PlaylistRepository
  						 left JOIN albums al ON al.AlbumId = m.AlbumId
 						 left JOIN artists a ON a.ArtistId = al.ArtistId
 						 
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
 							        replace(replace(
@@ -134,27 +142,13 @@ public class PlaylistRepository
 	    var results = await conn.QueryAsync<PlaylistModel, TrackID3, ReplayGain, ArtistID3, PlaylistModel>(query,
 		    (playlist, track, replayGain, extraArtist) =>
 		    {
-			    if (playlist.Tracks == null)
-			    {
-				    playlist.Tracks = new List<TrackID3>();
-			    }
-
 			    if (track != null)
 			    {
 				    track.ReplayGain = replayGain;
 
 				    if (!string.IsNullOrWhiteSpace(track.Isrc_Single))
 				    {
-					    if (track.Isrc == null)
-					    {
-						    track.Isrc = new List<string>();
-					    }
 					    track.Isrc.Add(track.Isrc_Single);
-				    }
-
-				    if (track.Artists == null)
-				    {
-					    track.Artists = new List<NameIdEntity>();
 				    }
 
 				    if (!track.Artists.Any(a => a.Id == track.ArtistId))

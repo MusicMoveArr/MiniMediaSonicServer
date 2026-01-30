@@ -40,6 +40,10 @@ public class ArtistID3
     [XmlAttribute("sortName")]
     [JsonPropertyName("sortName")]
     public string SortName { get; set; }
+    
+    [XmlAttribute("userRating")]
+    [JsonPropertyName("userRating")]
+    public int UserRating { get; set; }
 
     [XmlElement("roles")]
     [JsonPropertyName("roles")]

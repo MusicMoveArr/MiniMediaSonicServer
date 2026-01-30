@@ -24,6 +24,12 @@ public class ArtistRepository
     						'artist_' || a.ArtistId as CoverArt,
     						'' as ArtistImageUrl,
     						album_count.albums as AlbumCount,
+ 							artist_rated.Rating as UserRating,
+ 							(case when artist_rated.Starred = true 
+ 							    then artist_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred,
+    						
     						a.ArtistId as Id,
 						 	al.AlbumId as Id,
 						 	al.Title as Name,
@@ -35,6 +41,7 @@ public class ArtistRepository
 							m.file_creationtime as Created
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
 						 where a.ArtistId = @artistId";
@@ -82,10 +89,16 @@ public class ArtistRepository
     						a.Name as Name,
     						'artist_' || a.ArtistId as CoverArt,
     						'' as ArtistImageUrl,
-    						album_count.albums as AlbumCount
+    						album_count.albums as AlbumCount,
+ 							artist_rated.Rating as UserRating,
+ 							(case when artist_rated.Starred = true 
+ 							    then artist_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
     						--musicbrainzid
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
