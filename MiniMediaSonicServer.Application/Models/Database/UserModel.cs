@@ -9,4 +9,5 @@ public class UserModel
     public string Email { get; set; }
     public DateTime CreationDateTime { get; set; }
     public string TokenBasedAuth { get; set; }
+    public string ListenBrainzUserToken { get; set; }
 }

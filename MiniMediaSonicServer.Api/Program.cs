@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Api.Filters;
 using MiniMediaSonicServer.Api.Validators;
+using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -60,6 +61,11 @@ builder.Services.AddScoped<TrackService>();
 builder.Services.AddScoped<PlaylistService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<RatingService>();
+builder.Services.AddScoped<ScrobbleService>();
+
+//handlers
+builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
+
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
 
