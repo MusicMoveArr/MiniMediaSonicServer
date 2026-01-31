@@ -125,7 +125,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetSong                    | Working |  |
 | GetSongsByGenre            | Not yet |  |
 | GetStarred2                | Not yet |  |
-| GetStarred                 | Not yet |  |
+| GetStarred                 | Working |  |
 | GetTopSongs                | Not yet |  |
 | GetTranscodeDecision       | Not yet |  |
 | GetTranscodeStream         | Not yet |  |
@@ -139,7 +139,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | RefreshPodcasts            | Not yet |  |
 | SavePlayQueueByIndex       | Not yet |  |
 | SavePlayQueue              | Not yet |  |
-| Scrobble                   | Not yet |  |
+| Scrobble                   | Working | Want to implement Last.fm and database history tables still but ListenBrainz work |
 | Search2                    | Not yet |  |
 | Search3                    | Working |  |
 | Search                     | Not yet |  |
