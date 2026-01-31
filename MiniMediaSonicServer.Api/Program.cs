@@ -6,9 +6,11 @@ using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Api.Filters;
 using MiniMediaSonicServer.Api.Validators;
 using MiniMediaSonicServer.Application.Handlers.Scrobblers;
+using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,19 @@ builder.Services.AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidat
 
 builder.Services.Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"));
 builder.Services.Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"));
+
+string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
+if (!string.IsNullOrWhiteSpace(redisConnectionString))
+{
+    builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+    builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+}
+else
+{
+    builder.Services.AddSingleton<IRedisCacheService, RedisCacheDisabledService>();
+}
+
+
 
 //repositories
 builder.Services.AddScoped<UserRepository>();

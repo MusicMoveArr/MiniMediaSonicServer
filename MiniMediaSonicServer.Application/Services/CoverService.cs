@@ -9,6 +9,7 @@ namespace MiniMediaSonicServer.Application.Services;
 public class CoverService
 {
     private readonly TrackCoverRepository _trackCoverRepository;
+    private readonly Size DefaultCoverSize = new Size(400, 400);
 
     public CoverService(TrackCoverRepository trackCoverRepository)
     {
@@ -29,8 +30,7 @@ public class CoverService
 
         if (coverFileInfo != null)
         {
-            //todo: implement redis for caching
-            return File.ReadAllBytes(coverFileInfo.FullName);
+            return GetBytesOfResizedImage(coverFileInfo.FullName);
         }
         
         foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
@@ -38,17 +38,16 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                //todo: implement redis for caching
-                return track.EmbeddedPictures.First().PictureData;
+                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
             }
         }
 
         return null;
     }
 
-    public async Task<byte[]> GetArtistCoverByArtistIdAsync(Guid albumId)
+    public async Task<byte[]> GetArtistCoverByArtistIdAsync(Guid artistId)
     {
-        List<string> trackPaths = await _trackCoverRepository.GetTrackPathByArtistIdAsync(albumId);
+        List<string> trackPaths = await _trackCoverRepository.GetTrackPathByArtistIdAsync(artistId);
 
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory.Parent)
@@ -60,8 +59,7 @@ public class CoverService
 
         if (coverFileInfo != null)
         {
-            //todo: implement redis for caching
-            return File.ReadAllBytes(coverFileInfo.FullName);
+            return GetBytesOfResizedImage(coverFileInfo.FullName);
         }
         
         foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
@@ -69,8 +67,7 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                //todo: implement redis for caching
-                return track.EmbeddedPictures.First().PictureData;
+                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
             }
         }
         return null;
@@ -97,30 +94,32 @@ public class CoverService
 
         if (coverFileInfo.Count < 4)
         {
-            //todo: implement redis for caching
-            return File.ReadAllBytes(coverFileInfo.First().FullName);
+            return GetBytesOfResizedImage(coverFileInfo.First().FullName);
         }
 
         List<Image> covers = coverFileInfo
             .Select(cover => Image.Load(cover.FullName))
             .ToList();
 
+        int singleImageWidth = this.DefaultCoverSize.Width / 2;
+        int singleImageHeight = this.DefaultCoverSize.Height / 2;
+        
         foreach (Image cover in covers)
         {
             cover.Mutate(ctx =>
             {
-                ctx.Resize(new Size(200, 200));
+                ctx.Resize(new Size(singleImageWidth, singleImageHeight));
             });
         }
             
-        using var img = new Image<Rgba32>(400, 400);
+        using var img = new Image<Rgba32>(this.DefaultCoverSize.Width, this.DefaultCoverSize.Height);
 
         img.Mutate(ctx =>
         {
             ctx.DrawImage(covers[0], new Point(0, 0), PixelColorBlendingMode.Normal, 1f);
-            ctx.DrawImage(covers[1], new Point(200, 0), PixelColorBlendingMode.Normal, 1f);
-            ctx.DrawImage(covers[2], new Point(0, 200), PixelColorBlendingMode.Normal, 1f);
-            ctx.DrawImage(covers[3], new Point(200, 200), PixelColorBlendingMode.Normal, 1f);
+            ctx.DrawImage(covers[1], new Point(singleImageWidth, 0), PixelColorBlendingMode.Normal, 1f);
+            ctx.DrawImage(covers[2], new Point(0, singleImageHeight), PixelColorBlendingMode.Normal, 1f);
+            ctx.DrawImage(covers[3], new Point(singleImageWidth, singleImageHeight), PixelColorBlendingMode.Normal, 1f);
         });
 
         using (MemoryStream stream = new MemoryStream())
@@ -131,8 +130,35 @@ public class CoverService
             {
                 cover.Dispose();
             }
-            
             return stream.ToArray();
         }
+    }
+
+    private byte[] GetBytesOfResizedImage(string path)
+    {
+        using var image = Image.Load(path);
+        using MemoryStream stream = new MemoryStream();
+        image.Mutate(ctx =>
+        {
+            ctx.Resize(this.DefaultCoverSize);
+        });
+        image.Save(stream, new JpegEncoder());
+        return stream.ToArray();
+    }
+    private byte[]? GetBytesOfResizedImage(byte[]? imageData)
+    {
+        if (imageData == null)
+        {
+            return null;
+        }
+        
+        using var image = Image.Load(imageData);
+        using MemoryStream stream = new MemoryStream();
+        image.Mutate(ctx =>
+        {
+            ctx.Resize(this.DefaultCoverSize);
+        });
+        image.Save(stream, new JpegEncoder());
+        return stream.ToArray();
     }
 }

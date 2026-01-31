@@ -1,5 +1,7 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
 
@@ -13,10 +15,16 @@ public class GetCoverArtController : SonicControllerBase
     private readonly CoverService _coverService;
     private readonly string[] artistPrefix = ["ar", "artist"];
     private readonly string[] albumPrefix = ["ab", "album"];
+    private const string RedisPrefixKey = "image:";
+    private readonly IRedisCacheService _redisCacheService;
+    private const string NotFoundCoverData = "NotFound";
     
-    public GetCoverArtController(CoverService coverService)
+    public GetCoverArtController(
+        CoverService coverService,
+        IRedisCacheService redisCacheService)
     {
         _coverService = coverService;
+        _redisCacheService = redisCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -28,10 +36,19 @@ public class GetCoverArtController : SonicControllerBase
             RegexOptions.None, 
             TimeSpan.FromMilliseconds(100))?.Value;
         
-        byte[]? coverArt = null;
-        
         if (Guid.TryParse(extractedGuid, out Guid genericId))
         {
+            var cachedCover = await _redisCacheService.GetAsync(RedisPrefixKey, genericId.ToString());
+            if (cachedCover?.Length == NotFoundCoverData.Length)
+            {
+                return Results.Bytes(_unknownCover, "image/png");
+            }
+            else if (cachedCover?.Length > 0)
+            {
+                return Results.Bytes(cachedCover, "image/jpg");
+            }
+            
+            byte[]? coverArt = null;
             bool searchedArtist = false;
             bool searchedAlbum = false;
             bool searchedPlaylist = false;
@@ -59,13 +76,17 @@ public class GetCoverArtController : SonicControllerBase
             {
                 coverArt = await _coverService.GetPlaylistCoverByIdAsync(genericId);
             }
+            
+            if (coverArt != null)
+            {
+                await _redisCacheService.SetAsync(RedisPrefixKey, extractedGuid, coverArt);
+                return Results.Bytes(coverArt, "image/jpg");
+            }
+
+            await _redisCacheService.SetAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
+            return Results.Bytes(_unknownCover, "image/jpg");
         }
         
-        if (coverArt != null)
-        {
-            return Results.Bytes(coverArt, "image/jpg");
-        }
-
         return Results.Bytes(_unknownCover, "image/png");
     }
 }
