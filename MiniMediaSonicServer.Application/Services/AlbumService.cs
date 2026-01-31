@@ -23,4 +23,9 @@ public class AlbumService
     {
         return await _albumRepository.GetAlbumId3WithTracksAsync(albumId);
     }
+
+    public async Task<List<AlbumID3>> GetStarredAlbumsAsync(Guid userId)
+    {
+        return await _albumRepository.GetStarredAlbumsAsync(userId);
+    }
 }

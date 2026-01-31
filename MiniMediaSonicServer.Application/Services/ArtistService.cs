@@ -16,14 +16,14 @@ public class ArtistService
         _artistRepository = artistRepository;
     }
 
-    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId)
+    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
         return await _artistRepository.GetArtistByIdAsync(artistId);
     }
 
-    public async Task<ArtistsList> GetAllArtistsAsync()
+    public async Task<ArtistsList> GetAllArtistsAsync(Guid userId)
     {
-        var allArtists = await _artistRepository.GetAllArtistsAsync();
+        var allArtists = await _artistRepository.GetAllArtistsAsync(userId);
         
         var artistsIndexes = allArtists
             .Select(artist => new
@@ -62,5 +62,9 @@ public class ArtistService
         }
 
         return "#";
+    }
+    public async Task<List<ArtistID3>> GetStarredArtistsAsync(Guid userId)
+    {
+        return await _artistRepository.GetStarredArtistsAsync(userId);
     }
 }

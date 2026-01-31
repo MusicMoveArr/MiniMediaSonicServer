@@ -113,4 +113,8 @@ public class SubsonicResponse
     [XmlElement("song")]
     [JsonPropertyName("song")]
     public TrackID3? Song { get; set; }
+
+    [XmlElement("starred")]
+    [JsonPropertyName("starred")]
+    public StarredResponse? starred { get; set; }
 }

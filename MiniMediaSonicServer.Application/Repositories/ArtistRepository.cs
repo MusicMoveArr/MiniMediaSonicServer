@@ -82,7 +82,7 @@ public class ArtistRepository
         return groupedResult.FirstOrDefault();
     }
     
-    public async Task<List<ArtistID3>> GetAllArtistsAsync()
+    public async Task<List<ArtistID3>> GetAllArtistsAsync(Guid userId)
     {
 	    string query = @"SELECT distinct on (a.ArtistId)
     						a.ArtistId as Id,
@@ -98,12 +98,43 @@ public class ArtistRepository
     						--musicbrainzid
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
-	    return (await conn.QueryAsync<ArtistID3>(query))
+	    return (await conn.QueryAsync<ArtistID3>(query, param: new
+		    {
+			    userId
+		    }))
+		    .ToList();
+    }
+    
+    public async Task<List<ArtistID3>> GetStarredArtistsAsync(Guid userId)
+    {
+	    string query = @"SELECT distinct on (a.ArtistId)
+    						a.ArtistId as Id,
+    						a.Name as Name,
+    						'artist_' || a.ArtistId as CoverArt,
+    						'' as ArtistImageUrl,
+    						album_count.albums as AlbumCount,
+ 							artist_rated.Rating as UserRating,
+ 							(case when artist_rated.Starred = true 
+ 							    then artist_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
+    						--musicbrainzid
+						 FROM artists a
+						 JOIN albums al ON al.artistid = a.artistid
+ 						 join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId and artist_rated.Starred = true
+						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<ArtistID3>(query, param: new
+		    {
+			    userId
+		    }))
 		    .ToList();
     }
 }

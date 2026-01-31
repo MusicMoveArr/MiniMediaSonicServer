@@ -238,4 +238,47 @@ public class AlbumRepository
 
 	    return groupedResult.FirstOrDefault();
     }
+    
+    public async Task<List<AlbumID3>> GetStarredAlbumsAsync(Guid userId)
+    {
+        string query = @"SELECT 
+						 	al.AlbumId as Id,
+						 	al.Title as Name,
+						 	'' as version,
+						 	a.Name as Artist,
+						 	m.tag_year as year,
+						 	'album_' || al.AlbumId as CoverArt,
+ 							a.artistid AS ArtistId,
+							m.file_creationtime as Created,
+ 							album_rated.Rating as UserRating,
+ 							(case when album_rated.Starred = true 
+ 							    then album_rated.UpdatedAt 
+ 							    else null 
+ 							 end) as Starred
+						 FROM artists a
+						 JOIN albums al ON al.artistid = a.artistid
+ 						 join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId and album_rated.Starred = true
+						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
+						 JOIN lateral (
+						     select m.file_creationtime as file_creationtime 
+						     from metadata m 
+						     where m.albumid = al.albumid 
+						     order by m.file_creationtime desc
+						     limit 1) as recent_m on true";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        var results = (await conn.QueryAsync<AlbumID3>(query, 
+	        param: new
+	        {
+		        userId
+	        })).ToList();
+
+        foreach (var result in results)
+        {
+	        result.Artists = [new NameIdEntity(result.ArtistId, result.Artist)];
+        }
+
+        return results;
+    }
 }

@@ -21,7 +21,7 @@ public class GetArtistController : SonicControllerBase
     {
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
         {
-            Artist = await _artistService.GetArtistByIdAsync(request.Id)
+            Artist = await _artistService.GetArtistByIdAsync(request.Id, User.UserId)
         });
     }
 }

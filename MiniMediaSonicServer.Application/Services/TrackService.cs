@@ -29,4 +29,9 @@ public class TrackService
     {
         return await _trackRepository.GetTrackByIdAsync(trackId);
     }
+
+    public async Task<List<TrackID3>> GetStarredTracksAsync(Guid userId)
+    {
+        return await _trackRepository.GetStarredTracksAsync(userId);
+    }
 }
