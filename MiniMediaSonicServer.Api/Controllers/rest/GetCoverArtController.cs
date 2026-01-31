@@ -22,8 +22,6 @@ public class GetCoverArtController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetCoverRequest request)
     {
-        Console.WriteLine($"Grabbing cover art of '{request.Id}'");
-
         string extractedGuid = Regex.Match(
             request.Id, 
             "[\\w\\d]{8}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{12}",

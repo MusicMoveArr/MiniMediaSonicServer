@@ -24,7 +24,6 @@ public class GetAlbumList2Controller : SonicControllerBase
             request.Size = 50;
         }
         
-        Console.WriteLine($"Getting album list 2, {request.Type}, {request.Offset}, {request.Size}");
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
         {
             AlbumList2 = new AlbumList2Response

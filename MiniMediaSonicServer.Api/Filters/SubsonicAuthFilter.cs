@@ -30,8 +30,6 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         var password = q["p"].FirstOrDefault() ?? "";
         var token = q["t"].FirstOrDefault() ?? "";
         var salt = q["s"].FirstOrDefault() ?? "";
-        
-        Console.WriteLine(ctx.Request.Path);
 
         if (string.IsNullOrWhiteSpace(username))
         {

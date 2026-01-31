@@ -26,6 +26,7 @@ builder.Services.AddControllers(options =>
     {
         options.ModelValidatorProviders.Clear();
         options.Filters.Add(typeof(SubsonicAuthFilter));
+        options.Filters.Add(typeof(ApiLoggingFilter));
     })
     .AddJsonOptions(options =>
     {
@@ -68,6 +69,7 @@ builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
 
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
+builder.Services.AddScoped<ApiLoggingFilter>();
 
 var app = builder.Build();
 

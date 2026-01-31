@@ -18,7 +18,6 @@ public class GetAlbumController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetAlbumRequest request)
     {
-        Console.WriteLine($"Getting album, {request.Id}");
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
         {
             Album = await _albumService.GetAlbumByIdResponseAsync(request.Id)
