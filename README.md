@@ -59,6 +59,9 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   },
   "EncryptionKeys": {
     "UserPasswordKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "Redis": {
+    "ConnectionString": ""
   }
 }
 ```
