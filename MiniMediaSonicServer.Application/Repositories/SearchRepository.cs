@@ -37,7 +37,7 @@ public class SearchRepository
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
 						 where 
-							a.record_id > @offset and a.record_id < @offset + @count
+							a.record_id >= @offset and a.record_id <= @offset + @count
 							and length(@searchquery) = 0 or lower(a.Name) % lower(@searchquery)
 						 limit @count";
 
@@ -97,7 +97,7 @@ public class SearchRepository
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
 						 where 
-							al.record_id > @offset and al.record_id < @offset + @count
+							al.record_id >= @offset and al.record_id <= @offset + @count
 							and length(@searchquery) = 0 or lower(al.Title) % lower(@searchquery)
 						 limit @count";
 
@@ -214,7 +214,7 @@ public class SearchRepository
 						  ) t ON TRUE
 
 						 where 
-							m.record_id > @offset and m.record_id < @offset + @count
+							m.record_id >= @offset and m.record_id <= @offset + @count
 							and length(@searchquery) = 0 or lower(m.Title) % lower(@searchquery)
 						 limit @count";
 
