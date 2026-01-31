@@ -47,12 +47,9 @@ public class TrackRepository
 							'music' AS Type,
 							'song' AS MediaType,
  							    
- 							FLOOR(EXTRACT(EPOCH FROM
-							    CASE
-						          WHEN sim_m.Tag_Length !~ ':' THEN NULL 
-						          WHEN sim_m.Tag_Length ~ '^\d{{1,2}}:\d{{2}}$' THEN ('0:' || sim_m.Tag_Length)::interval
-						          ELSE sim_m.Tag_Length::interval
-						        END) /100) AS Duration,
+ 							EXTRACT(EPOCH FROM
+							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+							    ELSE m.Tag_Length END)::interval) AS Duration,
  							    
 							sim_m.file_creationtime as Created,
 							t.tags->>'bitrate' AS BitRate,
@@ -168,12 +165,9 @@ public class TrackRepository
 							'music' AS Type,
 							'song' AS MediaType,
  							    
- 							FLOOR(EXTRACT(EPOCH FROM
-							    CASE
-						          WHEN m.Tag_Length !~ ':' THEN NULL 
-						          WHEN m.Tag_Length ~ '^\d{{1,2}}:\d{{2}}$' THEN ('0:' || m.Tag_Length)::interval
-						          ELSE m.Tag_Length::interval
-						        END) /100) AS Duration,
+ 							EXTRACT(EPOCH FROM
+							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+							    ELSE m.Tag_Length END)::interval) AS Duration,
  							    
 							m.file_creationtime as Created,
 							t.tags->>'bitrate' AS BitRate,
