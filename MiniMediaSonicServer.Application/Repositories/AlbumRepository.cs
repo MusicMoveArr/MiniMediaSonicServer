@@ -16,9 +16,20 @@ public class AlbumRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<AlbumID3>> GetAlbumId3Async(GetAlbumList2Request request)
+    public async Task<List<AlbumID3>> GetAlbumId3Async(GetAlbumList2Request request, Guid userId)
     {
-        string query = @"SELECT 
+        string query = @"WITH album_playhistory AS (
+						     SELECT
+						         m.AlbumId,
+						         COUNT(*) AS AlbumPlaycount,
+						         MAX(playhistory.UpdatedAt) AS UpdatedAt
+						     FROM sonicserver_user_playhistory playhistory
+						     JOIN metadata m
+						         ON m.MetadataId = playhistory.TrackId
+						     WHERE playhistory.UserId = @userId
+						     GROUP BY m.AlbumId
+						 )
+						 SELECT 
 						 	al.AlbumId as Id,
 						 	al.Title as Name,
 						 	'' as version,
@@ -27,6 +38,7 @@ public class AlbumRepository
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							m.file_creationtime as Created,
+							COALESCE(playhistory.AlbumPlaycount, 0) as PlayCount,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
  							    then album_rated.UpdatedAt 
@@ -34,8 +46,16 @@ public class AlbumRepository
  							 end) as Starred
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
- 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
-						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
+ 						 left join sonicserver_album_rated album_rated on 
+						     album_rated.AlbumId = al.AlbumId 
+						     and album_rated.UserId = @userId
+						     
+						 JOIN lateral (
+						     select * from metadata m 
+						     where m.albumid = al.albumid 
+						     order by m.tag_year 
+						     desc limit 1) as m on true
+						     
 						 JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
 						     from metadata m 
@@ -43,17 +63,22 @@ public class AlbumRepository
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
 						                
-						where al.record_id > @offset and al.record_id < @offset + @limit
-							 and (CASE 
+						 LEFT JOIN album_playhistory playhistory
+							ON playhistory.AlbumId = al.AlbumId
+						 
+						where (CASE 
 					             WHEN @type = 'byGenre' THEN 
 									m.computed_genre ILIKE '%' || @genre || '%'
-					             ELSE true
+					             WHEN @type in ('recent', 'frequent') THEN 
+									playhistory.AlbumId is not null
+					             ELSE al.record_id >= @offset and al.record_id <= @offset + @limit
 					         END)
  						
 						ORDER BY
 				         CASE 
-				             WHEN @type IN ('random', 'frequent') THEN random()
-				             WHEN @type IN ('byYear') THEN m.tag_year
+				             WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount
+				             WHEN @type = 'random' THEN random()
+				             WHEN @type = 'byYear' THEN m.tag_year
 				             WHEN @type = 'starred' THEN 0
 				             ELSE NULL
 				         END DESC,
@@ -61,7 +86,8 @@ public class AlbumRepository
 				             WHEN @type = 'alphabeticalByName' THEN al.Title
 				         END ASC, 
 				         CASE 
-				             WHEN @type IN ('recent', 'newest') THEN recent_m.file_creationtime
+				             WHEN @type = 'recent' THEN playhistory.UpdatedAt
+				             WHEN @type = 'newest' THEN recent_m.file_creationtime
 				         END DESC
                          limit @limit";
 
@@ -73,7 +99,8 @@ public class AlbumRepository
 		        limit = request.Size,
 		        type = request.Type,
 		        offset = request.Offset,
-		        genre = request.Genre
+		        genre = request.Genre,
+		        userId
 	        })).ToList();
 
         foreach (var result in results)
@@ -186,24 +213,10 @@ public class AlbumRepository
 		    (album, track, replayGain, extraArtist) =>
 		    {
 			    track.ReplayGain = replayGain;
-			    
-			    if (album.Song == null)
-			    {
-				    album.Song = new List<TrackID3>();
-			    }
 
 			    if (!string.IsNullOrWhiteSpace(track.Isrc_Single))
 			    {
-				    if (track.Isrc == null)
-				    {
-					    track.Isrc = new List<string>();
-				    }
 				    track.Isrc.Add(track.Isrc_Single);
-			    }
-
-			    if (track.Artists == null)
-			    {
-				    track.Artists = new List<NameIdEntity>();
 			    }
 
 			    if (!track.Artists.Any(a => a.Id == track.ArtistId))

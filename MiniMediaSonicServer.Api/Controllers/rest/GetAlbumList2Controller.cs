@@ -28,7 +28,7 @@ public class GetAlbumList2Controller : SonicControllerBase
         {
             AlbumList2 = new AlbumList2Response
             {
-                Album = await _albumService.GetAlbumList2ResponseAsync(request)
+                Album = await _albumService.GetAlbumList2ResponseAsync(request, User.UserId)
             }
         });
     }

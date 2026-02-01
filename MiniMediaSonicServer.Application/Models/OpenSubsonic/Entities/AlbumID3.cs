@@ -91,6 +91,6 @@ public class AlbumID3
 
     [XmlElement("song")]
     [JsonPropertyName("song")]
-    public List<TrackID3> Song { get; set; }
+    public List<TrackID3> Song { get; set; } = new List<TrackID3>();
 
 }

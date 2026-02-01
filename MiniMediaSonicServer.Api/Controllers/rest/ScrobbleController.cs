@@ -22,6 +22,10 @@ public class ScrobbleController : SonicControllerBase
         {
             await _scrobbleService.ScrobbleTrackAsync(User, request.Id, request.Time);
         }
+        else
+        {
+            await _scrobbleService.PlayingNowTrackAsync(User, request.Id, request.Time);
+        }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse());
     }

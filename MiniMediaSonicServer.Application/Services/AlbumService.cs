@@ -14,9 +14,9 @@ public class AlbumService
         _albumRepository = albumRepository;
     }
 
-    public async Task<List<AlbumID3>> GetAlbumList2ResponseAsync(GetAlbumList2Request request)
+    public async Task<List<AlbumID3>> GetAlbumList2ResponseAsync(GetAlbumList2Request request, Guid userId)
     {
-        return await _albumRepository.GetAlbumId3Async(request);
+        return await _albumRepository.GetAlbumId3Async(request, userId);
     }
 
     public async Task<AlbumID3> GetAlbumByIdResponseAsync(Guid albumId)

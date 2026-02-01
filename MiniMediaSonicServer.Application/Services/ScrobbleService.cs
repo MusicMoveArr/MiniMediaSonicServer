@@ -8,14 +8,17 @@ namespace MiniMediaSonicServer.Application.Services;
 public class ScrobbleService
 {
     private readonly TrackRepository _trackRepository;
+    private readonly UserPlayHistoryRepository _userPlayHistoryRepository;
     private readonly ListenBrainzScrobbleHandler _listenBrainzScrobbleHandler;
 
     public ScrobbleService(
         TrackRepository trackRepository,
-        ListenBrainzScrobbleHandler listenBrainzScrobbleHandler)
+        ListenBrainzScrobbleHandler listenBrainzScrobbleHandler,
+        UserPlayHistoryRepository userPlayHistoryRepository)
     {
         _trackRepository = trackRepository;
         _listenBrainzScrobbleHandler = listenBrainzScrobbleHandler;
+        _userPlayHistoryRepository = userPlayHistoryRepository;
     }
 
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
@@ -27,10 +30,40 @@ public class ScrobbleService
         {
             return;
         }
+
+        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId);
+        if (userPlayHistory == null)
+        {
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, true, scrobbleAt);
+        }
+        else
+        {
+            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, true, scrobbleAt);
+        }
         
         if (!string.IsNullOrWhiteSpace(user.ListenBrainzUserToken))
         {
             await _listenBrainzScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
+        }
+    }
+
+    public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)
+    {
+        TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId);
+
+        if (track == null)
+        {
+            return;
+        }
+
+        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId);
+        if (userPlayHistory == null)
+        {
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, false, null);
+        }
+        else
+        {
+            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, false, null);
         }
     }
 }

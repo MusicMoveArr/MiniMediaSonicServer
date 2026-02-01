@@ -67,6 +67,7 @@ builder.Services.AddScoped<TrackRepository>();
 builder.Services.AddScoped<PlaylistRepository>();
 builder.Services.AddScoped<SearchRepository>();
 builder.Services.AddScoped<RatingRepository>();
+builder.Services.AddScoped<UserPlayHistoryRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
