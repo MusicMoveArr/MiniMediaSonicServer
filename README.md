@@ -86,7 +86,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | DeletePodcastEpisode       | Not yet |  |
 | DeleteShare                | Not yet |  |
 | DeleteUser                 | Not yet |  |
-| Download                   | Not yet |  |
+| Download                   | Working |  |
 | DownloadPodcastEpisode     | Not yet |  |
 | GetAlbum                   | Working |  |
 | GetAlbumList2              | Working |  |
@@ -110,7 +110,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetMusicFolders            | Partially |  |
 | GetNewestPodcasts          | Not yet |  |
 | GetNowPlaying              | Not yet |  |
-| GetOpenSubsonicExtensions  | Not yet |  |
+| GetOpenSubsonicExtensions  | Working |  |
 | GetPlaylist                | Working |  |
 | GetPlaylists               | Working |  |
 | GetPlayQueueByIndex        | Not yet |  |
@@ -139,7 +139,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | RefreshPodcasts            | Not yet |  |
 | SavePlayQueueByIndex       | Not yet |  |
 | SavePlayQueue              | Not yet |  |
-| Scrobble                   | Working | Want to implement Last.fm and database history tables still but ListenBrainz work |
+| Scrobble                   | Working | Need to implement Last.fm. history via database and ListenBrainz work |
 | Search2                    | Not yet |  |
 | Search3                    | Working |  |
 | Search                     | Not yet |  |
