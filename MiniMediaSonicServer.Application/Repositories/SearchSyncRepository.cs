@@ -8,19 +8,18 @@ using Npgsql;
 
 namespace MiniMediaSonicServer.Application.Repositories;
 
-public class SearchRepository
+public class SearchSyncRepository
 {
     private readonly DatabaseConfiguration _databaseConfiguration;
     
-    public SearchRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
+    public SearchSyncRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
     {
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<ArtistID3>> SearchArtistsAsync(string searchquery, int count, int offset)
+    public async Task<List<ArtistID3>> SearchArtistsAsync(int count, int offset)
     {
-	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
-						 SELECT distinct on (a.record_id)
+	    string query = @"SELECT
     						a.ArtistId as Id,
     						a.Name as Name,
     						'artist_' || a.ArtistId as CoverArt,
@@ -32,47 +31,30 @@ public class SearchRepository
  							    else null 
  							 end) as Starred
 						 FROM artists a
-						 left join sonicserver_indexed_search search on search.Id = a.ArtistId
+						 JOIN lateral (
+						     select count(ab.albumid) as albums 
+						     from albums ab 
+						     where ab.artistid = a.artistid 
+						     limit 1) as album_count on true
  						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
-						 JOIN albums al ON al.artistid = a.artistid
-						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
-						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
-						 where search.SearchTerm % lower(@searchquery)
-					     offset @offset
-						 limit @count";
+					     where 
+						 	a.record_id >= @offset 
+						 	and a.record_id <= @offset + @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
         await conn.OpenAsync();
-        var transaction = await conn.BeginTransactionAsync();
-        var results = new  List<ArtistID3>();
 
-        try
-        {
-	        results = (await conn.QueryAsync<ArtistID3>(query, 
-		        param: new
-		        {
-			        searchquery,
-			        count,
-			        offset
-		        },
-		        transaction: transaction)).ToList();
-        }
-        catch (Exception ex)
-        {
-	        Console.WriteLine($"Parameters, searchquery='{searchquery}', count='{count}', Error={ex.Message}\r\nStackTrace={ex.StackTrace}");
-        }
-        finally
-        {
-	        await transaction.CommitAsync();
-        }
-
-        return results;
+        return (await conn.QueryAsync<ArtistID3>(query, 
+	        param: new
+	        {
+		        count,
+		        offset
+	        })).ToList();
     }
     
-    public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count, int offset)
+    public async Task<List<AlbumID3>> SearchAlbumsAsync(int count, int offset)
     {
-	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
-						 SELECT distinct on (al.AlbumId)
+	    string query = @"SELECT
 						 	al.AlbumId as Id,
 						 	al.Title as Name,
 						 	'' as version,
@@ -80,7 +62,7 @@ public class SearchRepository
 						 	m.tag_year as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created,
+							recent_m.file_creationtime as Created,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
  							    then album_rated.UpdatedAt 
@@ -88,51 +70,38 @@ public class SearchRepository
  							 end) as Starred
 						 FROM albums al
 						 JOIN artists a on a.ArtistId = al.ArtistId
-						 left join sonicserver_indexed_search search on search.Id = al.AlbumId
  						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
-						 LEFT JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
+						 LEFT JOIN lateral (
+						     select m.tag_year
+						     from metadata m 
+						     where m.albumid = al.albumid 
+						     order by m.tag_year 
+						     desc limit 1) as m on true
+						     
 						 LEFT JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
 						     from metadata m 
 						     where m.albumid = al.albumid 
 						     order by m.file_creationtime desc
 						     limit 1) as recent_m on true
-						 where search.SearchTerm % lower(@searchquery)
-						 offset @offset
-						 limit @count";
+					     where 
+						 	al.record_id >= @offset 
+						 	and al.record_id <= @offset + @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
-	    var transaction = await conn.BeginTransactionAsync();
-	    var results = new  List<AlbumID3>();
 
-	    try
-	    {
-		    results = (await conn.QueryAsync<AlbumID3>(query, 
+	    return (await conn.QueryAsync<AlbumID3>(query, 
 			    param: new
 			    {
-				    searchquery,
 				    count,
 				    offset
-			    },
-			    transaction: transaction)).ToList();
-	    }
-	    catch (Exception ex)
-	    {
-		    Console.WriteLine($"Parameters, searchquery='{searchquery}', count='{count}', Error={ex.Message}\r\nStackTrace={ex.StackTrace}");
-	    }
-	    finally
-	    {
-		    await transaction.CommitAsync();
-	    }
-	    
-	    return results;
+			    })).ToList();
     }
     
-    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset)
+    public async Task<List<TrackID3>> SearchTracksAsync(int count, int offset)
     {
-	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
-						 SELECT 
+	    string query = @"SELECT 
  							m.MetadataId as TrackId,
  							al.AlbumId as Parent,
  							al.AlbumId as AlbumId,
@@ -188,7 +157,6 @@ public class SearchRepository
 						 FROM metadata m
 						 JOIN albums al ON al.AlbumId = m.AlbumId
 						 JOIN artists a on a.ArtistId = al.ArtistId
-						 left join sonicserver_indexed_search search on search.Id = m.MetadataId
 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  							    
  						 left join lateral (
@@ -210,19 +178,13 @@ public class SearchRepository
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
 						  ) t ON TRUE
-
-						 where search.SearchTerm % lower(@searchquery)
-						 offset @offset
-						 limit @count";
+					     where 
+						 	m.record_id >= @offset 
+						 	and m.record_id <= @offset + @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
-	    var transaction = await conn.BeginTransactionAsync();
-	    var results = new  List<TrackID3>();
-
-	    try
-	    {
-		    results = (await conn.QueryAsync<TrackID3, ReplayGain, ArtistID3, TrackID3>(query,
+	    var results = (await conn.QueryAsync<TrackID3, ReplayGain, ArtistID3, TrackID3>(query,
 			    (track, replayGain, extraArtist) =>
 			    {
 				    track.ReplayGain = replayGain;
@@ -246,19 +208,9 @@ public class SearchRepository
 			    splitOn: "TrackId, TrackGain, Id",
 			    param: new
 			    {
-				    searchquery,
 				    count,
 				    offset
 			    })).ToList();
-	    }
-	    catch (Exception ex)
-	    {
-		    Console.WriteLine($"Parameters, searchquery='{searchquery}', count='{count}', Error={ex.Message}\r\nStackTrace={ex.StackTrace}");
-	    }
-	    finally
-	    {
-		    await transaction.CommitAsync();
-	    }
 
 	    var groupedResult = results
 		    .GroupBy(track => track.TrackId)
@@ -277,25 +229,5 @@ public class SearchRepository
 		    .ToList();
 
 	    return groupedResult;
-    }
-    
-    
-    public async Task<ID3Type?> GetID3TypeAsync(Guid id)
-    {
-	    string query = @"select
-						 	case 
-						 	    when exists (select 1 from artists where artistid = @id)  then 1
-						 		when exists (select 1 from albums where albumid = @id) then 2
-						 		when exists (select 1 from metadata where metadataid = @id) then 3
-						 		else 0
-						 	end";
-
-	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-
-	    return await conn.QueryFirstOrDefaultAsync<ID3Type>(query,
-		    param: new
-		    {
-			    id
-		    });
     }
 }
