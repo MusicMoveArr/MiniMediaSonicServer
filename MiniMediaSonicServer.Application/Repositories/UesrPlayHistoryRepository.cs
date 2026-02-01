@@ -26,12 +26,12 @@ public class UserPlayHistoryRepository
 							@trackId,
 							@scrobble,
 							@scrobbleAt,
-						    t.tags->>'artist',
+						    COALESCE(t.tags->>'artist', ''),
 						    COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'),
-						    t.tags->>'artists',
-						    t.tags->>'album',
-						    m.Title,
-						    t.tags->>'isrc',
+						    COALESCE(t.tags->>'artists', ''),
+						    COALESCE(t.tags->>'album', ''),
+						    COALESCE(m.Title, ''),
+						    COALESCE(t.tags->>'isrc', ''),
 						 	current_timestamp,
 						 	current_timestamp
 						 FROM metadata m
