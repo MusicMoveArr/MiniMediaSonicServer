@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,15 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
     
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var endpoint = context.HttpContext.GetEndpoint();
+        bool hasAllowAnonymous = endpoint.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
+
+        if (hasAllowAnonymous)
+        {
+            await next();
+            return;
+        }
+        
         var ctx = context.HttpContext;
         var q = ctx.Request.Query;
         var username = q["u"].FirstOrDefault() ?? "";
