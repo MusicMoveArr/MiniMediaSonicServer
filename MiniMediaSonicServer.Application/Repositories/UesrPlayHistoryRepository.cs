@@ -27,7 +27,7 @@ public class UserPlayHistoryRepository
 							@scrobble,
 							@scrobbleAt,
 						    COALESCE(t.tags->>'artist', ''),
-						    COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'),
+						    COALESCE(COALESCE(t.tags->>'albumartist', t.tags->>'album_artist'), ''),
 						    COALESCE(t.tags->>'artists', ''),
 						    COALESCE(t.tags->>'album', ''),
 						    COALESCE(m.Title, ''),
