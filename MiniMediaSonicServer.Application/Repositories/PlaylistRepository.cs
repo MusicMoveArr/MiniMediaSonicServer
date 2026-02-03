@@ -33,7 +33,8 @@ public class PlaylistRepository
 							 from sonicserver_playlist_track track 
 							 where track.PlaylistId = playlist.PlaylistId)
 							 track on true
-						 where userid = @userId";
+						 where userid = @userId
+						 	   and playlist.IsDeleted = false";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -132,7 +133,8 @@ public class PlaylistRepository
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
 						  ) t ON TRUE
-						 where playlist.PlaylistId = @playlistId";
+						 where playlist.PlaylistId = @playlistId
+						 	   and playlist.IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -241,6 +243,40 @@ public class PlaylistRepository
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
 	    await conn.ExecuteAsync(query, 
+		    param: new
+		    {
+			    playlistId
+		    });
+    }
+    
+    public async Task SetPlaylistDeletedAsync(Guid playlistId)
+    {
+	    string query = @"UPDATE sonicserver_playlist 
+						 SET UpdatedAt = current_timestamp,
+						     IsDeleted = true,
+						     DeletedAt = current_timestamp
+                         where PlaylistId = @playlistId 
+                           	   and IsDeleted = false";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    await conn.ExecuteAsync(query, 
+		    param: new
+		    {
+			    playlistId
+		    });
+    }
+    
+    public async Task<bool> PlaylistExistsAsync(Guid playlistId)
+    {
+	    string query = @"SELECT true
+						 from sonicserver_playlist playlist
+						 where playlist.PlaylistId = @playlistId
+						 	   and playlist.IsDeleted = false";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<bool>(query, 
 		    param: new
 		    {
 			    playlistId

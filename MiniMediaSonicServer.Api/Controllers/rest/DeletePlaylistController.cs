@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
+using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Controllers.rest;
 
@@ -7,9 +9,16 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 [Route("/rest/[controller].view")]
 public class DeletePlaylistController : SonicControllerBase
 {
-    [HttpGet, HttpPost]
-    public async Task<IResult> Get()
+    private readonly PlaylistService _playlistService;
+    public DeletePlaylistController(PlaylistService playlistService)
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel()));
+        _playlistService = playlistService;
+    }
+    
+    [HttpGet, HttpPost]
+    public async Task<IResult> Get([FromQuery] DeletePlaylistRequest request)
+    {
+        await _playlistService.SetPlaylistDeletedAsync(request.Id);
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse());
     }
 }

@@ -5,6 +5,8 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 
 public class ArtistID3
 {
+    public static readonly string[] IgnoredArticles = ["The", "El", "La", "Los", "Las", "Le", "Les", "Os", "As", "O", "A"];
+    
     [XmlAttribute("id")]
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
@@ -39,7 +41,13 @@ public class ArtistID3
     
     [XmlAttribute("sortName")]
     [JsonPropertyName("sortName")]
-    public string SortName { get; set; }
+    public string SortName {
+        get
+        {
+            return GetSortName(Name);
+        }
+        set { }
+    }
     
     [XmlAttribute("userRating")]
     [JsonPropertyName("userRating")]
@@ -47,5 +55,25 @@ public class ArtistID3
 
     [XmlElement("roles")]
     [JsonPropertyName("roles")]
-    public List<string> Roles { get; set; } = ["artist", "albumartist"];
+    public List<string> Roles { get; set; } = ["maincredit", "albumartist", "artist", "composer", "performer"]; //["artist", "albumartist"];
+    
+    
+    
+    private string GetSortName(string name)
+    {
+        name = name.TrimStart();
+        
+        string? ignoreArticle = name.Length > 3 ? IgnoredArticles.FirstOrDefault(n => name.ToLower().StartsWith(n.ToLower())) : string.Empty;
+        if (ignoreArticle != null)
+        {
+            name = name.Substring(ignoreArticle.Length + 1);
+        }
+        
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return string.Empty;
+        }
+
+        return name.ToLower();
+    }
 }

@@ -20,12 +20,6 @@ public class SubsonicResponse
         License = new License();
     }
 
-    public SubsonicResponse(User user)
-        : this()
-    {
-        this.User = user;
-    }
-
     [XmlAttribute("xmlns")]
     [JsonIgnore]
     public string Xmlns { get; set; }

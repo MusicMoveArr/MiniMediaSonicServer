@@ -38,9 +38,18 @@ public class PlaylistService
         return await _playlistRepository.GetPlaylistByIdAsync(playlistId);
     }
 
+    public async Task SetPlaylistDeletedAsync(Guid playlistId)
+    {
+        await _playlistRepository.SetPlaylistDeletedAsync(playlistId);
+    }
+
     public async Task UpdatePlaylistByIdAsync(UpdatePlaylistRequest request)
     {
-
+        if (!await _playlistRepository.PlaylistExistsAsync(request.PlaylistId))
+        {
+            return;
+        }
+        
         if (request.SongIdToAdd?.Any() == true)
         {
             foreach (var trackId in request.SongIdToAdd)
