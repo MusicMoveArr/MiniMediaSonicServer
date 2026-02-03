@@ -81,7 +81,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | CreateUser                 | Not yet |  |
 | DeleteBookmark             | Not yet |  |
 | DeleteInternetRadioStation | Not yet |  |
-| DeletePlaylist             | Not yet |  |
+| DeletePlaylist             | Working |  |
 | DeletePodcastChannel       | Not yet |  |
 | DeletePodcastEpisode       | Not yet |  |
 | DeleteShare                | Not yet |  |
@@ -124,7 +124,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetSimilarSongs            | Not yet |  |
 | GetSong                    | Working |  |
 | GetSongsByGenre            | Not yet |  |
-| GetStarred2                | Not yet |  |
+| GetStarred2                | Working |  |
 | GetStarred                 | Working |  |
 | GetTopSongs                | Not yet |  |
 | GetTranscodeDecision       | Not yet |  |
