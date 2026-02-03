@@ -129,8 +129,8 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetTopSongs                | Not yet |  |
 | GetTranscodeDecision       | Not yet |  |
 | GetTranscodeStream         | Not yet |  |
-| GetUser                    | Not yet |  |
-| GetUsers                   | Not yet |  |
+| GetUser                    | Working |  |
+| GetUsers                   | Working |  |
 | GetVideoInfo               | Not yet |  |
 | GetVideos                  | Not yet |  |
 | HLS                        | Not yet |  |
