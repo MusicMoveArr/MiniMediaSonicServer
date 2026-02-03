@@ -78,14 +78,14 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | CreatePlaylist             | Working |  |
 | CreatePodcastChannel       | Not yet |  |
 | CreateShare                | Not yet |  |
-| CreateUser                 | Not yet |  |
+| CreateUser                 | Working |  |
 | DeleteBookmark             | Not yet |  |
 | DeleteInternetRadioStation | Not yet |  |
 | DeletePlaylist             | Working |  |
 | DeletePodcastChannel       | Not yet |  |
 | DeletePodcastEpisode       | Not yet |  |
 | DeleteShare                | Not yet |  |
-| DeleteUser                 | Not yet |  |
+| DeleteUser                 | Working |  |
 | Download                   | Working |  |
 | DownloadPodcastEpisode     | Not yet |  |
 | GetAlbum                   | Working |  |
@@ -152,5 +152,5 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | UpdateInternetRadioStation | Not yet |  |
 | UpdatePlaylist             | Working |  |
 | UpdateShare                | Not yet |  |
-| UpdateUser                 | Not yet |  |
+| UpdateUser                 | Working |  |
                              
