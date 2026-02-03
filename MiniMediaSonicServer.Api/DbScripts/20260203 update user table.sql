@@ -1,0 +1,17 @@
+alter table sonicserver_user add column DeletedAt timestamp default null;
+alter table sonicserver_user add column IsDeleted bool default false not null;
+alter table sonicserver_user add column LdapAuthenticated bool default true not null;
+alter table sonicserver_user add column AdminRole bool default true not null;
+alter table sonicserver_user add column SettingsRole bool default true not null;
+alter table sonicserver_user add column StreamRole bool default true not null;
+alter table sonicserver_user add column JukeboxRole bool default true not null;
+alter table sonicserver_user add column DownloadRole bool default true not null;
+alter table sonicserver_user add column UploadRole bool default true not null;
+alter table sonicserver_user add column CoverArtRole bool default true not null;
+alter table sonicserver_user add column CommentRole bool default true not null;
+alter table sonicserver_user add column PodcastRole bool default true not null;
+alter table sonicserver_user add column ShareRole bool default true not null;
+alter table sonicserver_user add column VideoConversionRole bool default true not null;
+alter table sonicserver_user add column MusicFolderId int default 1 not null;
+alter table sonicserver_user add column MaxBitRate int default 0 not null;
+alter table sonicserver_user add column UpdatedAt timestamp default current_timestamp not null;

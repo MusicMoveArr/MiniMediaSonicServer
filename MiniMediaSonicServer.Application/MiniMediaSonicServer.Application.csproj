@@ -7,6 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Reference Include="BCrypt.Net-Next">
+        <HintPath>..\..\..\.nuget\packages\bcrypt.net-next\4.0.3\lib\net6.0\BCrypt.Net-Next.dll</HintPath>
+      </Reference>
       <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
         <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\9.0.11\ref\net9.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
       </Reference>

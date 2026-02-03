@@ -7,7 +7,7 @@ public class User
 {
     [JsonPropertyName("username")]
     [XmlElement("username")]
-    public string Username { get; set; } = "admin";
+    public string Username { get; set; }
 
     [JsonPropertyName("scrobblingEnabled")]
     [XmlElement("scrobblingEnabled")]

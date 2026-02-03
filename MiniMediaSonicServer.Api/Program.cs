@@ -80,6 +80,7 @@ builder.Services.AddScoped<PlaylistService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<RatingService>();
 builder.Services.AddScoped<ScrobbleService>();
+builder.Services.AddScoped<UserService>();
 
 //handlers
 builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
