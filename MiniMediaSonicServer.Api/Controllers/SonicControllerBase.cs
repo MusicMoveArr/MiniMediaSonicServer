@@ -11,9 +11,27 @@ public abstract class SonicControllerBase : ControllerBase
     
     protected User GetUserModel()
     {
+        return GetUserModel(this.User);
+    }
+    protected User GetUserModel(UserModel user)
+    {
         return new User
         {
-            Username = User.Username
+            Username = user.Username,
+            Email = user.Email,
+            AdminRole = user.AdminRole,
+            SettingsRole = user.SettingsRole,
+            StreamRole = user.StreamRole,
+            JukeboxRole = user.JukeboxRole,
+            DownloadRole = user.DownloadRole,
+            UploadRole = user.UploadRole,
+            CoverArtRole = user.CoverArtRole,
+            CommentRole = user.CommentRole,
+            PodcastRole = user.PodcastRole,
+            ShareRole = user.ShareRole,
+            VideoConversionRole = user.VideoConversionRole,
+            Folder = [user.MusicFolderId],
+            MaxBitRate = user.MaxBitRate
         };
     }
 }

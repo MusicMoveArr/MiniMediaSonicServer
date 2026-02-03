@@ -24,6 +24,11 @@ public class UserService
     {
         return await _userRepository.GetUserByUsernameAsync(username);
     }
+    
+    public async Task<List<UserModel>> GetAllUsersAsync()
+    {
+        return await _userRepository.GetAllUsersAsync();
+    }
 
     public async Task UpdateUserAsync(UpdateUserRequest request)
     {

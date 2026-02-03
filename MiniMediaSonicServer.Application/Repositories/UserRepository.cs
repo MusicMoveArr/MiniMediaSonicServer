@@ -32,6 +32,17 @@ public class UserRepository
                 });
     }
     
+    public async Task<List<UserModel>> GetAllUsersAsync()
+    {
+        string query = @"SELECT *
+                         FROM sonicserver_user su
+                         where IsDeleted = false";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+        return (await conn.QueryAsync<UserModel>(query))
+            .ToList();
+    }
+    
     public async Task<bool> UserExistsByUsernameAsync(string username)
     {
         string query = @"SELECT true

@@ -110,5 +110,9 @@ public class SubsonicResponse
 
     [XmlElement("starred")]
     [JsonPropertyName("starred")]
-    public StarredResponse? starred { get; set; }
+    public StarredResponse? Starred { get; set; }
+
+    [XmlElement("users")]
+    [JsonPropertyName("users")]
+    public UserListResponse? Users { get; set; }
 }

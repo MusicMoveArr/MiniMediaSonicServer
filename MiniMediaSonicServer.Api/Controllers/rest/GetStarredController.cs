@@ -27,7 +27,7 @@ public class GetStarredController : SonicControllerBase
     {
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
-            starred = new StarredResponse
+            Starred = new StarredResponse
             {
                 Artists = await _artistService.GetStarredArtistsAsync(User.UserId),
                 Albums = await _albumService.GetStarredAlbumsAsync(User.UserId),
