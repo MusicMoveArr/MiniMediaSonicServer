@@ -19,7 +19,7 @@ public class GetPlaylistsController : SonicControllerBase
     public async Task<IResult> Get()
     {
         var userModel = GetUserModel();
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(userModel)
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             Playlists = new Playlists
             {

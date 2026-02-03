@@ -19,7 +19,7 @@ public class GetGenresController : SonicControllerBase
     public async Task<IResult> Get()
     {
         var allGenres = await _trackService.GetAllGenresAsync();
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
             Genres = new Genres
             {

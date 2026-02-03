@@ -24,7 +24,7 @@ public class Search3Controller : SonicControllerBase
             request.Query = string.Empty;
         }
         
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             SearchResult3 = new SearchResult3
             {

@@ -18,7 +18,7 @@ public class GetSongController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetSongRequest request)
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             Song = await _trackService.GetTrackByIdAsync(request.Id)
         });

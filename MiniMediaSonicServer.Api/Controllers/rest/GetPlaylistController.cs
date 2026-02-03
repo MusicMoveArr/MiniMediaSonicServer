@@ -22,7 +22,7 @@ public class GetPlaylistController : SonicControllerBase
         var userModel = GetUserModel();
         var playlist = await _playlistService.GetPlaylistByIdAsync(request.Id);
         
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
             Playlist = new Playlist
             {

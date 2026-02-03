@@ -25,7 +25,7 @@ public class GetStarredController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get()
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse(GetUserModel())
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             starred = new StarredResponse
             {
