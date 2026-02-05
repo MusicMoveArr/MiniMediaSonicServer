@@ -10,15 +10,18 @@ public class ScrobbleService
     private readonly TrackRepository _trackRepository;
     private readonly UserPlayHistoryRepository _userPlayHistoryRepository;
     private readonly ListenBrainzScrobbleHandler _listenBrainzScrobbleHandler;
+    private readonly MalojaScrobbleHandler _malojaScrobbleHandler;
 
     public ScrobbleService(
         TrackRepository trackRepository,
         ListenBrainzScrobbleHandler listenBrainzScrobbleHandler,
-        UserPlayHistoryRepository userPlayHistoryRepository)
+        UserPlayHistoryRepository userPlayHistoryRepository,
+        MalojaScrobbleHandler malojaScrobbleHandler)
     {
         _trackRepository = trackRepository;
         _listenBrainzScrobbleHandler = listenBrainzScrobbleHandler;
         _userPlayHistoryRepository = userPlayHistoryRepository;
+        _malojaScrobbleHandler = malojaScrobbleHandler;
     }
 
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
@@ -44,6 +47,11 @@ public class ScrobbleService
         if (!string.IsNullOrWhiteSpace(user.ListenBrainzUserToken))
         {
             await _listenBrainzScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(user.MalojaUrl) && !string.IsNullOrWhiteSpace(user.MalojaApiKey))
+        {
+            await _malojaScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
         }
     }
 

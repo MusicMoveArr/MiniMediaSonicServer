@@ -84,6 +84,7 @@ builder.Services.AddScoped<UserService>();
 
 //handlers
 builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
+builder.Services.AddScoped<MalojaScrobbleHandler>();
 
 
 builder.Services.AddScoped<SubsonicAuthFilter>();

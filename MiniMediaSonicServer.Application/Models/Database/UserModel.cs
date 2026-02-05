@@ -25,4 +25,7 @@ public class UserModel
     public bool VideoConversionRole { get; set; }
     public int MusicFolderId { get; set; }
     public int MaxBitRate { get; set; }
+    
+    public string MalojaUrl { get; set; }
+    public string MalojaApiKey { get; set; }
 }
