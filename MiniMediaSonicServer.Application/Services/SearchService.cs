@@ -26,13 +26,13 @@ public class SearchService
         return await _searchRepository.SearchArtistsAsync(query, count, offset);
     }
 
-    public async Task<List<AlbumID3>> SearchAlbumsAsync(string query, int count, int offset)
+    public async Task<List<AlbumID3>> SearchAlbumsAsync(string query, int count, int offset, Guid userId)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
-            return await _searchSyncRepository.SearchAlbumsAsync(count, offset);
+            return await _searchSyncRepository.SearchAlbumsAsync(count, offset, userId);
         }
-        return await _searchRepository.SearchAlbumsAsync(query, count, offset);
+        return await _searchRepository.SearchAlbumsAsync(query, count, offset, userId);
     }
 
     public async Task<List<TrackID3>> SearchTracksAsync(string query, int count, int offset)

@@ -29,7 +29,7 @@ public class Search3Controller : SonicControllerBase
             SearchResult3 = new SearchResult3
             {
                 Artists = await _searchService.SearchArtistsAsync(request.Query, request.ArtistCount, request.ArtistOffset),
-                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset),
+                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset, User.UserId),
                 Tracks = await _searchService.SearchTracksAsync(request.Query, request.SongCount, request.SongOffset),
             }
         });

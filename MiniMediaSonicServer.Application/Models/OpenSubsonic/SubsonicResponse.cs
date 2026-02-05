@@ -79,6 +79,10 @@ public class SubsonicResponse
     [XmlElement("artists")]
     [JsonPropertyName("artists")]
     public ArtistsList? Artists { get; set; }
+    
+    [XmlElement("similarSongs")]
+    [JsonPropertyName("similarSongs")]
+    public SimilarSongsListResponse? SimilarSongsList { get; set; }
 
     [XmlElement("similarSongs2")]
     [JsonPropertyName("similarSongs2")]

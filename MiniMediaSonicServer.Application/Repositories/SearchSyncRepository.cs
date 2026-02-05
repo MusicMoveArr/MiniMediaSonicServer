@@ -52,7 +52,7 @@ public class SearchSyncRepository
 	        })).ToList();
     }
     
-    public async Task<List<AlbumID3>> SearchAlbumsAsync(int count, int offset)
+    public async Task<List<AlbumID3>> SearchAlbumsAsync(int count, int offset, Guid userId)
     {
 	    string query = @"SELECT
 						 	al.AlbumId as Id,

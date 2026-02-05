@@ -69,7 +69,7 @@ public class SearchRepository
         return results;
     }
     
-    public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count, int offset)
+    public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count, int offset, Guid userId)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
 						 SELECT distinct on (al.AlbumId)
@@ -85,11 +85,12 @@ public class SearchRepository
  							(case when album_rated.Starred = true 
  							    then album_rated.UpdatedAt 
  							    else null 
- 							 end) as Starred
+ 							 end) as Starred,
+							search.SearchTerm
 						 FROM albums al
+						 join sonicserver_indexed_search search on search.Id = al.AlbumId
 						 JOIN artists a on a.ArtistId = al.ArtistId
-						 left join sonicserver_indexed_search search on search.Id = al.AlbumId
- 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId
 						 LEFT JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 LEFT JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
@@ -113,7 +114,8 @@ public class SearchRepository
 			    {
 				    searchquery,
 				    count,
-				    offset
+				    offset,
+				    userId
 			    },
 			    transaction: transaction)).ToList();
 	    }

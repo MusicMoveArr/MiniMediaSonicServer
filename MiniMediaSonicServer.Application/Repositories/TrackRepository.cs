@@ -16,7 +16,7 @@ public class TrackRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid trackId, int count)
+    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid id, int count)
     {
         string query = @"SELECT distinct on (sim_ta.name, sim_m.title) 
 							sim_m.MetadataId as TrackId,
@@ -93,7 +93,9 @@ public class TrackRepository
 						    FROM jsonb_each_text(sim_m.tag_alljsontags)
 						  ) t ON TRUE
 						  
-						 where m.MetaDataId = @trackId
+						 where m.MetaDataId = @id 
+ 							    or a.ArtistId = @id
+ 							    or al.AlbumId = @id
                          limit @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -101,7 +103,7 @@ public class TrackRepository
         var results = (await conn.QueryAsync<TrackID3>(query, 
 	        param: new
 	        {
-		        trackId,
+		        id,
 		        count
 	        })).ToList();
 
