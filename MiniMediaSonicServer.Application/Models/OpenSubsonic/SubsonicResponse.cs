@@ -59,6 +59,10 @@ public class SubsonicResponse
     [XmlElement("user")]
     [JsonPropertyName("user")]
     public User? User { get; set; }
+    
+    [XmlElement("albumList")]
+    [JsonPropertyName("albumList")]
+    public AlbumListResponse AlbumList { get; set; }
 
     [XmlElement("albumList2")]
     [JsonPropertyName("albumList2")]
