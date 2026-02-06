@@ -244,7 +244,10 @@ public class AlbumRepository
 		    .Select(group =>
 		    {
 			    var album = group.First();
-			    album.Song = group.SelectMany(image => image.Song).ToList();
+			    album.Song = group
+				    .SelectMany(album => album.Song)
+				    .DistinctBy(track => track.TrackId)
+				    .ToList();
 			    return album;
 		    })
 		    .ToList();
