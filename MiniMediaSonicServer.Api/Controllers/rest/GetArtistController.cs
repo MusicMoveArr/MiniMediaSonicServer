@@ -7,6 +7,7 @@ using MiniMediaSonicServer.Application.Services;
 namespace MiniMediaSonicServer.Api.Controllers.rest;
 
 [ApiController]
+[Route("/rest/[controller]")]
 [Route("/rest/[controller].view")]
 public class GetArtistController : SonicControllerBase
 {
