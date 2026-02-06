@@ -1,6 +1,6 @@
 ALTER TABLE artists ADD COLUMN record_id BIGINT;
 
-CREATE SEQUENCE artists_record_id_seq;
+CREATE SEQUENCE IF NOT EXISTS artists_record_id_seq;
 
 UPDATE artists
 SET record_id = nextval('artists_record_id_seq')

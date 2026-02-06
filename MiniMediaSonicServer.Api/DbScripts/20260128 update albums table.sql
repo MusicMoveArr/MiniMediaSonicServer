@@ -1,6 +1,6 @@
 ALTER TABLE albums ADD COLUMN record_id BIGINT;
 
-CREATE SEQUENCE albums_record_id_seq;
+CREATE SEQUENCE IF NOT EXISTS albums_record_id_seq;
 
 UPDATE albums
 SET record_id = nextval('albums_record_id_seq')

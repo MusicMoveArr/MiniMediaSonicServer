@@ -1,6 +1,6 @@
 ALTER TABLE metadata ADD COLUMN record_id BIGINT;
 
-CREATE SEQUENCE metadata_record_id_seq;
+CREATE SEQUENCE IF NOT EXISTS metadata_record_id_seq;
 
 UPDATE metadata
 SET record_id = nextval('metadata_record_id_seq')
