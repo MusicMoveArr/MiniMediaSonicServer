@@ -11,9 +11,12 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class StreamController : SonicControllerBase
 {
     private readonly StreamService _streamService;
-    public StreamController(StreamService streamService)
+    private readonly TranscodeService _transcodeService;
+    public StreamController(StreamService streamService,
+        TranscodeService transcodeService)
     {
         _streamService = streamService;
+        _transcodeService = transcodeService;
     }
     
     [HttpGet, HttpPost]
@@ -24,6 +27,20 @@ public class StreamController : SonicControllerBase
         if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
         {
             return SubsonicResults.Fail(HttpContext, 0, "Track not found");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Format) && !path.EndsWith(request.Format))
+        {
+            byte[]? bytes = await _transcodeService.TranscodeAsync(path, request.Format, request.MaxBitRate);
+            if (bytes?.Length > 0)
+            {
+                if (request.Format == "aac")
+                {
+                    request.Format = "m4a";
+                }
+                var transcodedContentType = ContentTypeFromSuffix(request.Format);
+                return Results.File(bytes, transcodedContentType, enableRangeProcessing: true);
+            }
         }
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));
