@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using Npgsql;
@@ -16,17 +17,17 @@ public class TrackRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid id, int count)
+    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid id, int count, ID3Type type)
     {
-        string query = @"SELECT distinct on (sim_ta.name, sim_m.title) 
+        string query = @"SELECT 
 							sim_m.MetadataId as TrackId,
- 							sim_al.AlbumId as Parent,
- 							sim_al.AlbumId as AlbumId,
- 							sim_ta.artistid AS ArtistId,
+ 							sim_m.AlbumId as Parent,
+ 							sim_m.AlbumId as AlbumId,
+ 							sim_m.artistid AS ArtistId,
 						 	'album_' || sim_m.MetadataId as CoverArt,
  							sim_m.Title as Title,
- 							sim_al.Title as Album,
- 							sim_ta.Name as Artist,
+ 							sim_m.AlbumTitle as Album,
+ 							sim_m.ArtistName as Artist,
  							sim_m.Tag_Track as TrackNumber,
  							sim_m.Tag_Year as Year,
  							sim_m.computed_genre as Genre,
@@ -74,8 +75,8 @@ public class TrackRepository
 						  JOIN metadata m on m.albumid = al.albumid
  							    
 						  --find track in tidal data
-						  join tidal_artist ta on ta.name = a.name 
-						  join tidal_album ta2 on ta2.artistid = ta.artistid and ta2.title = al.title 
+						  join tidal_artist ta on lower(ta.name) = lower(a.name)
+						  join tidal_album ta2 on ta2.artistid = ta.artistid and lower(ta2.title) = lower(al.title)
 						  join tidal_track tt on tt.albumid = ta2.albumid and similarity((tt.title || ' ' || tt.version), m.title) > 0.90
 						  join tidal_track_similar tts on tts.trackid = tt.trackid 
 						  --get similar tracks data
@@ -83,9 +84,27 @@ public class TrackRepository
 						  join tidal_album tsim_ta2 on tsim_ta2.albumid = tsim_tt.albumid
 						  join tidal_artist tsim_ta on tsim_ta.artistid = tsim_ta2.artistid
 						  --find songs we have
-						  join artists sim_ta on sim_ta.name = tsim_ta.name
-						  JOIN albums sim_al ON sim_al.artistid = sim_ta.artistid
-						  JOIN metadata sim_m on sim_m.albumid = sim_al.albumid and similarity((tsim_tt.title || ' ' || tsim_tt.version), sim_m.title) > 0.90
+						  join lateral (
+  							select 	sim_m.MetadataId, 
+  									sim_m.path,
+		  							sim_m.Title, 
+		  							sim_m.Tag_Track, 
+		  							sim_m.Tag_Year, 
+		  							sim_m.Tag_Isrc, 
+		  							sim_m.computed_genre,
+		  							sim_m.File_CreationTime,
+		  							sim_m.tag_alljsontags,
+		  							sim_al.AlbumId,
+		  							sim_al.Title as AlbumTitle,
+		  							sim_ta.ArtistId,
+		  							sim_ta.Name as ArtistName
+	  							from metadata sim_m
+	  							join artists sim_ta on lower(sim_ta.name) = lower(tsim_ta.name)
+	  							JOIN albums sim_al ON sim_al.artistid = sim_ta.artistid
+	  							where sim_m.albumid = sim_al.albumid 
+	  							and similarity((tsim_tt.title || ' ' || tsim_tt.version), sim_m.title) > 0.90
+	  							limit 1
+						  ) sim_m on true
 						  
  						  left join sonicserver_track_rated track_rated on track_rated.TrackId = sim_m.MetadataId
  						  LEFT JOIN LATERAL (
@@ -93,9 +112,11 @@ public class TrackRepository
 						    FROM jsonb_each_text(sim_m.tag_alljsontags)
 						  ) t ON TRUE
 						  
-						 where m.MetaDataId = @id 
- 							    or a.ArtistId = @id
- 							    or al.AlbumId = @id
+ 						 where case 
+ 							    when @type = 'Artist' then a.ArtistId = @id
+ 							    when @type = 'AlbumId' then al.AlbumId = @id
+ 							    when @type = 'Track' then m.MetaDataId = @id 
+ 						 end
                          limit @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -104,7 +125,8 @@ public class TrackRepository
 	        param: new
 	        {
 		        id,
-		        count
+		        count,
+		        type = type.ToString()
 	        })).ToList();
 
         foreach (var result in results)

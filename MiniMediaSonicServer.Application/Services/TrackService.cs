@@ -9,15 +9,18 @@ namespace MiniMediaSonicServer.Application.Services;
 public class TrackService
 {
     private readonly TrackRepository _trackRepository;
+    private readonly SearchRepository _searchRepository;
 
-    public TrackService(TrackRepository trackRepository)
+    public TrackService(TrackRepository trackRepository, SearchRepository searchRepository)
     {
         _trackRepository = trackRepository;
+        _searchRepository = searchRepository;
     }
 
     public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count)
     {
-        return await _trackRepository.GetSimilarTracksAsync(trackId, count);
+        var id3Type = await _searchRepository.GetID3TypeAsync(trackId);
+        return await _trackRepository.GetSimilarTracksAsync(trackId, count, id3Type);
     }
 
     public async Task<List<GenreCountModel>> GetAllGenresAsync()

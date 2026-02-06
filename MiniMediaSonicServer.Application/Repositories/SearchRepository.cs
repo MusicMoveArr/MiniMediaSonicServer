@@ -282,7 +282,7 @@ public class SearchRepository
     }
     
     
-    public async Task<ID3Type?> GetID3TypeAsync(Guid id)
+    public async Task<ID3Type> GetID3TypeAsync(Guid id)
     {
 	    string query = @"select
 						 	case 
@@ -294,10 +294,10 @@ public class SearchRepository
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
-	    return await conn.QueryFirstOrDefaultAsync<ID3Type>(query,
+	    return (await conn.QueryFirstOrDefaultAsync<ID3Type?>(query,
 		    param: new
 		    {
 			    id
-		    });
+		    })) ?? ID3Type.Unknowm;
     }
 }

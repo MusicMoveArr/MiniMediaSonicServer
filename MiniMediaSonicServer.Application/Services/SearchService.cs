@@ -44,7 +44,7 @@ public class SearchService
         return await _searchRepository.SearchTracksAsync(query, count, offset);
     }
 
-    public async Task<ID3Type?> GetID3TypeAsync(Guid id)
+    public async Task<ID3Type> GetID3TypeAsync(Guid id)
     {
         return await _searchRepository.GetID3TypeAsync(id);
     }

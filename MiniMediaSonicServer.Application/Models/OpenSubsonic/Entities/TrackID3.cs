@@ -161,9 +161,9 @@ public class TrackID3
     [JsonPropertyName("sortName")]
     public string SortName { get; set; }
 
-    [XmlAttribute("musicBrainzId")]
+    [XmlElement("musicBrainzId")]
     [JsonPropertyName("musicBrainzId")]
-    public Guid MusicBrainzId { get; set; }
+    public Guid? MusicBrainzId { get; set; }
 
     [XmlElement("isrc")]
     [JsonPropertyName("isrc")]
