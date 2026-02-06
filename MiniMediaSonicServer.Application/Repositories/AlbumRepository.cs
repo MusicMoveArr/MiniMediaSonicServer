@@ -247,6 +247,8 @@ public class AlbumRepository
 			    album.Song = group
 				    .SelectMany(album => album.Song)
 				    .DistinctBy(track => track.TrackId)
+				    .OrderBy(track => track.TrackNumber)
+				    .ThenBy(track => track.DiscNumber)
 				    .ToList();
 			    return album;
 		    })
