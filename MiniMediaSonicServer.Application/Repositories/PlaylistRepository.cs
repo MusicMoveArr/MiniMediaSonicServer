@@ -282,4 +282,21 @@ public class PlaylistRepository
 			    playlistId
 		    });
     }
+    
+    public async Task<bool> TrackExistsInPlaylistAsync(Guid playlistId, Guid trackId)
+    {
+	    string query = @"SELECT true
+						 from sonicserver_playlist_track track
+						 where track.PlaylistId = @playlistId
+						   	   and track.TrackId = @trackId";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<bool>(query, 
+		    param: new
+		    {
+			    playlistId,
+			    trackId
+		    });
+    }
 }

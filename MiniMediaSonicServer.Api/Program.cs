@@ -9,6 +9,9 @@ using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
+using MiniMediaSonicServer.WebJob.Playlists.Application.Extensions;
+using MiniMediaSonicServer.WebJob.Playlists.Application.Jobs;
+using Quartz;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
 
@@ -34,6 +37,20 @@ builder.Services.AddControllers(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("PlaylistImportJob");
+
+    q.AddJob<PlaylistImportJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("PlaylistImportJob-trigger")
+        .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlaylistImportCron"]));
+});
+
+builder.Services.AddQuartzHostedService();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -90,6 +107,10 @@ builder.Services.AddScoped<MalojaScrobbleHandler>();
 
 builder.Services.AddScoped<SubsonicAuthFilter>();
 builder.Services.AddScoped<ApiLoggingFilter>();
+
+//PlaylistWebjob
+builder.Services.AddPlaylistDependencies();
+
 
 var app = builder.Build();
 

@@ -400,4 +400,20 @@ public class TrackRepository
 
 	    return groupedResult.ToList();
     }
+    
+    public async Task<Guid?> GetTrackIdByPathAsync(string path)
+    {
+	    string query = @"SELECT m.MetadataId
+						 FROM metadata m
+						 where m.Path = @path
+						 limit 1";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<Guid>(query, 
+		    new
+		    {
+			    path = path
+		    });
+    }
 }

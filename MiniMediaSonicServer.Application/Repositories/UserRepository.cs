@@ -43,6 +43,17 @@ public class UserRepository
             .ToList();
     }
     
+    public async Task<List<Guid>> GetAllUserIdsAsync()
+    {
+        string query = @"SELECT su.UserId
+                         FROM sonicserver_user su
+                         where IsDeleted = false";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+        return (await conn.QueryAsync<Guid>(query))
+            .ToList();
+    }
+    
     public async Task<bool> UserExistsByUsernameAsync(string username)
     {
         string query = @"SELECT true
