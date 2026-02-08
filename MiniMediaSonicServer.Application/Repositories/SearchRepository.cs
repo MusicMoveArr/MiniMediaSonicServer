@@ -214,6 +214,7 @@ public class SearchRepository
 						  ) t ON TRUE
 
 						 where search.SearchTerm % lower(@searchquery)
+					     order by similarity(search.SearchTerm, lower(@searchquery)) desc 
 						 offset @offset
 						 limit @count";
 
