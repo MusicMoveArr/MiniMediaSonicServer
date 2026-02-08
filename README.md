@@ -62,9 +62,21 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   },
   "Redis": {
     "ConnectionString": ""
+  },
+  "Jobs": {
+    "PlaylistImportCron": "0 0 * * * ?",
+    "PlaylistFixTracksCron": "0 0 * * * ?",
+    "ReIndexSearchCron": "0 0 * ? * *"
   }
 }
 ```
+
+## Webjobs (Scheduled Tasks)
+By default the following jobs are scheduled hourly which can be changed in the appsettings.json
+
+1. Playlist Import: Will look into the "/playlists" folder looking for .m3u files to import 
+2. Playlist Fix Tracks: will look for playlist track files that were replaced (e.g. mp3 > flac) so files don't exist anymore but are in your playlists, it will search & replace that track with another with 99% accuracy match
+3. ReIndex Search: Keeping the search up-to-date whenever new tracks were added/remove/updated
 
 ## Implemented API's
 A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind you with missing API implementations
