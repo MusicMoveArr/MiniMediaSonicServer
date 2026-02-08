@@ -131,9 +131,9 @@ public class SearchRepository
 	    return results;
     }
     
-    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset)
+    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset, int accuracy = 50)
     {
-	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
+	    string query = @$"SET LOCAL pg_trgm.similarity_threshold = 0.{accuracy};
 						 SELECT 
  							m.MetadataId as TrackId,
  							al.AlbumId as Parent,
@@ -157,7 +157,7 @@ public class SearchRepository
  								when m.Path ilike '%.wav' then 'audio/wav'
  								else 'application/octet-stream'
  							end as ContentType,
- 							regexp_substr(m.Path, '([a-zA-Z0-9]{2,5})$') as Suffix,
+ 							regexp_substr(m.Path, '([a-zA-Z0-9]{{2,5}})$') as Suffix,
 							m.tag_isrc as Isrc_Single,
 							m.Path as Path,
 							'music' AS Type,
@@ -250,7 +250,8 @@ public class SearchRepository
 			    {
 				    searchquery,
 				    count,
-				    offset
+				    offset,
+				    accuracy
 			    })).ToList();
 	    }
 	    catch (Exception ex)

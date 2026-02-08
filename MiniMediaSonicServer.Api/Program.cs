@@ -11,6 +11,7 @@ using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Extensions;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Jobs;
+using MiniMediaSonicServer.WebJob.Indexing.Application.Extensions;
 using Quartz;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
@@ -40,14 +41,8 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("PlaylistImportJob");
-
-    q.AddJob<PlaylistImportJob>(opts => opts.WithIdentity(jobKey));
-
-    q.AddTrigger(opts => opts
-        .ForJob(jobKey)
-        .WithIdentity("PlaylistImportJob-trigger")
-        .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlaylistImportCron"]));
+    q.AddPlaylistJobs(builder);
+    q.AddIndexingJobs(builder);
 });
 
 builder.Services.AddQuartzHostedService();
@@ -110,6 +105,8 @@ builder.Services.AddScoped<ApiLoggingFilter>();
 
 //PlaylistWebjob
 builder.Services.AddPlaylistDependencies();
+//IndexingWebJob
+builder.Services.AddIndexingDependencies();
 
 
 var app = builder.Build();
