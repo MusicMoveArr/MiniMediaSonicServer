@@ -13,7 +13,10 @@ public static class DependencyExtension
         services.AddScoped<PlaylistImportService>()
             .AddScoped<PlaylistImportRepository>()
             .AddScoped<FixMissingPlaylistTracksService>()
-            .AddScoped<FixMissingPlaylistTracksRepository>();
+            .AddScoped<FixMissingPlaylistTracksRepository>()
+            .AddScoped<NavidromeSmartPlaylistService>()
+            .AddScoped<NavidromeSmartPlaylistRepository>()
+            .AddScoped<NavidromeSmartPlaylistRefreshJob>();
     
     public static IServiceCollectionQuartzConfigurator AddPlaylistJobs(
         this IServiceCollectionQuartzConfigurator config,
@@ -33,6 +36,14 @@ public static class DependencyExtension
             .ForJob(fixTracksjobKey)
             .WithIdentity("FixMissingPlaylistTracksJob-trigger")
             .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlaylistFixTracksCron"]));
+        
+        
+        var refreshNavidromeSmartPlaylistjobKey = new JobKey("NavidromeSmartPlaylistRefreshJob");
+        config.AddJob<NavidromeSmartPlaylistRefreshJob>(opts => opts.WithIdentity(refreshNavidromeSmartPlaylistjobKey));
+        config.AddTrigger(opts => opts
+            .ForJob(refreshNavidromeSmartPlaylistjobKey)
+            .WithIdentity("NavidromeSmartPlaylistRefreshJob-trigger")
+            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["NavidromeSmartPlaylistRefreshCron"]));
         return config;
     }
 }

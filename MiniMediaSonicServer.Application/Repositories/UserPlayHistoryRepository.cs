@@ -16,7 +16,7 @@ public class UserPlayHistoryRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task CreatePlayHistoryAsync(Guid userId, Guid trackId, bool scrobble, DateTime? scrobbleAt)
+    public async Task CreatePlayHistoryAsync(Guid userId, Guid trackId, bool scrobble, DateTime? scrobbleAt, DateTime currentDateTime)
     {
 	    string query = @"INSERT INTO sonicserver_user_playhistory (HistoryId, UserId, TrackId, Scrobble, ScrobbleAt, 
                                           						   Artist, AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt)
@@ -32,8 +32,8 @@ public class UserPlayHistoryRepository
 						    COALESCE(t.tags->>'album', ''),
 						    COALESCE(m.Title, ''),
 						    COALESCE(t.tags->>'isrc', ''),
-						 	current_timestamp,
-						 	current_timestamp
+						 	@currentDateTime,
+						 	@currentDateTime
 						 FROM metadata m
 						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
@@ -50,15 +50,17 @@ public class UserPlayHistoryRepository
 			    userId,
 			    trackId,
 			    scrobble,
-			    scrobbleAt
+			    scrobbleAt,
+			    currentDateTime
 		    });
     }
     
-    public async Task<UserPlayHistoryModel?> GetLastUserPlayByTrackIdAsync(Guid userId, Guid trackId)
+    public async Task<UserPlayHistoryModel?> GetLastUserPlayByTrackIdAsync(Guid userId, Guid trackId, DateTime timeFilter)
     {
 	    string query = @"SELECT * FROM sonicserver_user_playhistory
 					     WHERE UserId = @userId
 					     AND TrackId = @trackId
+					     AND CreatedAt >= @timeFilter
 					     order by UpdatedAt desc
 						 limit 1";
 
@@ -68,16 +70,17 @@ public class UserPlayHistoryRepository
 		    param: new
 		    {
 			    userId,
-			    trackId
+			    trackId,
+			    timeFilter
 		    });
     }
     
-    public async Task UpdateUserPlayHistoryAsync(Guid historyId, bool scrobble, DateTime? scrobbleAt)
+    public async Task UpdateUserPlayHistoryAsync(Guid historyId, bool scrobble, DateTime? scrobbleAt, DateTime currentDateTime)
     {
 	    string query = @"UPDATE sonicserver_user_playhistory 
 						 SET Scrobble = @scrobble,
 						     ScrobbleAt = @scrobbleAt,
-						     UpdatedAt = current_timestamp						 
+						     UpdatedAt = @currentDateTime						 
 						 where HistoryId = @historyId";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -87,7 +90,8 @@ public class UserPlayHistoryRepository
 		    {
 			    historyId,
 			    scrobble,
-			    scrobbleAt
+			    scrobbleAt,
+			    currentDateTime
 		    });
     }
 }

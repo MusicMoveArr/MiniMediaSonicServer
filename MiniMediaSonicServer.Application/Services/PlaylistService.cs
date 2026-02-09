@@ -56,7 +56,7 @@ public class PlaylistService
             {
                 await _playlistRepository.AddTrackToPlaylistAsync(request.PlaylistId, trackId);
             }
-            await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId);
+            await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId, DateTime.Now);
         }
         
     }

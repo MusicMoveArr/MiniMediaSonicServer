@@ -28,20 +28,21 @@ public class ScrobbleService
     {
         DateTime scrobbleAt = time > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime : DateTime.Now;
         TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId);
-
+        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
+        
         if (track == null)
         {
             return;
         }
 
-        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId);
+        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {
-            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, true, scrobbleAt);
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, true, scrobbleAt, DateTime.Now);
         }
         else
         {
-            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, true, scrobbleAt);
+            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, true, scrobbleAt, DateTime.Now);
         }
         
         if (!string.IsNullOrWhiteSpace(user.ListenBrainzUserToken))
@@ -58,20 +59,21 @@ public class ScrobbleService
     public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)
     {
         TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId);
+        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
 
         if (track == null)
         {
             return;
         }
 
-        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId);
+        var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {
-            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, false, null);
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, false, null, DateTime.Now);
         }
         else
         {
-            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, false, null);
+            await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, false, null, DateTime.Now);
         }
     }
 }

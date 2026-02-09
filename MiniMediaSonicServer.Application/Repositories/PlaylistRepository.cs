@@ -236,16 +236,17 @@ public class PlaylistRepository
 		    });
     }
     
-    public async Task UpdatePlaylistUpdatedAtAsync(Guid playlistId)
+    public async Task UpdatePlaylistUpdatedAtAsync(Guid playlistId, DateTime currentDateTime)
     {
-	    string query = @"UPDATE sonicserver_playlist SET UpdatedAt = current_timestamp where PlaylistId = @playlistId;";
+	    string query = @"UPDATE sonicserver_playlist SET UpdatedAt = @currentDateTime where PlaylistId = @playlistId;";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
 	    await conn.ExecuteAsync(query, 
 		    param: new
 		    {
-			    playlistId
+			    playlistId,
+			    currentDateTime
 		    });
     }
     
@@ -297,6 +298,20 @@ public class PlaylistRepository
 		    {
 			    playlistId,
 			    trackId
+		    });
+    }
+    
+    public async Task DeleteAllTracksFromPlaylistAsync(Guid playlistId)
+    {
+	    string query = @"DELETE FROM sonicserver_playlist_track
+						 WHERE PlayListId = @playlistId";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    await conn.ExecuteAsync(query, 
+		    param: new
+		    {
+			    playlistId
 		    });
     }
 }
