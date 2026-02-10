@@ -13,7 +13,8 @@ This roadmap will be ongoing as the project keeps going
 - [x] Legacy Subsonic authentication (needs to be improved still)
 - [x] Token-based Subsonic authentication
 - [x] Get similar tracks from Tidal
-- [ ] Redis caching
+- [x] Redis caching
+- [x] Support for Navidrome's Smart Playlist (nsp) format
 
 ## Docker Compose
 ```
