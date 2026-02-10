@@ -4,19 +4,19 @@ public class OperatorField
 {
     public string? Title { get; set; }
     public string? Album { get; set; }
-    public string? HasCoverAart { get; set; }
-    public string? TrackNumber { get; set; }
-    public string? DiscNumber { get; set; }
+    public bool? HasCoverAart { get; set; }
+    public int? TrackNumber { get; set; }
+    public int? DiscNumber { get; set; }
     public List<int>? Year { get; set; }
-    public string? Date { get; set; }
-    public string? OriginalYear { get; set; }
-    public string? OriginalDate { get; set; }
-    public string? ReleaseYear { get; set; }
-    public string? ReleaseDate { get; set; }
-    public string? Size { get; set; }
-    public string? Compilation { get; set; }
-    public string? DateAdded { get; set; }
-    public string? DateNodified { get; set; }
+    public DateTime? Date { get; set; }
+    public DateTime? OriginalYear { get; set; }
+    public DateTime? OriginalDate { get; set; }
+    public DateTime? ReleaseYear { get; set; }
+    public DateTime? ReleaseDate { get; set; }
+    public long? Size { get; set; }
+    public bool? Compilation { get; set; }
+    public DateTime? DateAdded { get; set; }
+    public DateTime? DateModified { get; set; }
     public string? DiscSubtitle { get; set; }
     public string? Comment { get; set; }
     public string? Lyrics { get; set; }
@@ -30,7 +30,7 @@ public class OperatorField
     public string? FilePath { get; set; }
     public string? FileType { get; set; }
     public string? Grouping { get; set; }
-    public string? Duration { get; set; }
+    public int? Duration { get; set; }
     public int? Bitrate { get; set; }
     public int? BitDepth { get; set; }
     public int? BPM { get; set; }

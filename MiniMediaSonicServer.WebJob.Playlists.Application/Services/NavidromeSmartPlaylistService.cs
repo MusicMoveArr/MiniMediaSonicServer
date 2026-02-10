@@ -171,7 +171,7 @@ public class NavidromeSmartPlaylistService
             case "filepath": return "m.Path";
             case "filetype": return string.Empty;
             case "grouping": return string.Empty;
-            case "duration": return "m.Tag_Length";
+            case "duration": return "COALESCE((t.tags->>'duration')::numeric, 0)";
             case "bitrate": return "COALESCE((t.tags->>'bitrate')::numeric, 0)";
             case "bitdepth": return "COALESCE((t.tags->>'bitdepth')::numeric, 0)";
             case "bpm": return "COALESCE((t.tags->>'bpm')::numeric, 0)";
