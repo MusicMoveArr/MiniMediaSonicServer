@@ -13,7 +13,7 @@ public class Operator
     [JsonProperty("gt")]
     public OperatorField? GreaterThan { get; set; }
     
-    [JsonProperty("ls")]
+    [JsonProperty("lt")]
     public OperatorField? LessThan { get; set; }
     
     public OperatorField? Contains { get; set; }

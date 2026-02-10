@@ -49,6 +49,12 @@ public class OperatorField
     public Guid? Mbz_Release_Group_Id { get; set; }
     public int? Library_Id { get; set; }
     
+    //extra - Not officially supported by Navidrome's documentation
+    public string? Genre { get; set; }
+    public bool? ArtistLoved { get; set; }
+    public bool? AlbumLoved { get; set; }
+    
+    
     private Dictionary<string, object?> _activeFields;
     public Dictionary<string, object?> ActiveFields
     {

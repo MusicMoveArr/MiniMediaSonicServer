@@ -156,31 +156,31 @@ public class NavidromeSmartPlaylistService
             case "releasedate": return string.Empty;
             case "size": return string.Empty;
             case "compilation": return string.Empty;
-            case "dateadded": return "m.FileCreationTime";
-            case "datenodified": return string.Empty;
+            case "dateadded": return "m.File_CreationTime";
+            case "datemodified": return "m.File_LastWriteTime";
             case "discsubtitle": return string.Empty;
             case "comment": return "t.tags->>'comment'";
             case "lyrics": return "t.tags->>'lyrics'";
-            case "sorttitle": return "t.tags->>'sortaltitle'";
-            case "sortalbum": return "t.tags->>'sortalbum'";
-            case "sortartist": return "t.tags->>'sortartist'";
+            case "sorttitle": return "COALESCE(t.tags->>'sorttitle', t.tags->>'titlesort')";
+            case "sortalbum": return "COALESCE(t.tags->>'sortalbum', t.tags->>'albumsort')";
+            case "sortartist": return "COALESCE(t.tags->>'sortartist', t.tags->>'artistsort')";
             case "sortalbumartist": return "t.tags->>'sortalbumartist'";
-            case "albumtype": return string.Empty;
+            case "albumtype": return "t.tags->>'musicbrainz_albumtype'";
             case "albumcomment": return string.Empty;
-            case "catalognumber": return string.Empty;
+            case "catalognumber": return "t.tags->>'catalognumber'";
             case "filepath": return "m.Path";
             case "filetype": return string.Empty;
             case "grouping": return string.Empty;
             case "duration": return "m.Tag_Length";
-            case "bitrate": return "CAST(COALESCE(t.tags->>'bitrate', '0') AS INTEGER)";
-            case "bitdepth": return string.Empty;
-            case "bpm": return "CAST(COALESCE(t.tags->>'bpm', '0') AS INTEGER)";
+            case "bitrate": return "COALESCE((t.tags->>'bitrate')::numeric, 0)";
+            case "bitdepth": return "COALESCE((t.tags->>'bitdepth')::numeric, 0)";
+            case "bpm": return "COALESCE((t.tags->>'bpm')::numeric, 0)";
             case "channels": return string.Empty;
             case "loved": return "rated.Starred";
             case "dateloved": return string.Empty;
             case "lastplayed": return "(current_timestamp::date - history.CreatedAt::date)";
             case "daterated": return string.Empty;
-            case "playcount": return "playhistory.TrackPlaycount";
+            case "playcount": return "COALESCE(playhistory.TrackPlaycount, 0)";
             case "rating": return "rated.Rating";
             case "mbz_album_id": return "t.tags->>'musicbrainz album id'";
             case "mbz_album_artist_id": return "t.tags->>'musicbrainz album artist id'";
@@ -189,6 +189,10 @@ public class NavidromeSmartPlaylistService
             case "mbz_release_track_id": return "t.tags->>'musicbrainz track id'";
             case "mbz_release_group_id": return "t.tags->>'musicbrainz release group id'";
             case "library_id": return string.Empty;
+            //extra - Not officially supported by Navidrome's documentation
+            case "genre": return "m.Computed_Genre";
+            case "artistloved": return "artist_rated.Starred";
+            case "albumloved": return "album_rated.Starred";
             default:
                 return string.Empty;
         }
