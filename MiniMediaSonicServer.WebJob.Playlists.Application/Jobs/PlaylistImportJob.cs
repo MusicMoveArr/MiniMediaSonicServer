@@ -19,7 +19,7 @@ public class PlaylistImportJob : IJob
             return;
         }
 
-        foreach (string path in Directory.GetFiles("/playlists"))
+        foreach (string path in Directory.GetFiles("/playlists").Where(file => !file.EndsWith(".nsp")))
         {
             await _playlistImportService.ImportPlaylistPathAsync(path);
         }
