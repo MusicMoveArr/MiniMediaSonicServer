@@ -45,7 +45,7 @@ public class PlaylistRepository
 	        })).ToList();
     }
     
-    public async Task<PlaylistModel> GetPlaylistByIdAsync(Guid playlistId)
+    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId)
     {
 	    string query = @"SELECT
     						playlist.PlaylistId, 
@@ -59,13 +59,13 @@ public class PlaylistRepository
  							al.AlbumId as Parent,
  							al.AlbumId as AlbumId,
  							a.artistid AS ArtistId,
-						 	'album_' || m.MetadataId as CoverArt,
+						 	'track_' || m.MetadataId as CoverArt,
  							m.Title as Title,
  							al.Title as Album,
  							a.Name as Artist,
- 							m.Tag_Track as TrackNumber,
+ 							playlist_track.TrackOrder as TrackNumber,
  							m.Tag_Year as Year,
- 							'' as Genre,
+ 							m.Computed_Genre as Genre,
  							0 as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
@@ -108,10 +108,10 @@ public class PlaylistRepository
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
  						 from sonicserver_playlist playlist
- 						 left join sonicserver_playlist_track playlist_track on playlist_track.playlistid = playlist.playlistid
- 					     left JOIN metadata m on m.MetadataId = playlist_track.TrackId
- 						 left JOIN albums al ON al.AlbumId = m.AlbumId
-						 left JOIN artists a ON a.ArtistId = al.ArtistId
+ 						 join sonicserver_playlist_track playlist_track on playlist_track.playlistid = playlist.playlistid
+ 					     JOIN metadata m on m.MetadataId = playlist_track.TrackId
+ 						 JOIN albums al ON al.AlbumId = m.AlbumId
+						 JOIN artists a ON a.ArtistId = al.ArtistId
 						 
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  						 left join lateral (
@@ -176,7 +176,26 @@ public class PlaylistRepository
 		    .Select(group =>
 		    {
 			    var playlist = group.First();
-			    playlist.Tracks = group.SelectMany(playlist => playlist.Tracks).ToList();
+
+			    foreach (var tracks in group
+				             .SelectMany(playlist => playlist.Tracks)
+				             .GroupBy(track => track.TrackId))
+			    {
+				    foreach (var track in tracks)
+				    {
+					    track.Artists = tracks.Select(artist => artist.Artists)
+						    .SelectMany(artists => artists)
+						    .DistinctBy(artist => artist.Id)
+						    .ToList();
+				    }
+			    }
+			    
+			    playlist.Tracks = group
+				    .SelectMany(playlist => playlist.Tracks)
+				    .DistinctBy(track => track.TrackId)
+				    .OrderBy(track => track.TrackNumber)
+				    .ToList();
+			    
 			    playlist.SongCount = playlist.Tracks.Count;
 			    return playlist;
 		    })

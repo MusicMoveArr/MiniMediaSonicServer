@@ -22,6 +22,11 @@ public class GetPlaylistController : SonicControllerBase
     {
         var userModel = GetUserModel();
         var playlist = await _playlistService.GetPlaylistByIdAsync(request.Id);
+
+        if (playlist == null)
+        {
+            return SubsonicResults.Fail(HttpContext, 70, "Playlist not found");
+        }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {

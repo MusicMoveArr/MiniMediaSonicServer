@@ -33,7 +33,7 @@ public class PlaylistService
         return await _playlistRepository.GetPlaylistByIdAsync(playlistId);
     }
 
-    public async Task<PlaylistModel> GetPlaylistByIdAsync(Guid playlistId)
+    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId)
     {
         return await _playlistRepository.GetPlaylistByIdAsync(playlistId);
     }

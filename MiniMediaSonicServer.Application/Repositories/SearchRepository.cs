@@ -145,7 +145,7 @@ public class SearchRepository
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
  							m.Tag_Year as Year,
- 							'' as Genre,
+ 							m.Computed_Genre as Genre,
  							0 as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
