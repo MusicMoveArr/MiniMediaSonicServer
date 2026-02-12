@@ -108,10 +108,10 @@ public class PlaylistRepository
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
  						 from sonicserver_playlist playlist
- 						 join sonicserver_playlist_track playlist_track on playlist_track.playlistid = playlist.playlistid
- 					     JOIN metadata m on m.MetadataId = playlist_track.TrackId
- 						 JOIN albums al ON al.AlbumId = m.AlbumId
-						 JOIN artists a ON a.ArtistId = al.ArtistId
+ 						 LEFT JOIN sonicserver_playlist_track playlist_track on playlist_track.playlistid = playlist.playlistid
+ 					     LEFT JOIN metadata m on m.MetadataId = playlist_track.TrackId
+ 						 LEFT JOIN albums al ON al.AlbumId = m.AlbumId
+						 LEFT JOIN artists a ON a.ArtistId = al.ArtistId
 						 
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
  						 left join lateral (
