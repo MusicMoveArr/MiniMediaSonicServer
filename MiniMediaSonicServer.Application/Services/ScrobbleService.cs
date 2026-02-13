@@ -38,7 +38,7 @@ public class ScrobbleService
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {
-            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, true, scrobbleAt, DateTime.Now);
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, true, scrobbleAt, time, DateTime.Now);
         }
         else
         {
@@ -69,7 +69,7 @@ public class ScrobbleService
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {
-            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, false, null, DateTime.Now);
+            await _userPlayHistoryRepository.CreatePlayHistoryAsync(user.UserId, trackId, false, null, time, DateTime.Now);
         }
         else
         {

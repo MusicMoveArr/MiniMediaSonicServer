@@ -15,4 +15,6 @@ public class UserPlayHistoryModel
     public string Isrc { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string ImportedBy { get; set; }
+    public long PlayOffset { get; set; }
 }

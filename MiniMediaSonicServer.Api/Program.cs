@@ -9,6 +9,7 @@ using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
+using MiniMediaSonicServer.WebJob.Import.Application.Extensions;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Extensions;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Extensions;
@@ -43,6 +44,7 @@ builder.Services.AddQuartz(q =>
 {
     q.AddPlaylistJobs(builder);
     q.AddIndexingJobs(builder);
+    q.AddImportJobs(builder);
 });
 
 builder.Services.AddQuartzHostedService();
@@ -81,6 +83,7 @@ builder.Services.AddScoped<SearchRepository>();
 builder.Services.AddScoped<SearchSyncRepository>();
 builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<UserPlayHistoryRepository>();
+builder.Services.AddScoped<UserPropertyRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
@@ -107,6 +110,8 @@ builder.Services.AddScoped<ApiLoggingFilter>();
 builder.Services.AddPlaylistDependencies();
 //IndexingWebJob
 builder.Services.AddIndexingDependencies();
+//ImportLastFmWebJob
+builder.Services.AddImportDependencies();
 
 
 var app = builder.Build();

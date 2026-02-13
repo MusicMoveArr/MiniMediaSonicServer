@@ -2,7 +2,6 @@ using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Models.Database;
-using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using Npgsql;
 
 namespace MiniMediaSonicServer.Application.Repositories;
@@ -16,10 +15,18 @@ public class UserPlayHistoryRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task CreatePlayHistoryAsync(Guid userId, Guid trackId, bool scrobble, DateTime? scrobbleAt, DateTime currentDateTime)
+    public async Task CreatePlayHistoryAsync(
+	    Guid userId, 
+	    Guid trackId, 
+	    bool scrobble, 
+	    DateTime? scrobbleAt, 
+	    long playOffset, 
+	    DateTime currentDateTime,
+	    string importedBy = null)
     {
 	    string query = @"INSERT INTO sonicserver_user_playhistory (HistoryId, UserId, TrackId, Scrobble, ScrobbleAt, 
-                                          						   Artist, AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt)
+                                          						   Artist, AlbumArtist, Artists, Album, Title, ISRC, 
+                                          						   CreatedAt, UpdatedAt, ImportedBy, playOffset)
 						 SELECT
 						    @historyId,
 							@userId,
@@ -33,7 +40,9 @@ public class UserPlayHistoryRepository
 						    COALESCE(m.Title, ''),
 						    COALESCE(t.tags->>'isrc', ''),
 						 	@currentDateTime,
-						 	@currentDateTime
+						 	@currentDateTime,
+						 	@importedBy,
+						 	@playOffset
 						 FROM metadata m
 						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
@@ -51,7 +60,9 @@ public class UserPlayHistoryRepository
 			    trackId,
 			    scrobble,
 			    scrobbleAt,
-			    currentDateTime
+			    currentDateTime,
+			    importedBy,
+			    playOffset
 		    });
     }
     
@@ -93,5 +104,30 @@ public class UserPlayHistoryRepository
 			    scrobbleAt,
 			    currentDateTime
 		    });
+    }
+    
+    public async Task<List<UserPlayHistoryModel>> GetScrobbledAtTimeAsync(
+	    Guid userId, 
+	    DateTime timeFilter,
+	    long epochPlayOffset)
+    {
+	    string query = @"SELECT * 
+						 FROM sonicserver_user_playhistory
+					     WHERE UserId = @userId
+					     AND (CreatedAt between @timeFilterFrom and @timeFilterTill
+					     	 or ScrobbleAt between @timeFilterFrom and @timeFilterTill
+					     	 or PlayOffset between @epochPlayOffset-5 and @epochPlayOffset+5)";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<UserPlayHistoryModel>(query,
+		    param: new
+		    {
+			    userId,
+			    timeFilterFrom = timeFilter.Subtract(TimeSpan.FromSeconds(5)),
+			    timeFilterTill = timeFilter.Add(TimeSpan.FromSeconds(5)),
+			    epochPlayOffset
+		    }))
+		    .ToList();
     }
 }

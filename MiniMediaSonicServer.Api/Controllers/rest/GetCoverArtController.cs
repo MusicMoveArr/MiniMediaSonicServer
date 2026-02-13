@@ -39,7 +39,7 @@ public class GetCoverArtController : SonicControllerBase
         
         if (Guid.TryParse(extractedGuid, out Guid genericId))
         {
-            var cachedCover = await _redisCacheService.GetAsync(RedisPrefixKey, genericId.ToString());
+            var cachedCover = await _redisCacheService.GetBytesAsync(RedisPrefixKey, genericId.ToString());
             if (cachedCover?.Length == NotFoundCoverData.Length)
             {
                 return Results.Bytes(_unknownCover, "image/png");
@@ -80,11 +80,11 @@ public class GetCoverArtController : SonicControllerBase
             
             if (coverArt != null)
             {
-                await _redisCacheService.SetAsync(RedisPrefixKey, extractedGuid, coverArt);
+                await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, coverArt);
                 return Results.Bytes(coverArt, "image/jpg");
             }
 
-            await _redisCacheService.SetAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
+            await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
             return Results.Bytes(_unknownCover, "image/jpg");
         }
         

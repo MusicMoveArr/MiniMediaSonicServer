@@ -28,6 +28,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MiniMediaSonicServer.Application\MiniMediaSonicServer.Application.csproj" />
+      <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Import.Application\MiniMediaSonicServer.WebJob.Import.Application.csproj" />
       <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Indexing.Application\MiniMediaSonicServer.WebJob.Indexing.Application.csproj" />
       <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Playlists.Application\MiniMediaSonicServer.WebJob.Playlists.Application.csproj" />
     </ItemGroup>
@@ -91,6 +92,15 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="DbScripts\20260207 playlist import table.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DbScripts\20260212 user properties table.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DbScripts\20260212 update user history table.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DbScripts\20260212 update user table.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

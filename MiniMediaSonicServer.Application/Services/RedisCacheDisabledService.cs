@@ -4,9 +4,15 @@ namespace MiniMediaSonicServer.Application.Services;
 
 public class RedisCacheDisabledService : IRedisCacheService
 {
-    public Task SetAsync(string prefixKey, string key, byte[] data)
+    public Task SetBytesAsync(string prefixKey, string key, byte[] data)
         => Task.CompletedTask;
 
-    public Task<byte[]?> GetAsync(string prefixKey, string key) => 
+    public Task<byte[]?> GetBytesAsync(string prefixKey, string key) => 
         Task.FromResult<byte[]?>(null);
+
+    public Task SetStringAsync(string prefixKey, string key, string data)
+        => Task.CompletedTask;
+
+    public Task<string?> GetStringAsync(string prefixKey, string key) => 
+        Task.FromResult<string?>(null);
 }

@@ -224,4 +224,26 @@ public class UserRepository
                 username
             });
     }
+    
+    public async Task<TimeZoneInfo?> GetTimezoneByUserIdAsync(Guid userId)
+    {
+        string query = @"SELECT Timezone 
+                         from sonicserver_user
+                         where UserId = @userId
+                           	   and IsDeleted = false";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        string? timezoneName = await conn.ExecuteScalarAsync<string>(query, 
+            param: new
+            {
+                userId
+            });
+
+        if (string.IsNullOrWhiteSpace(timezoneName))
+        {
+            return null;
+        }
+        return TimeZoneInfo.FindSystemTimeZoneById(timezoneName);
+    }
 }
