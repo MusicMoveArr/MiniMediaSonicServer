@@ -54,6 +54,7 @@ public class PlaylistRepository
     						playlist.Public, 
     						playlist.CreatedAt, 
     						playlist.UpdatedAt,
+    						COALESCE(ImportPlaylist.IsImport, false) AS ReadOnly,
     
          					m.MetadataId as TrackId,
  							al.AlbumId as Parent,
@@ -128,6 +129,12 @@ public class PlaylistRepository
  							from artists join_artist 
  							where lower(join_artist.name) = lower(all_artists.artist)
  							limit 1) joined_artist on true
+ 							    
+ 						left join lateral (
+ 							select true AS IsImport
+ 							from sonicserver_playlist_import_user import 
+ 							where playlist.PlayListId = import.PlayListId
+ 							limit 1) ImportPlaylist on true
  							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags

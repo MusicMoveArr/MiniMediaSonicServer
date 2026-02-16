@@ -40,7 +40,8 @@ public class GetPlaylistController : SonicControllerBase
                 Id = playlist.PlaylistId,
                 Owner = userModel.Username,
                 Public = playlist.Public,
-                Entry = playlist.Tracks
+                Entry = playlist.Tracks,
+                ReadOnly = playlist.ReadOnly,
             }
         });
     }
