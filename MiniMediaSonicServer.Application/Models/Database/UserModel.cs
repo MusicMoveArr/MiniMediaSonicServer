@@ -11,7 +11,6 @@ public class UserModel
     public string TokenBasedAuth { get; set; }
     public string ListenBrainzUserToken { get; set; }
     
-    public bool LdapAuthenticated { get; set; }
     public bool AdminRole { get; set; }
     public bool SettingsRole { get; set; }
     public bool StreamRole { get; set; }

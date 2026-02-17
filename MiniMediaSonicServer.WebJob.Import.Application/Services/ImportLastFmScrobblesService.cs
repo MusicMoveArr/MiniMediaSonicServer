@@ -103,6 +103,7 @@ public class ImportLastFmScrobblesService
                     .SearchTracksAsync(searchQuery, 
                         1, 
                         0, 
+                        userId,
                         99))
                 .FirstOrDefault();
             if (track != null && trackId != Guid.Empty)

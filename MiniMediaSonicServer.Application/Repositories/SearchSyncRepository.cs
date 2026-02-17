@@ -17,7 +17,7 @@ public class SearchSyncRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<ArtistID3>> SearchArtistsAsync(int count, int offset)
+    public async Task<List<ArtistID3>> SearchArtistsAsync(int count, int offset, Guid userId)
     {
 	    string query = @"SELECT
     						a.ArtistId as Id,
@@ -36,7 +36,7 @@ public class SearchSyncRepository
 						     from albums ab 
 						     where ab.artistid = a.artistid 
 						     limit 1) as album_count on true
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 					     where 
 						 	a.record_id >= @offset 
 						 	and a.record_id <= @offset + @count";
@@ -48,7 +48,8 @@ public class SearchSyncRepository
 	        param: new
 	        {
 		        count,
-		        offset
+		        offset,
+		        userId
 	        })).ToList();
     }
     
@@ -70,7 +71,7 @@ public class SearchSyncRepository
  							 end) as Starred
 						 FROM albums al
 						 JOIN artists a on a.ArtistId = al.ArtistId
- 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId
 						 LEFT JOIN lateral (
 						     select m.tag_year
 						     from metadata m 
@@ -95,11 +96,12 @@ public class SearchSyncRepository
 			    param: new
 			    {
 				    count,
-				    offset
+				    offset,
+				    userId
 			    })).ToList();
     }
     
-    public async Task<List<TrackID3>> SearchTracksAsync(int count, int offset)
+    public async Task<List<TrackID3>> SearchTracksAsync(int count, int offset, Guid userId)
     {
 	    string query = @"SELECT 
  							m.MetadataId as TrackId,
@@ -129,6 +131,7 @@ public class SearchSyncRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -174,6 +177,13 @@ public class SearchSyncRepository
  							where lower(join_artist.name) = lower(all_artists.artist)
  							limit 1) joined_artist on true
  							    
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
+ 							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
@@ -209,7 +219,8 @@ public class SearchSyncRepository
 			    param: new
 			    {
 				    count,
-				    offset
+				    offset,
+				    userId
 			    })).ToList();
 
 	    var groupedResult = results

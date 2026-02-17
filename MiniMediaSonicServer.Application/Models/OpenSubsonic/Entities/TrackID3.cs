@@ -145,9 +145,9 @@ public class TrackID3
     [JsonPropertyName("originalHeight")]
     public int OriginalHeight { get; set; }
 
-    [XmlAttribute("played")]
+    [XmlElement("played")]
     [JsonPropertyName("played")]
-    public string Played { get; set; }
+    public DateTime? Played { get; set; }
 
     [XmlAttribute("bpm")]
     [JsonPropertyName("bpm")]

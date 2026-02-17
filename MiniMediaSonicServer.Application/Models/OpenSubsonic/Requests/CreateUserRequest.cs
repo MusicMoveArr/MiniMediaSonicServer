@@ -5,7 +5,6 @@ public class CreateUserRequest
     public string Username { get; set; }
     public string Password { get; set; }
     public string Email { get; set; }
-    public bool? LdapAuthenticated { get; set; }
     public bool? AdminRole { get; set; }
     public bool? SettingsRole { get; set; }
     public bool? StreamRole { get; set; }

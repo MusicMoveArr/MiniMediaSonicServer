@@ -30,12 +30,12 @@ public class PlaylistService
     public async Task<PlaylistModel> CreatePlaylistAsync(Guid userId, string name)
     {
         Guid playlistId = await _playlistRepository.CreatePlaylistAsync(userId, name);
-        return await _playlistRepository.GetPlaylistByIdAsync(playlistId);
+        return await _playlistRepository.GetPlaylistByIdAsync(playlistId, userId);
     }
 
-    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId)
+    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId, Guid userId)
     {
-        return await _playlistRepository.GetPlaylistByIdAsync(playlistId);
+        return await _playlistRepository.GetPlaylistByIdAsync(playlistId, userId);
     }
 
     public async Task SetPlaylistDeletedAsync(Guid playlistId)

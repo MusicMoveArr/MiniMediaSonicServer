@@ -53,7 +53,8 @@ public class RatingRepository
     
     public async Task StarTrackAsync(Guid userId, Guid trackId, bool star)
     {
-	    string query = @"INSERT INTO sonicserver_track_rated (UserId, TrackId, Rating, Starred, Artist, AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt)
+	    string query = @"INSERT INTO sonicserver_track_rated (UserId, TrackId, Rating, Starred, Artist, 
+                                     AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt)
 						 SELECT 
 							@userId,
 							@trackId,
@@ -91,7 +92,8 @@ public class RatingRepository
     
     public async Task RateArtistAsync(Guid userId, Guid artistId, int rating)
     {
-	    string query = @"INSERT INTO sonicserver_artist_rated (UserId, ArtistId, Rating, Starred, Artist, CreatedAt, UpdatedAt)
+	    string query = @"INSERT INTO sonicserver_artist_rated (UserId, ArtistId, Rating, Starred, 
+                                      						   Artist, CreatedAt, UpdatedAt)
 						 SELECT 
 							@userId,
 							@artistId,

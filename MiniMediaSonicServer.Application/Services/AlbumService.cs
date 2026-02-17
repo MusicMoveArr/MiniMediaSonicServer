@@ -19,9 +19,9 @@ public class AlbumService
         return await _albumRepository.GetAlbumId3Async(request, userId);
     }
 
-    public async Task<AlbumID3> GetAlbumByIdResponseAsync(Guid albumId)
+    public async Task<AlbumID3> GetAlbumByIdResponseAsync(Guid albumId, Guid userId)
     {
-        return await _albumRepository.GetAlbumId3WithTracksAsync(albumId);
+        return await _albumRepository.GetAlbumId3WithTracksAsync(albumId, userId);
     }
 
     public async Task<List<AlbumID3>> GetStarredAlbumsAsync(Guid userId)

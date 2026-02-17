@@ -16,7 +16,7 @@ public class ArtistRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId)
+    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
         string query = @"SELECT 
     						a.ArtistId as Id,
@@ -41,7 +41,7 @@ public class ArtistRepository
 							m.file_creationtime as Created
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
 						 where a.ArtistId = @artistId";
@@ -61,10 +61,10 @@ public class ArtistRepository
 	        splitOn: "Id, Id",
 	        param: new
 	        {
-		        artistId
+		        artistId,
+		        userId
 	        })).ToList();
 
-        
         var groupedResult = results
 	        .GroupBy(artist => artist.Id)
 	        .Select(group =>

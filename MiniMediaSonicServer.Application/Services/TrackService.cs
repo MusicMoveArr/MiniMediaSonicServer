@@ -17,10 +17,10 @@ public class TrackService
         _searchRepository = searchRepository;
     }
 
-    public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count)
+    public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count, Guid userId)
     {
         var id3Type = await _searchRepository.GetID3TypeAsync(trackId);
-        return await _trackRepository.GetSimilarTracksAsync(trackId, count, id3Type);
+        return await _trackRepository.GetSimilarTracksAsync(trackId, count, id3Type, userId);
     }
 
     public async Task<List<GenreCountModel>> GetAllGenresAsync()

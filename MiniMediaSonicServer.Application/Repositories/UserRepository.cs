@@ -92,7 +92,6 @@ public class UserRepository
     {
         string query = @"UPDATE sonicserver_user
                          SET Email = COALESCE(@Email, Email),
-                             LdapAuthenticated = COALESCE(@LdapAuthenticated, LdapAuthenticated),
                              AdminRole = COALESCE(@AdminRole, AdminRole),
                              SettingsRole = COALESCE(@SettingsRole, SettingsRole),
                              StreamRole = COALESCE(@StreamRole, StreamRole),
@@ -129,7 +128,6 @@ public class UserRepository
                              Email, 
                              CreationDateTime, 
                              TokenBasedAuth,
-                             LdapAuthenticated,
                              AdminRole,
                              SettingsRole,
                              StreamRole,
@@ -145,7 +143,6 @@ public class UserRepository
                              MaxBitRate)
                          VALUES(@userId, @Username, @Password,  @Name,  @Email, current_timestamp, 
                                 @tokenBasedAuth,
-                                COALESCE(@LdapAuthenticated, true),
                                 COALESCE(@AdminRole, true),
                                 COALESCE(@SettingsRole, true),
                                 COALESCE(@StreamRole, true),
@@ -170,7 +167,6 @@ public class UserRepository
             Name = request.Username,
             request.Email,
             tokenBasedAuth,
-            request.LdapAuthenticated,
             request.AdminRole,
             request.SettingsRole,
             request.StreamRole,

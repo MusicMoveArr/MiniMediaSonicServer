@@ -24,7 +24,7 @@ public class GetSimilarSongsController : SonicControllerBase
         {
             SimilarSongsList = new SimilarSongsListResponse
             {
-                Tracks = await _trackService.GetAlbumList2ResponseAsync(request.Id, request.Count)
+                Tracks = await _trackService.GetAlbumList2ResponseAsync(request.Id, request.Count, User.UserId)
             }
         });
     }

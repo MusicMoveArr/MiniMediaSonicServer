@@ -17,7 +17,7 @@ public class TrackRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid id, int count, ID3Type type)
+    public async Task<List<TrackID3>> GetSimilarTracksAsync(Guid id, int count, ID3Type type, Guid userId)
     {
         string query = @"SELECT 
 							sim_m.MetadataId as TrackId,
@@ -47,6 +47,7 @@ public class TrackRepository
 							sim_m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -106,7 +107,14 @@ public class TrackRepository
 	  							limit 1
 						  ) sim_m on true
 						  
- 						  left join sonicserver_track_rated track_rated on track_rated.TrackId = sim_m.MetadataId
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = sim_m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
+ 							    
+ 						  left join sonicserver_track_rated track_rated on track_rated.TrackId = sim_m.MetadataId and track_rated.UserId = @userId
  						  LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(sim_m.tag_alljsontags)
@@ -126,7 +134,8 @@ public class TrackRepository
 	        {
 		        id,
 		        count,
-		        type = type.ToString()
+		        type = type.ToString(),
+		        userId
 	        })).ToList();
 
         foreach (var result in results)
@@ -193,6 +202,7 @@ public class TrackRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -223,6 +233,14 @@ public class TrackRepository
 						 JOIN albums al ON al.AlbumId = m.AlbumId
 						 JOIN artists a ON a.ArtistId = al.ArtistId
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
+ 						 
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
+ 							    
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
 							        replace(replace(
@@ -322,6 +340,7 @@ public class TrackRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -365,6 +384,13 @@ public class TrackRepository
  							from artists join_artist 
  							where lower(join_artist.name) = lower(all_artists.artist)
  							limit 1) joined_artist on true
+ 							    
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
  							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags

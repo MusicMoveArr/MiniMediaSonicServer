@@ -17,7 +17,7 @@ public class SearchRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<List<ArtistID3>> SearchArtistsAsync(string searchquery, int count, int offset)
+    public async Task<List<ArtistID3>> SearchArtistsAsync(string searchquery, int count, int offset, Guid userId)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
 						 SELECT distinct on (a.record_id)
@@ -33,7 +33,7 @@ public class SearchRepository
  							 end) as Starred
 						 FROM artists a
 						 left join sonicserver_indexed_search search on search.Id = a.ArtistId
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId
+ 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
@@ -53,7 +53,8 @@ public class SearchRepository
 		        {
 			        searchquery,
 			        count,
-			        offset
+			        offset,
+			        userId
 		        },
 		        transaction: transaction)).ToList();
         }
@@ -131,7 +132,7 @@ public class SearchRepository
 	    return results;
     }
     
-    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset, int accuracy = 50)
+    public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset, Guid userId, int accuracy = 50)
     {
 	    string query = @$"SET LOCAL pg_trgm.similarity_threshold = 0.{accuracy};
 						 SELECT 
@@ -162,6 +163,7 @@ public class SearchRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -213,6 +215,13 @@ public class SearchRepository
 						    FROM jsonb_each_text(m.tag_alljsontags)
 						  ) t ON TRUE
 
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
+
 						 where search.SearchTerm % lower(@searchquery)
 					     order by similarity(search.SearchTerm, lower(@searchquery)) desc 
 						 offset @offset
@@ -252,7 +261,8 @@ public class SearchRepository
 				    searchquery,
 				    count,
 				    offset,
-				    accuracy
+				    accuracy,
+				    userId
 			    })).ToList();
 	    }
 	    catch (Exception ex)

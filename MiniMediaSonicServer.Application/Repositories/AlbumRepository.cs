@@ -111,7 +111,7 @@ public class AlbumRepository
         return results;
     }
     
-    public async Task<AlbumID3> GetAlbumId3WithTracksAsync(Guid albumId)
+    public async Task<AlbumID3> GetAlbumId3WithTracksAsync(Guid albumId, Guid userId)
     {
 	    string query = @"SELECT 
  							al.AlbumId as Id,
@@ -155,6 +155,7 @@ public class AlbumRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -201,6 +202,13 @@ public class AlbumRepository
  							where lower(join_artist.name) = lower(all_artists.artist)
  							limit 1) joined_artist on true
  							    
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
+ 							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
@@ -236,7 +244,8 @@ public class AlbumRepository
 		    splitOn: "TrackId, TrackGain, Id",
 		    param: new
 		    {
-			    id = albumId
+			    id = albumId,
+			    userId
 		    });
 	    
 	    var groupedResult = results

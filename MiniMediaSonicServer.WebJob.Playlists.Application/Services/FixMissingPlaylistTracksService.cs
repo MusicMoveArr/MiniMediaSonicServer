@@ -27,6 +27,7 @@ public class FixMissingPlaylistTracksService
                     $"{playlistTrack.Artist} {playlistTrack.Album} {playlistTrack.Title}", 
                     1, 
                     0, 
+                    Guid.Empty,
                     99))
                     .FirstOrDefault();
 

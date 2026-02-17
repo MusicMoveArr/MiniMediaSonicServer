@@ -45,7 +45,7 @@ public class PlaylistRepository
 	        })).ToList();
     }
     
-    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId)
+    public async Task<PlaylistModel?> GetPlaylistByIdAsync(Guid playlistId, Guid userId)
     {
 	    string query = @"SELECT
     						playlist.PlaylistId, 
@@ -83,6 +83,7 @@ public class PlaylistRepository
 							m.Path as Path,
 							'music' AS Type,
 							'song' AS MediaType,
+ 							playhistory.LastPlayDate as Played,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -114,7 +115,7 @@ public class PlaylistRepository
  						 LEFT JOIN albums al ON al.AlbumId = m.AlbumId
 						 LEFT JOIN artists a ON a.ArtistId = al.ArtistId
 						 
- 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
 							        replace(replace(
@@ -135,6 +136,13 @@ public class PlaylistRepository
  							from sonicserver_playlist_import_user import 
  							where playlist.PlayListId = import.PlayListId
  							limit 1) ImportPlaylist on true
+ 							    
+ 						 left join lateral (
+ 							select hist.UpdatedAt as LastPlayDate
+ 							from sonicserver_user_playhistory hist
+ 							where hist.UserId = @userId and hist.TrackId = m.MetadataId
+ 							order by UpdatedAt desc
+ 							limit 1) playhistory on true
  							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
@@ -175,7 +183,8 @@ public class PlaylistRepository
 		    splitOn: "TrackId, TrackGain, Id",
 		    param: new
 		    {
-			    playlistId
+			    playlistId,
+			    userId
 		    });
 	    
 	    var groupedResult = results

@@ -18,7 +18,7 @@ public class ArtistService
 
     public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
-        return await _artistRepository.GetArtistByIdAsync(artistId);
+        return await _artistRepository.GetArtistByIdAsync(artistId, userId);
     }
 
     public async Task<ArtistsList> GetAllArtistsAsync(Guid userId)

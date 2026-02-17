@@ -17,13 +17,13 @@ public class SearchService
         _searchSyncRepository = searchSyncRepository;
     }
 
-    public async Task<List<ArtistID3>> SearchArtistsAsync(string query, int count, int offset)
+    public async Task<List<ArtistID3>> SearchArtistsAsync(string query, int count, int offset, Guid userId)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
-            return await _searchSyncRepository.SearchArtistsAsync(count, offset);
+            return await _searchSyncRepository.SearchArtistsAsync(count, offset, userId);
         }
-        return await _searchRepository.SearchArtistsAsync(query, count, offset);
+        return await _searchRepository.SearchArtistsAsync(query, count, offset, userId);
     }
 
     public async Task<List<AlbumID3>> SearchAlbumsAsync(string query, int count, int offset, Guid userId)
@@ -35,13 +35,13 @@ public class SearchService
         return await _searchRepository.SearchAlbumsAsync(query, count, offset, userId);
     }
 
-    public async Task<List<TrackID3>> SearchTracksAsync(string query, int count, int offset)
+    public async Task<List<TrackID3>> SearchTracksAsync(string query, int count, int offset, Guid userId)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
-            return await _searchSyncRepository.SearchTracksAsync(count, offset);
+            return await _searchSyncRepository.SearchTracksAsync(count, offset, userId);
         }
-        return await _searchRepository.SearchTracksAsync(query, count, offset);
+        return await _searchRepository.SearchTracksAsync(query, count, offset, userId);
     }
 
     public async Task<ID3Type> GetID3TypeAsync(Guid id)
