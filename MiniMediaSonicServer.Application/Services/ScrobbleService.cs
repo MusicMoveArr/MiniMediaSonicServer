@@ -27,7 +27,7 @@ public class ScrobbleService
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
     {
         DateTime scrobbleAt = time > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime : DateTime.Now;
-        TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId);
+        TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId, user.UserId);
         DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
         
         if (track == null)
@@ -58,7 +58,7 @@ public class ScrobbleService
 
     public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)
     {
-        TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId);
+        TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId, user.UserId);
         DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
 
         if (track == null)

@@ -28,13 +28,18 @@ public class TrackService
         return await _trackRepository.GetAllGenresAsync();
     }
 
-    public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId)
+    public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId, Guid userId)
     {
-        return await _trackRepository.GetTrackByIdAsync(trackId);
+        return await _trackRepository.GetTrackByIdAsync(trackId, userId);
     }
 
     public async Task<List<TrackID3>> GetStarredTracksAsync(Guid userId)
     {
         return await _trackRepository.GetStarredTracksAsync(userId);
+    }
+
+    public async Task<List<TrackID3>> GetTopTracksByArtistNameAsync(string artistName, int count, Guid userId)
+    {
+        return await _trackRepository.GetTopArtistTracksAsync(artistName, count, userId);
     }
 }

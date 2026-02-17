@@ -123,4 +123,8 @@ public class SubsonicResponse
     [XmlElement("users")]
     [JsonPropertyName("users")]
     public UserListResponse? Users { get; set; }
+
+    [XmlElement("topSongs")]
+    [JsonPropertyName("topSongs")]
+    public TopSongsResponse? TopSongs { get; set; }
 }

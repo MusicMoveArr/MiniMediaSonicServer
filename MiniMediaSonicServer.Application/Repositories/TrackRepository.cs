@@ -156,9 +156,14 @@ public class TrackRepository
 		        .QueryAsync<GenreCountModel>(query))
 				.ToList();
     }
-    
-    
-    public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId)
+
+    public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId, Guid userId)
+    {
+	    return (await GetTracksAsync([trackId], userId))
+		    .FirstOrDefault();
+    }
+
+    public async Task<List<TrackID3>> GetTracksAsync(List<Guid> trackIds, Guid userId)
     {
 	    string query = @"SELECT 
  							m.MetadataId as TrackId,
@@ -213,10 +218,11 @@ public class TrackRepository
  							    
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
-						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
-						 JOIN metadata m on m.albumid = al.albumid
- 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
+ 						 FROM unnest(@trackIds) WITH ORDINALITY AS u(MetadataId, id_order)
+						 JOIN metadata m on m.MetadataId = u.MetadataId
+						 JOIN albums al ON al.AlbumId = m.AlbumId
+						 JOIN artists a ON a.ArtistId = al.ArtistId
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
 							        replace(replace(
@@ -235,8 +241,7 @@ public class TrackRepository
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE
-						 where m.MetadataId = @trackId";
+						  ) t ON TRUE";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -263,7 +268,8 @@ public class TrackRepository
 		    splitOn: "TrackId, TrackGain, Id",
 		    param: new
 		    {
-			    trackId
+			    trackIds,
+			    userId
 		    });
 	    
 	    var groupedResult = results
@@ -271,13 +277,19 @@ public class TrackRepository
 		    .Select(group =>
 		    {
 			    var tracks = group.First();
-			    tracks.Artists = group.SelectMany(track => track.Artists).ToList();
-			    tracks.Isrc = group.SelectMany(track => track.Isrc).ToList();
+			    tracks.Artists = group
+				    .SelectMany(track => track.Artists)
+				    .DistinctBy(a => a.Id)
+				    .ToList();
+			    
+			    tracks.Isrc = group
+				    .SelectMany(track => track.Isrc)
+				    .Distinct().ToList();
 			    return tracks;
 		    })
 		    .ToList();
 
-	    return groupedResult.FirstOrDefault();
+	    return groupedResult;
     }
     
     public async Task<List<TrackID3>> GetStarredTracksAsync(Guid userId)
@@ -415,5 +427,59 @@ public class TrackRepository
 		    {
 			    path = path
 		    });
+    }
+    
+    public async Task<List<TrackID3>> GetTopArtistTracksAsync(string artistName, int count, Guid userId)
+    {
+	    //similar to the query of "GetSimilarTracksAsync"
+	    //with extra popularity check
+        string query = @"SELECT sim_m.MetadataId
+						  FROM artists a
+						  JOIN albums al ON al.artistid = a.artistid
+						  JOIN metadata m on m.albumid = al.albumid
+ 							    
+						  --find track in tidal data
+						  join tidal_artist ta on lower(ta.name) = lower(a.name)
+						  join tidal_album ta2 on ta2.artistid = ta.artistid and lower(ta2.title) = lower(al.title)
+						  join tidal_track tt on tt.albumid = ta2.albumid 
+						                         and similarity((tt.title || ' ' || tt.version), m.title) > 0.90
+						      					 and tt.popularity != 0
+						  --find songs we have
+						  join lateral (
+  							select 	sim_m.MetadataId, 
+  									sim_m.path,
+		  							sim_m.Title, 
+		  							sim_m.Tag_Track, 
+		  							sim_m.Tag_Year, 
+		  							sim_m.Tag_Isrc, 
+		  							sim_m.computed_genre,
+		  							sim_m.File_CreationTime,
+		  							sim_m.tag_alljsontags,
+		  							sim_al.AlbumId,
+		  							sim_al.Title as AlbumTitle,
+		  							sim_ta.ArtistId,
+		  							sim_ta.Name as ArtistName
+	  							from metadata sim_m
+	  							join artists sim_ta on lower(sim_ta.name) = lower(ta.name)
+	  							JOIN albums sim_al ON sim_al.artistid = sim_ta.artistid
+	  							where sim_m.albumid = sim_al.albumid 
+	  							and similarity((tt.title || ' ' || tt.version), sim_m.title) > 0.90
+	  							limit 1
+						  ) sim_m on true
+						  
+ 						 where lower(a.Name) = lower(@artistName)
+ 						 order by tt.popularity desc
+                         limit @count";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        var trackIds = (await conn.QueryAsync<Guid>(query, 
+	        param: new
+	        {
+		        artistName,
+		        count
+	        })).ToList();
+
+        return await GetTracksAsync(trackIds, userId);
     }
 }

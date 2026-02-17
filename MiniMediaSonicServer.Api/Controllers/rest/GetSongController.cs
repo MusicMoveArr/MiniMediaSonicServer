@@ -21,7 +21,7 @@ public class GetSongController : SonicControllerBase
     {
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
-            Song = await _trackService.GetTrackByIdAsync(request.Id)
+            Song = await _trackService.GetTrackByIdAsync(request.Id, User.UserId)
         });
     }
 }
