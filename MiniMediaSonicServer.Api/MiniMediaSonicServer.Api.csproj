@@ -103,6 +103,9 @@
       <None Update="DbScripts\20260212 update user table.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="DbScripts\20260219 update rating tables.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

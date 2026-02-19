@@ -26,7 +26,7 @@ public class ArtistRepository
     						album_count.albums as AlbumCount,
  							artist_rated.Rating as UserRating,
  							(case when artist_rated.Starred = true 
- 							    then artist_rated.UpdatedAt 
+ 							    then artist_rated.StarredAt 
  							    else null 
  							 end) as Starred,
     						
@@ -92,7 +92,7 @@ public class ArtistRepository
     						album_count.albums as AlbumCount,
  							artist_rated.Rating as UserRating,
  							(case when artist_rated.Starred = true 
- 							    then artist_rated.UpdatedAt 
+ 							    then artist_rated.StarredAt 
  							    else null 
  							 end) as Starred
     						--musicbrainzid
@@ -120,7 +120,7 @@ public class ArtistRepository
     						album_count.albums as AlbumCount,
  							artist_rated.Rating as UserRating,
  							(case when artist_rated.Starred = true 
- 							    then artist_rated.UpdatedAt 
+ 							    then artist_rated.StarredAt 
  							    else null 
  							 end) as Starred
     						--musicbrainzid

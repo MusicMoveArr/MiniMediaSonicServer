@@ -61,7 +61,7 @@ public class TrackRepository
  							
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							
@@ -216,7 +216,7 @@ public class TrackRepository
  							    
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							    
@@ -354,7 +354,7 @@ public class TrackRepository
  							    
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							    
@@ -395,7 +395,8 @@ public class TrackRepository
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE";
+						  ) t ON TRUE
+ 					      order by track_rated.StarredAt desc";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 

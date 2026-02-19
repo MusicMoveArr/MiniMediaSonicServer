@@ -97,7 +97,7 @@ public class PlaylistRepository
  							    
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							    

@@ -40,8 +40,9 @@ public class AlbumRepository
 							m.file_creationtime as Created,
 							COALESCE(playhistory.AlbumPlaycount, 0) as PlayCount,
  							album_rated.Rating as UserRating,
+
  							(case when album_rated.Starred = true 
- 							    then album_rated.UpdatedAt 
+ 							    then album_rated.StarredAt 
  							    else null 
  							 end) as Starred
 						 FROM artists a
@@ -123,8 +124,9 @@ public class AlbumRepository
  							a.artistid AS ArtistId,
  							m.file_creationtime as Created,
  							album_rated.Rating as UserRating,
+ 							
  							(case when album_rated.Starred = true 
- 							    then album_rated.UpdatedAt 
+ 							    then album_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							
@@ -169,7 +171,7 @@ public class AlbumRepository
  							    
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
  							    
@@ -184,8 +186,8 @@ public class AlbumRepository
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
- 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
- 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId
+ 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and track_rated.UserId = @userId
  							    
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
@@ -279,7 +281,7 @@ public class AlbumRepository
 							m.file_creationtime as Created,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
- 							    then album_rated.UpdatedAt 
+ 							    then album_rated.StarredAt 
  							    else null 
  							 end) as Starred
 						 FROM artists a

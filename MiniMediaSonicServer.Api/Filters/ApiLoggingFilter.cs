@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -16,8 +17,9 @@ public sealed class ApiLoggingFilter : IAsyncActionFilter
             .Where(query => !ignoreQueries.Contains(query.Key))
             .Select(query => $"{query.Key}='{query.Value}'"));
         
-        Console.WriteLine($"Request: {context.HttpContext.Request.Path}, Query: {query}, Body: {bodyText}");
-        
+        Stopwatch sw = Stopwatch.StartNew();
         await next();
+        sw.Stop();
+        Console.WriteLine($"Request: {context.HttpContext.Request.Path}, Query: {query}, Body: {bodyText}, Response time: {sw.ElapsedMilliseconds}msec");
     }
 }

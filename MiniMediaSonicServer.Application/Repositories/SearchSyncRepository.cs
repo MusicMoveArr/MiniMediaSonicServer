@@ -27,7 +27,7 @@ public class SearchSyncRepository
     						album_count.albums as AlbumCount,
  							artist_rated.Rating as UserRating,
  							(case when artist_rated.Starred = true 
- 							    then artist_rated.UpdatedAt 
+ 							    then artist_rated.StarredAt 
  							    else null 
  							 end) as Starred
 						 FROM artists a
@@ -66,7 +66,7 @@ public class SearchSyncRepository
 							recent_m.file_creationtime as Created,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
- 							    then album_rated.UpdatedAt 
+ 							    then album_rated.StarredAt 
  							    else null 
  							 end) as Starred
 						 FROM albums al
@@ -145,7 +145,7 @@ public class SearchSyncRepository
 
  							track_rated.Rating as UserRating,
  							(case when track_rated.Starred = true 
- 							    then track_rated.UpdatedAt 
+ 							    then track_rated.StarredAt 
  							    else null 
  							 end) as Starred,
 
@@ -160,7 +160,7 @@ public class SearchSyncRepository
 						 FROM metadata m
 						 JOIN albums al ON al.AlbumId = m.AlbumId
 						 JOIN artists a on a.ArtistId = al.ArtistId
-						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId
+						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  							    
  						 left join lateral (
  							select DISTINCT unnest(string_to_array(
