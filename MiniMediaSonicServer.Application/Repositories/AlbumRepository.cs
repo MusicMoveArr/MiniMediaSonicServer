@@ -72,6 +72,7 @@ public class AlbumRepository
 									m.computed_genre ILIKE '%' || @genre || '%'
 					             WHEN @type in ('recent', 'frequent') THEN 
 									playhistory.AlbumId is not null
+								 WHEN 'newest' = 'newest' THEN 1=1
 					             ELSE al.record_id >= @offset and al.record_id <= @offset + @limit
 					         END)
  						
