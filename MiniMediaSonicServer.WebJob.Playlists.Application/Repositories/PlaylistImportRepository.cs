@@ -57,10 +57,11 @@ public class PlaylistImportRepository
     
     public async Task<PlaylistImportUserModel?> GetPlaylistImportUserAsync(Guid importId, Guid userId)
     {
-        string query = @"select * 
-                         from sonicserver_playlist_import_user
-                         where ImportId = @importId
-                         and UserId = @userId
+        string query = @"select piu.* 
+                         from sonicserver_playlist_import_user piu
+                         join sonicserver_playlist playlist on playlist.PlayListId = piu.PlayListId and playlist.UserId = piu.UserId and playlist.IsDeleted = false
+                         where piu.ImportId = @importId
+                         and piu.UserId = @userId
                          limit 1";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
