@@ -78,7 +78,11 @@ public class PlaylistImportRepository
     public async Task InsertPlaylistImportUserAsync(Guid importId, Guid userId, Guid playlistId)
     {
         string query = @"INSERT INTO sonicserver_playlist_import_user(ImportId, UserId, PlaylistId, CreatedAt, UpdatedAt)
-						 VALUES(@importId, @userId, @PlaylistId, current_timestamp, current_timestamp)";
+						 VALUES(@importId, @userId, @PlaylistId, current_timestamp, current_timestamp)
+						 ON CONFLICT (importId, userId)
+						 DO UPDATE SET
+						 	PlaylistId = EXCLUDED.PlaylistId,
+						 	UpdatedAt = current_timestamp";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
         await conn.OpenAsync();
