@@ -178,7 +178,7 @@ public class NavidromeSmartPlaylistService
             case "channels": return string.Empty;
             case "loved": return "rated.Starred";
             case "dateloved": return string.Empty;
-            case "lastplayed": return "(current_timestamp::date - history.CreatedAt::date)";
+            case "lastplayed": return "(current_timestamp::date - playhistory.CreatedAt::date)";
             case "daterated": return string.Empty;
             case "playcount": return "COALESCE(playhistory.TrackPlaycount, 0)";
             case "rating": return "rated.Rating";

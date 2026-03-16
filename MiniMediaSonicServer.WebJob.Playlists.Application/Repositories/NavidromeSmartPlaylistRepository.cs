@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
+using MiniMediaSonicServer.Application.Models.Database;
 using Npgsql;
 
 namespace MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
@@ -29,7 +30,7 @@ public class NavidromeSmartPlaylistRepository
         
         string tableSample = sort == "random" ? "TABLESAMPLE SYSTEM (1)" : string.Empty;
         string ordering = !string.IsNullOrWhiteSpace(sort) && sort != "random" ? 
-	        $"order by @sort {order}" : string.Empty;
+	        $"order by {sort} {order}" : string.Empty;
         
         string query = @$"WITH track_playhistory AS (
 						     SELECT
@@ -54,7 +55,6 @@ public class NavidromeSmartPlaylistRepository
 						 left join sonicserver_track_rated rated on rated.UserId = @userId and rated.TrackId = m.MetadataId
 						 left join sonicserver_artist_rated artist_rated on artist_rated.UserId = @userId and artist_rated.ArtistId = a.ArtistId
 						 left join sonicserver_album_rated album_rated on album_rated.UserId = @userId and album_rated.AlbumId = al.AlbumId
-						 left join sonicserver_user_playhistory history on history.UserId = @userId and history.TrackId = m.MetadataId
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
