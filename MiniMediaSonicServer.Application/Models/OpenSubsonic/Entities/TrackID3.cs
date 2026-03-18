@@ -33,9 +33,9 @@ public class TrackID3
     [JsonPropertyName("track")]
     public int TrackNumber { get; set; }
 
-    [XmlAttribute("year")]
+    [XmlElement("year")]
     [JsonPropertyName("year")]
-    public int Year { get; set; }
+    public int? Year { get; set; }
 
     [XmlAttribute("genre")]
     [JsonPropertyName("genre")]

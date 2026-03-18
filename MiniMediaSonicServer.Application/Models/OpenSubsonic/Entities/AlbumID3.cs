@@ -29,9 +29,9 @@ public class AlbumID3
     [JsonPropertyName("coverArt")]
     public string CoverArt { get; set; }
     
-    [XmlAttribute("year")]
+    [XmlElement("year")]
     [JsonPropertyName("year")]
-    public int Year { get; set; }
+    public int? Year { get; set; }
     
     [XmlElement("starred")]
     [JsonPropertyName("starred")]

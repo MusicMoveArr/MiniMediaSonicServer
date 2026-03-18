@@ -34,7 +34,7 @@ public class AlbumRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	m.tag_year as year,
+						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							m.file_creationtime as Created,
@@ -54,8 +54,8 @@ public class AlbumRepository
 						 JOIN lateral (
 						     select * from metadata m 
 						     where m.albumid = al.albumid 
-						     order by m.tag_year 
-						     desc limit 1) as m on true
+						     order by m.tag_year desc
+						     limit 1) as m on true
 						     
 						 JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
@@ -120,7 +120,7 @@ public class AlbumRepository
  							al.Title as Name,
  							'' as version,
  							a.Name as Artist,
- 							m.tag_year as Year,
+ 							NULLIF(m.tag_year, 0) as Year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
  							m.file_creationtime as Created,
@@ -140,7 +140,7 @@ public class AlbumRepository
  							al.Title as Album,
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
- 							m.Tag_Year as Year,
+ 							NULLIF(m.tag_year, 0) as Year,
  							m.Computed_Genre as Genre,
  							0 as Size,
  							case 
@@ -276,7 +276,7 @@ public class AlbumRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	m.tag_year as year,
+						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							m.file_creationtime as Created,

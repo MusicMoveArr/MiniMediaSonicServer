@@ -35,7 +35,7 @@ public class ArtistRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	m.tag_year as year,
+						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							m.file_creationtime as Created

@@ -29,7 +29,7 @@ public class TrackRepository
  							sim_m.AlbumTitle as Album,
  							sim_m.ArtistName as Artist,
  							sim_m.Tag_Track as TrackNumber,
- 							sim_m.Tag_Year as Year,
+ 							NULLIF(sim_m.Tag_Year, 0) as Year,
  							sim_m.computed_genre as Genre,
  							9999 as Size,
  							case 
@@ -184,7 +184,7 @@ public class TrackRepository
  							al.Title as Album,
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
- 							m.Tag_Year as Year,
+ 							NULLIF(m.Tag_Year, 0) as Year,
  							m.Computed_Genre as Genre,
  							0 as Size,
  							case 
@@ -322,7 +322,7 @@ public class TrackRepository
  							al.Title as Album,
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
- 							m.Tag_Year as Year,
+ 							NULLIF(m.Tag_Year, 0) as Year,
  							m.Computed_Genre as Genre,
  							0 as Size,
  							case 

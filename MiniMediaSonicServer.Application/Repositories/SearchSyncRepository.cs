@@ -60,7 +60,7 @@ public class SearchSyncRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	m.tag_year as year,
+						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							recent_m.file_creationtime as Created,
@@ -113,7 +113,7 @@ public class SearchSyncRepository
  							al.Title as Album,
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
- 							m.Tag_Year as Year,
+ 							NULLIF(m.tag_year, 0) as Year,
  							m.Computed_Genre as Genre,
  							0 as Size,
  							case 
