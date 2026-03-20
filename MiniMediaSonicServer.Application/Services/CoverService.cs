@@ -16,6 +16,42 @@ public class CoverService
         _trackCoverRepository = trackCoverRepository;
     }
 
+    public async Task<byte[]> GetAlbumCoverByTrackIdAsync(Guid trackId)
+    {
+        string? trackPath = await _trackCoverRepository.GetTrackPathByTrackIdAsync(trackId);
+        
+        if(string.IsNullOrWhiteSpace(trackPath))
+        {
+            return null;
+        }
+        
+        FileInfo trackFileInfo = new FileInfo(trackPath);
+
+        if (trackFileInfo.Directory?.Exists == true)
+        {
+            var coverFileInfo = trackFileInfo.Directory
+                .GetFiles("*.jpg", SearchOption.TopDirectoryOnly)
+                .Select(dir => dir)
+                .FirstOrDefault();
+
+            if (coverFileInfo != null)
+            {
+                return GetBytesOfResizedImage(coverFileInfo.FullName);
+            }
+        }
+        
+        if(trackFileInfo.Exists)
+        {
+            ATL.Track track = new ATL.Track(trackPath);
+            if (track.EmbeddedPictures.Any())
+            {
+                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
+            }
+        }
+
+        return null;
+    }
+
     public async Task<byte[]> GetAlbumCoverByAlbumIdAsync(Guid albumId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByAlbumIdAsync(albumId);

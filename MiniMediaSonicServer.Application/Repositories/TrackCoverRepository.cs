@@ -14,6 +14,24 @@ public class TrackCoverRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
+    public async Task<string?> GetTrackPathByTrackIdAsync(Guid trackId)
+    {
+        string query = @"SELECT m.path
+						 FROM artists a
+						 JOIN albums al ON al.artistid = a.artistid
+						 JOIN metadata m on m.albumid = al.albumid
+						 where m.MetadataId = @trackId
+						 limit 1";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        return (await conn.QueryAsync<string>(query,
+            param: new
+            {
+                trackId
+            })).FirstOrDefault();
+    }
+    
     public async Task<List<string>> GetTrackPathByAlbumIdAsync(Guid albumId)
     {
         string query = @"SELECT m.path

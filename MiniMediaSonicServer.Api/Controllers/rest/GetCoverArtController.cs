@@ -16,6 +16,7 @@ public class GetCoverArtController : SonicControllerBase
     private readonly CoverService _coverService;
     private readonly string[] artistPrefix = ["ar", "artist"];
     private readonly string[] albumPrefix = ["ab", "album"];
+    private readonly string[] trackPrefix = ["track"];
     private const string RedisPrefixKey = "image:";
     private readonly IRedisCacheService _redisCacheService;
     private const string NotFoundCoverData = "NotFound";
@@ -46,12 +47,13 @@ public class GetCoverArtController : SonicControllerBase
             }
             else if (cachedCover?.Length > 0)
             {
-                return Results.Bytes(cachedCover, "image/jpg");
+                return Results.Bytes(cachedCover, "image/jpeg");
             }
             
             byte[]? coverArt = null;
             bool searchedArtist = false;
             bool searchedAlbum = false;
+            bool searchedTrack = false;
             bool searchedPlaylist = false;
             
             if(artistPrefix.Any(prefix => request.Id.StartsWith(prefix)))
@@ -64,6 +66,11 @@ public class GetCoverArtController : SonicControllerBase
                 coverArt = await _coverService.GetAlbumCoverByAlbumIdAsync(genericId);
                 searchedAlbum = true;
             }
+            else if(trackPrefix.Any(prefix => request.Id.StartsWith(prefix)))
+            {
+                coverArt = await _coverService.GetAlbumCoverByTrackIdAsync(genericId);
+                searchedTrack = true;
+            }
 
             if (!searchedArtist && coverArt == null)
             {
@@ -73,6 +80,10 @@ public class GetCoverArtController : SonicControllerBase
             {
                 coverArt = await _coverService.GetAlbumCoverByAlbumIdAsync(genericId);
             }
+            if (!searchedTrack && coverArt == null)
+            {
+                coverArt = await _coverService.GetAlbumCoverByTrackIdAsync(genericId);
+            }
             if (!searchedPlaylist && coverArt == null)
             {
                 coverArt = await _coverService.GetPlaylistCoverByIdAsync(genericId);
@@ -81,11 +92,11 @@ public class GetCoverArtController : SonicControllerBase
             if (coverArt != null)
             {
                 await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, coverArt);
-                return Results.Bytes(coverArt, "image/jpg");
+                return Results.Bytes(coverArt, "image/jpeg");
             }
 
             await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
-            return Results.Bytes(_unknownCover, "image/jpg");
+            return Results.Bytes(_unknownCover, "image/jpeg");
         }
         
         return Results.Bytes(_unknownCover, "image/png");
