@@ -112,6 +112,9 @@
       <None Update="DbScripts\20260316 add rating indexes.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="DbScripts\20260320 add playhistory index.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
