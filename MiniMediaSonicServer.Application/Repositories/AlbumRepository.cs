@@ -42,11 +42,11 @@ public class AlbumRepository
  							album_rated.Rating as UserRating,
 
  							(case when album_rated.Starred = true 
- 							    then album_rated.StarredAt 
+ 							    then album_rated.StarredAt
  							    else null 
  							 end) as Starred
-						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
+						 from albums al TABLESAMPLE SYSTEM(CASE WHEN @type = 'random' THEN 1 ELSE 100 END)
+						 join artists a on a.artistid = al.artistid 
  						 left join sonicserver_album_rated album_rated on 
 						     album_rated.AlbumId = al.AlbumId 
 						     and album_rated.UserId = @userId
@@ -72,7 +72,8 @@ public class AlbumRepository
 									m.computed_genre ILIKE '%' || @genre || '%'
 					             WHEN @type in ('recent', 'frequent') THEN 
 									playhistory.AlbumId is not null
-								 WHEN 'newest' = 'newest' THEN 1=1
+								 WHEN @type in ('newest', 'random') THEN 1=1
+								 WHEN @type = 'starred' THEN album_rated.Starred
 					             ELSE al.record_id >= @offset and al.record_id <= @offset + @limit
 					         END)
  						
@@ -81,7 +82,6 @@ public class AlbumRepository
 				             WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount
 				             WHEN @type = 'random' THEN random()
 				             WHEN @type = 'byYear' THEN m.tag_year
-				             WHEN @type = 'starred' THEN 0
 				             ELSE NULL
 				         END DESC,
 				         CASE 
@@ -90,6 +90,7 @@ public class AlbumRepository
 				         CASE 
 				             WHEN @type = 'recent' THEN playhistory.UpdatedAt
 				             WHEN @type = 'newest' THEN recent_m.file_creationtime
+				             WHEN @type = 'starred' THEN album_rated.StarredAt
 				         END DESC
                          limit @limit";
 
