@@ -4,7 +4,7 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
 public class SavePlayQueueRequest
 {
-    public string Id { get; set; }
+    public List<string> Id { get; set; }
     public long Position { get; set; }
     public Guid? Current { get; set; }
 }

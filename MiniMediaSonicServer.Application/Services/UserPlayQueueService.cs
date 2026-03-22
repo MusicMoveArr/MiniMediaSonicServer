@@ -30,7 +30,7 @@ public class UserPlayQueueService
     public async Task SaveUserPlayQueueTracksAsync(SavePlayQueueRequest request, Guid userId)
     {
         //clear queue according to OpenSubsonic
-        if (string.IsNullOrWhiteSpace(request.Id) && !
+        if (!request.Id.Any() && !
             request.Current.HasValue &&
             request.Position == 0)
         {
@@ -39,7 +39,6 @@ public class UserPlayQueueService
         }
         
         var trackIds = request.Id
-            .Split([',', ';'], StringSplitOptions.RemoveEmptyEntries)
             .Select(id => Guid.TryParse(id, out Guid guid) ? guid : Guid.Empty)
             .Where(id => id != Guid.Empty)
             .ToList();
