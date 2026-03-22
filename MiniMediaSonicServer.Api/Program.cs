@@ -84,6 +84,7 @@ builder.Services.AddScoped<SearchSyncRepository>();
 builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<UserPlayHistoryRepository>();
 builder.Services.AddScoped<UserPropertyRepository>();
+builder.Services.AddScoped<UserPlayQueueRepository>();
 
 //services
 builder.Services.AddScoped<AlbumService>();
@@ -96,6 +97,7 @@ builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<RatingService>();
 builder.Services.AddScoped<ScrobbleService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<UserPlayQueueService>();
 builder.Services.AddScoped<TranscodeService>();
 
 //handlers

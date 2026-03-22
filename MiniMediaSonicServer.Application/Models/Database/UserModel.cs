@@ -27,4 +27,7 @@ public class UserModel
     
     public string MalojaUrl { get; set; }
     public string MalojaApiKey { get; set; }
+    
+    //current request
+    public string ClientName { get; set; }
 }

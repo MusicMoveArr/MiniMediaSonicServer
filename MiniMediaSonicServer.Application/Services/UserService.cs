@@ -64,6 +64,18 @@ public class UserService
     {
         await _userRepository.SetUserDeletedByUsernameAsync(username);
     }
+    
+    public async Task<DateTime?> GetUserDateTimeAsync(Guid userId)
+    {
+        TimeZoneInfo? userTimezone = await _userRepository.GetTimezoneByUserIdAsync(userId);
+        return userTimezone != null ? DateTime.UtcNow.Add(userTimezone.BaseUtcOffset) : null;
+    }
+    
+    public async Task<DateTime> GetUserOrServerDateTimeAsync(Guid userId)
+    {
+        DateTime? userTime = await GetUserDateTimeAsync(userId);
+        return userTime ?? DateTime.Now;
+    }
 
     public bool ValidatePassword(string password, string hashedPassword)
     {

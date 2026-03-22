@@ -31,6 +31,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         var password = q["p"].FirstOrDefault() ?? "";
         var token = q["t"].FirstOrDefault() ?? "";
         var salt = q["s"].FirstOrDefault() ?? "";
+        var appName = q["c"].FirstOrDefault() ?? "";
 
         if (string.IsNullOrWhiteSpace(username))
         {
@@ -67,6 +68,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
             return;
         }
 
+        user.ClientName = appName;
         ctx.Items["user"] = user;
         await next();
     }
