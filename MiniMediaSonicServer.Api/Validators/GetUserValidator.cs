@@ -7,8 +7,6 @@ public class GetUserRequestValidator : AbstractValidator<GetUserRequest>
 {
     public GetUserRequestValidator()
     {
-        RuleFor(request => request.Username)
-            .Matches("^[a-zA-Z0-9_-]+$")
-            .NotEmpty();
+        
     }
 }
