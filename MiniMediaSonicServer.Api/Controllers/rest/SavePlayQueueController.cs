@@ -17,7 +17,7 @@ public class SavePlayQueueController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] SavePlayQueueRequest request)
+    public async Task<IResult> Get([FromQuery] SavePlayQueueRequest request)
     {
         await _userPlayQueueService.SaveUserPlayQueueAsync(request, User.UserId, User.ClientName);
         await _userPlayQueueService.SaveUserPlayQueueTracksAsync(request, User.UserId);

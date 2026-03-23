@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class StarRequest
+[HybridBind]
+public class StarRequest : SubsonicAuthModel
 {
     public List<Guid> Id { get; set; }
     public List<Guid> AlbumId { get; set; }

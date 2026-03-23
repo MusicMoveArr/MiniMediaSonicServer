@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class GetAlbumListRequest
+[HybridBind]
+public class GetAlbumListRequest : SubsonicAuthModel
 {
     public string Type { get; set; }
     public int Size { get; set; }

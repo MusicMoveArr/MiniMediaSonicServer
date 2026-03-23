@@ -18,7 +18,7 @@ public class GetUserController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] GetUserRequest request)
+    public async Task<IResult> Get([FromQuery] GetUserRequest request)
     {
         var user = GetUserModel();
         if (User.AdminRole && !string.Equals(request.Username, user.Username, StringComparison.OrdinalIgnoreCase))

@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class ScrobbleRequest
+[HybridBind]
+public class ScrobbleRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
     public long Time { get; set; }

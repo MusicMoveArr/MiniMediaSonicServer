@@ -21,7 +21,7 @@ public class StarController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] StarRequest request)
+    public async Task<IResult> Get([FromQuery] StarRequest request)
     {
         if (request?.Id?.Any() == true)
         {

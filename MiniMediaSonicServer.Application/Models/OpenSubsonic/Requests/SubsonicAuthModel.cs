@@ -1,21 +1,26 @@
 using System.Text.Json.Serialization;
+using MiniMediaSonicServer.Application.Attributes;
 
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
+[HybridBind]
 public class SubsonicAuthModel
 {
     [JsonPropertyName("u")]
-    public string Username { get; set; }
+    public string AuthUsername { get; set; }
     
     [JsonPropertyName("p")]
-    public string Password { get; set; }
+    public string AuthPassword { get; set; }
     
     [JsonPropertyName("t")]
-    public string Token { get; set; }
+    public string AuthToken { get; set; }
     
     [JsonPropertyName("s")]
-    public string Salt { get; set; }
+    public string AuthSalt { get; set; }
     
     [JsonPropertyName("c")]
-    public string AppName { get; set; }
+    public string AuthAppName { get; set; }
+    
+    [JsonPropertyName("f")]
+    public string AuthOutputFormat { get; set; }
 }

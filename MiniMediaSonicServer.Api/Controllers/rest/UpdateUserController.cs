@@ -17,7 +17,7 @@ public class UpdateUserController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] UpdateUserRequest request)
+    public async Task<IResult> Get([FromQuery] UpdateUserRequest request)
     {
         var currentUser = GetUserModel();
         if (currentUser.Username != request.Username && !currentUser.AdminRole)

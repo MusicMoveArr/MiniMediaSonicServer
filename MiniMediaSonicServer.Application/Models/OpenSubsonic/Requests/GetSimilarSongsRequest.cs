@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class GetSimilarSongsRequest
+[HybridBind]
+public class GetSimilarSongsRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
     public int Count { get; set; }

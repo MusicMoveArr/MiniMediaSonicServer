@@ -20,7 +20,7 @@ public class StreamController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] StreamRequest request)
+    public async Task<IResult> Get([FromQuery] StreamRequest request)
     {
         var path = await _streamService.GetTrackPathByIdResponseAsync(request.Id);
 

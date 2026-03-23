@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class UpdatePlaylistRequest
+[HybridBind]
+public class UpdatePlaylistRequest : SubsonicAuthModel
 {
     public Guid PlaylistId { get; set; }
     public string? Name { get; set; }

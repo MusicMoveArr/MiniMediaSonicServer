@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class StreamRequest
+[HybridBind]
+public class StreamRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
     public int MaxBitRate { get; set; }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Controllers.rest;
@@ -17,7 +18,7 @@ public class GetGenresController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get()
+    public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
     {
         var allGenres = await _trackService.GetAllGenresAsync();
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()

@@ -19,63 +19,31 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
     
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var authModel = context.ActionArguments.Values.FirstOrDefault() as SubsonicAuthModel;
         var endpoint = context.HttpContext.GetEndpoint();
         bool hasAllowAnonymous = endpoint.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
-
+        var ctx = context.HttpContext;
+        
         if (hasAllowAnonymous)
         {
+            ctx.Items["format"] = authModel.AuthOutputFormat;
             await next();
             return;
         }
-        
-        var ctx = context.HttpContext;
-        var q = ctx.Request.Query;
-        
-        SubsonicAuthModel authModel = new  SubsonicAuthModel();
-        authModel.Username = q["u"].FirstOrDefault() ?? string.Empty;
-        authModel.Password = q["p"].FirstOrDefault() ?? string.Empty;
-        authModel.Token = q["t"].FirstOrDefault() ?? string.Empty;
-        authModel.Salt = q["s"].FirstOrDefault() ?? string.Empty;
-        authModel.AppName = q["c"].FirstOrDefault() ?? string.Empty;
 
-        try
-        {
-            //not always works atm somehow
-            if (context.HttpContext.Request.Body.Length > 0)
-            {
-                var request = context.HttpContext.Request;
-                request.Body.Position = 0;
-                using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-                var body = await reader.ReadToEndAsync();
-                if (!string.IsNullOrWhiteSpace(body))
-                {
-                    var model = JsonSerializer.Deserialize<SubsonicAuthModel>(body);
-                    authModel.Username = !string.IsNullOrWhiteSpace(model.Username) ? model.Username : authModel.Username;
-                    authModel.Password = !string.IsNullOrWhiteSpace(model.Password) ? model.Password : authModel.Password;
-                    authModel.Token = !string.IsNullOrWhiteSpace(model.Token) ? model.Token : authModel.Token;
-                    authModel.Salt = !string.IsNullOrWhiteSpace(model.Salt) ? model.Salt : authModel.Salt;
-                    authModel.AppName = !string.IsNullOrWhiteSpace(model.AppName) ? model.AppName : authModel.AppName;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e + "\r\n" + e.StackTrace);
-        }
-
-        if (string.IsNullOrWhiteSpace(authModel.Username))
+        if (string.IsNullOrWhiteSpace(authModel.AuthUsername))
         {
             context.Result = SubsonicResults.FailActionResult(ctx, 10, "Required parameter is missing");
             return;
         }
-        if (!Regex.IsMatch(authModel.Username, "^[a-zA-Z0-9_-]+$", RegexOptions.None, TimeSpan.FromMilliseconds(100)))
+        if (!Regex.IsMatch(authModel.AuthUsername, "^[a-zA-Z0-9_-]+$", RegexOptions.None, TimeSpan.FromMilliseconds(100)))
         {
             context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
             return;
         }
 
         var authenticated = false;
-        var user = await _userService.GetUserByUsernameAsync(authModel.Username);
+        var user = await _userService.GetUserByUsernameAsync(authModel.AuthUsername);
         
         if (user == null)
         {
@@ -83,13 +51,13 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
             return;
         }
         
-        if (!string.IsNullOrWhiteSpace(authModel.Token) && !string.IsNullOrWhiteSpace(authModel.Salt))
+        if (!string.IsNullOrWhiteSpace(authModel.AuthToken) && !string.IsNullOrWhiteSpace(authModel.AuthSalt))
         {
-            authenticated = _userService.ValidateToken(user.TokenBasedAuth, authModel.Token, authModel.Salt);
+            authenticated = _userService.ValidateToken(user.TokenBasedAuth, authModel.AuthToken, authModel.AuthSalt);
         }
-        else if (!string.IsNullOrWhiteSpace(authModel.Password))
+        else if (!string.IsNullOrWhiteSpace(authModel.AuthPassword))
         {
-            authenticated = _userService.ValidatePassword(authModel.Password, user.Password);
+            authenticated = _userService.ValidatePassword(authModel.AuthPassword, user.Password);
         }
 
         if (!authenticated)
@@ -98,8 +66,9 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
             return;
         }
 
-        user.ClientName = authModel.AppName;
+        user.ClientName = authModel.AuthAppName;
         ctx.Items["user"] = user;
+        ctx.Items["format"] = authModel.AuthOutputFormat;
         await next();
     }
 }

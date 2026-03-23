@@ -18,7 +18,7 @@ public class GetUsersController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get()
+    public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
     {
         if (!User.AdminRole)
         {

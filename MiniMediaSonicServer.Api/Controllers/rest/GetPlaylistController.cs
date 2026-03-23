@@ -18,7 +18,7 @@ public class GetPlaylistController : SonicControllerBase
     }
 
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] GetPlaylistRequest request)
+    public async Task<IResult> Get([FromQuery] GetPlaylistRequest request)
     {
         var userModel = GetUserModel();
         var playlist = await _playlistService.GetPlaylistByIdAsync(request.Id, User.UserId);

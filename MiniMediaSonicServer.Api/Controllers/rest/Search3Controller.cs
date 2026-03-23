@@ -18,7 +18,7 @@ public class Search3Controller : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] Search3Request request)
+    public async Task<IResult> Get([FromQuery] Search3Request request)
     {
         if (request.Query == "\"\"" || request.Query == "''")
         {

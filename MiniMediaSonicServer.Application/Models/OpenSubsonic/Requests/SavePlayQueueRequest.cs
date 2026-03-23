@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
+using MiniMediaSonicServer.Application.Attributes;
 
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class SavePlayQueueRequest
+[HybridBind]
+public class SavePlayQueueRequest : SubsonicAuthModel
 {
     public List<string> Id { get; set; }
     public long Position { get; set; }

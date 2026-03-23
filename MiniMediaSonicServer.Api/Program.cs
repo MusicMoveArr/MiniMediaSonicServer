@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DbUp;
 using FluentValidation;
 using Microsoft.Extensions.Options;
+using MiniMediaSonicServer.Api.Binders;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Api.Filters;
 using MiniMediaSonicServer.Api.Validators;
@@ -34,6 +35,7 @@ builder.Services.AddControllers(options =>
         options.ModelValidatorProviders.Clear();
         options.Filters.Add(typeof(SubsonicAuthFilter));
         options.Filters.Add(typeof(ApiLoggingFilter));
+        options.ModelBinderProviders.Insert(0, new HybridBinderProvider());
     })
     .AddJsonOptions(options =>
     {

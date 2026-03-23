@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class DeleteUserRequest
+[HybridBind]
+public class DeleteUserRequest : SubsonicAuthModel
 {
     public string Username { get; set; }
 }

@@ -1,6 +1,9 @@
+using MiniMediaSonicServer.Application.Attributes;
+
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 
-public class DeletePlaylistRequest
+[HybridBind]
+public class DeletePlaylistRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
 }

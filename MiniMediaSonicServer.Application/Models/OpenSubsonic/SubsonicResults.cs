@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -34,7 +36,7 @@ public static class SubsonicResults
 
     private static IResult Write(HttpContext ctx, SubsonicResponse response)
     {
-        var f = (ctx.Request.Query["f"].FirstOrDefault() ?? "").ToLowerInvariant();
+        var f = (ctx.Request.Query["f"].FirstOrDefault() ?? ctx.Items["format"]?.ToString())?.ToLowerInvariant();
 
         if (f == "json" || f == "jsonp")
         {

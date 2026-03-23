@@ -21,7 +21,7 @@ public class SetRatingController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery][FromBody] SetRatingRequest request)
+    public async Task<IResult> Get([FromQuery] SetRatingRequest request)
     {
         ID3Type? type = await _searchService.GetID3TypeAsync(request.Id);
         switch (type)
