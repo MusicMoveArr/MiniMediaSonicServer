@@ -137,6 +137,14 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
+
+app.Use(next => context =>
+{
+    context.Request.EnableBuffering();
+    return next(context);
+});
+
 app.UseEndpoints(endpoints => endpoints.MapControllers());
+
 
 app.Run();

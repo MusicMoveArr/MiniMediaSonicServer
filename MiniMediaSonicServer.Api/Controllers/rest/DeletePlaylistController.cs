@@ -17,7 +17,7 @@ public class DeletePlaylistController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] DeletePlaylistRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] DeletePlaylistRequest request)
     {
         await _playlistService.SetPlaylistDeletedAsync(request.Id);
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse());

@@ -18,7 +18,7 @@ public class GetAlbumListController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetAlbumListRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetAlbumListRequest request)
     {
         if (request.Size == 0)
         {

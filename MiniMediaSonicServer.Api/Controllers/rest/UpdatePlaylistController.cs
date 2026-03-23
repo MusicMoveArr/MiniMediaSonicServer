@@ -17,7 +17,7 @@ public class UpdatePlaylistController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] UpdatePlaylistRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] UpdatePlaylistRequest request)
     {
         await _playlistService.UpdatePlaylistByIdAsync(request);
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse());

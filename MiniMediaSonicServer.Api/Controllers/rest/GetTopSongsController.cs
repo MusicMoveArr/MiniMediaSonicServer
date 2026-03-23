@@ -18,7 +18,7 @@ public class GetTopSongsController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetTopSongsRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetTopSongsRequest request)
     {
         if (request.Count <= 0)
         {

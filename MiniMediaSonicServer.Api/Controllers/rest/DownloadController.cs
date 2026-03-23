@@ -17,7 +17,7 @@ public class DownloadController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] StreamRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] StreamRequest request)
     {
         var path = await _streamService.GetTrackPathByIdResponseAsync(request.Id);
 

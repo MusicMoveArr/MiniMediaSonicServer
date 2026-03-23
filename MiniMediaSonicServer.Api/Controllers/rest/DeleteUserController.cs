@@ -17,7 +17,7 @@ public class DeleteUserController : SonicControllerBase
     }
 
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] DeleteUserRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] DeleteUserRequest request)
     {
         var currentUser = GetUserModel();
         if (currentUser.Username != request.Username && !currentUser.AdminRole)

@@ -17,7 +17,7 @@ public class ScrobbleController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] ScrobbleRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] ScrobbleRequest request)
     {
         if (request.Submission)
         {

@@ -30,7 +30,7 @@ public class GetCoverArtController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetCoverRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetCoverRequest request)
     {
         string extractedGuid = Regex.Match(
             request.Id, 

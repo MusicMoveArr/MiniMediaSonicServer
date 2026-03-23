@@ -17,7 +17,7 @@ public class GetSongController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetSongRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetSongRequest request)
     {
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {

@@ -21,7 +21,7 @@ public class UnstarController : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] UnstarRequest request)
+    public async Task<IResult> Get([FromQuery][FromBody] UnstarRequest request)
     {
         if (request?.Id?.Any() == true)
         {

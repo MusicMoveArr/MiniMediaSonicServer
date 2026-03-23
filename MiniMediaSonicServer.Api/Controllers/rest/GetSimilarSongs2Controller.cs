@@ -18,7 +18,7 @@ public class GetSimilarSongs2Controller : SonicControllerBase
     }
     
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetSimilarSongs2Request request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetSimilarSongs2Request request)
     {
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {

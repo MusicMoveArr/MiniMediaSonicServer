@@ -1,7 +1,10 @@
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using Microsoft.AspNetCore.Mvc.Filters;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Filters;
@@ -27,25 +30,42 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         
         var ctx = context.HttpContext;
         var q = ctx.Request.Query;
-        var username = q["u"].FirstOrDefault() ?? "";
-        var password = q["p"].FirstOrDefault() ?? "";
-        var token = q["t"].FirstOrDefault() ?? "";
-        var salt = q["s"].FirstOrDefault() ?? "";
-        var appName = q["c"].FirstOrDefault() ?? "";
+        
+        SubsonicAuthModel authModel = new  SubsonicAuthModel();
+        authModel.Username = q["u"].FirstOrDefault() ?? string.Empty;
+        authModel.Password = q["p"].FirstOrDefault() ?? string.Empty;
+        authModel.Token = q["t"].FirstOrDefault() ?? string.Empty;
+        authModel.Salt = q["s"].FirstOrDefault() ?? string.Empty;
+        authModel.AppName = q["c"].FirstOrDefault() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(username))
+        if (context.HttpContext.Request.ContentLength > 0)
+        {
+            var request = context.HttpContext.Request;
+            request.Body.Position = 0;
+            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+            var body = await reader.ReadToEndAsync();
+            
+            var model = JsonSerializer.Deserialize<SubsonicAuthModel>(body);
+            authModel.Username = !string.IsNullOrWhiteSpace(model.Username) ? model.Username : authModel.Username;
+            authModel.Password = !string.IsNullOrWhiteSpace(model.Password) ? model.Password : authModel.Password;
+            authModel.Token = !string.IsNullOrWhiteSpace(model.Token) ? model.Token : authModel.Token;
+            authModel.Salt = !string.IsNullOrWhiteSpace(model.Salt) ? model.Salt : authModel.Salt;
+            authModel.AppName = !string.IsNullOrWhiteSpace(model.AppName) ? model.AppName : authModel.AppName;
+        }
+
+        if (string.IsNullOrWhiteSpace(authModel.Username))
         {
             context.Result = SubsonicResults.FailActionResult(ctx, 10, "Required parameter is missing");
             return;
         }
-        if (!Regex.IsMatch(username, "^[a-zA-Z0-9_-]+$", RegexOptions.None, TimeSpan.FromMilliseconds(100)))
+        if (!Regex.IsMatch(authModel.Username, "^[a-zA-Z0-9_-]+$", RegexOptions.None, TimeSpan.FromMilliseconds(100)))
         {
             context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
             return;
         }
 
         var authenticated = false;
-        var user = await _userService.GetUserByUsernameAsync(username);
+        var user = await _userService.GetUserByUsernameAsync(authModel.Username);
         
         if (user == null)
         {
@@ -53,13 +73,13 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
             return;
         }
         
-        if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrWhiteSpace(salt))
+        if (!string.IsNullOrWhiteSpace(authModel.Token) && !string.IsNullOrWhiteSpace(authModel.Salt))
         {
-            authenticated = _userService.ValidateToken(user.TokenBasedAuth, token, salt);
+            authenticated = _userService.ValidateToken(user.TokenBasedAuth, authModel.Token, authModel.Salt);
         }
-        else if (!string.IsNullOrWhiteSpace(password))
+        else if (!string.IsNullOrWhiteSpace(authModel.Password))
         {
-            authenticated = _userService.ValidatePassword(password, user.Password);
+            authenticated = _userService.ValidatePassword(authModel.Password, user.Password);
         }
 
         if (!authenticated)
@@ -68,7 +88,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
             return;
         }
 
-        user.ClientName = appName;
+        user.ClientName = authModel.AppName;
         ctx.Items["user"] = user;
         await next();
     }

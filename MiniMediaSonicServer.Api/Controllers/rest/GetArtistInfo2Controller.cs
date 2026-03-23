@@ -18,7 +18,7 @@ public class GetArtistInfo2Controller : SonicControllerBase
     }
 
     [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] GetArtistInfo2Request request)
+    public async Task<IResult> Get([FromQuery][FromBody] GetArtistInfo2Request request)
     {
         //var artist = await _artistService.GetArtistByIdAsync(request.Id);
         
