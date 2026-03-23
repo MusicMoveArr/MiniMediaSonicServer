@@ -57,6 +57,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidat
 
 builder.Services.Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"));
 builder.Services.Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"));
+builder.Services.Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"));
 
 string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnectionString))
