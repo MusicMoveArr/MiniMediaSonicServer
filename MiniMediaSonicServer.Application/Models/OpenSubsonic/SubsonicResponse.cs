@@ -13,7 +13,7 @@ public class SubsonicResponse
         Xmlns = "http://subsonic.org/restapi";
         Status = "ok";
         Version = "1.16.1";
-        Type = "navidrome";
+        Type = "subsonic";
         ServerVersion = "0.51.0";
         OpenSubsonic = true;
 
