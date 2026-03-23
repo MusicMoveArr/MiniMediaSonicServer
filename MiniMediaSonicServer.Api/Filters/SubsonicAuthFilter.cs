@@ -38,21 +38,29 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         authModel.Salt = q["s"].FirstOrDefault() ?? string.Empty;
         authModel.AppName = q["c"].FirstOrDefault() ?? string.Empty;
 
-        if (context.HttpContext.Request.Body.Length > 0)
+        try
         {
-            var request = context.HttpContext.Request;
-            request.Body.Position = 0;
-            using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
-            var body = await reader.ReadToEndAsync();
-            if (!string.IsNullOrWhiteSpace(body))
+            //not always works atm somehow
+            if (context.HttpContext.Request.Body.Length > 0)
             {
-                var model = JsonSerializer.Deserialize<SubsonicAuthModel>(body);
-                authModel.Username = !string.IsNullOrWhiteSpace(model.Username) ? model.Username : authModel.Username;
-                authModel.Password = !string.IsNullOrWhiteSpace(model.Password) ? model.Password : authModel.Password;
-                authModel.Token = !string.IsNullOrWhiteSpace(model.Token) ? model.Token : authModel.Token;
-                authModel.Salt = !string.IsNullOrWhiteSpace(model.Salt) ? model.Salt : authModel.Salt;
-                authModel.AppName = !string.IsNullOrWhiteSpace(model.AppName) ? model.AppName : authModel.AppName;
+                var request = context.HttpContext.Request;
+                request.Body.Position = 0;
+                using var reader = new StreamReader(request.Body, Encoding.UTF8, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                if (!string.IsNullOrWhiteSpace(body))
+                {
+                    var model = JsonSerializer.Deserialize<SubsonicAuthModel>(body);
+                    authModel.Username = !string.IsNullOrWhiteSpace(model.Username) ? model.Username : authModel.Username;
+                    authModel.Password = !string.IsNullOrWhiteSpace(model.Password) ? model.Password : authModel.Password;
+                    authModel.Token = !string.IsNullOrWhiteSpace(model.Token) ? model.Token : authModel.Token;
+                    authModel.Salt = !string.IsNullOrWhiteSpace(model.Salt) ? model.Salt : authModel.Salt;
+                    authModel.AppName = !string.IsNullOrWhiteSpace(model.AppName) ? model.AppName : authModel.AppName;
+                }
             }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e + "\r\n" + e.StackTrace);
         }
 
         if (string.IsNullOrWhiteSpace(authModel.Username))
