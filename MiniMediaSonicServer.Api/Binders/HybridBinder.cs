@@ -30,13 +30,6 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
         {
             foreach (var prop in typeof(T).GetProperties().Where(p => p.CanWrite))
             {
-                var currentValue = prop.GetValue(result);
-
-                if (currentValue != null)
-                {
-                    continue;
-                }
-                
                 var jsonPropertyName = prop.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
                 var queryKey = jsonPropertyName ?? prop.Name;
                 var valueResult = bindingContext.ValueProvider.GetValue(queryKey);
