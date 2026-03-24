@@ -21,7 +21,9 @@ public class GetUserController : SonicControllerBase
     public async Task<IResult> Get([FromQuery] GetUserRequest request)
     {
         var user = GetUserModel();
-        if (User.AdminRole && !string.Equals(request.Username, user.Username, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(request.Username) &&
+            User.AdminRole && 
+            !string.Equals(request.Username, user.Username, StringComparison.OrdinalIgnoreCase))
         {
             var userdb = await _userService.GetUserByUsernameAsync(request.Username);
 
