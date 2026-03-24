@@ -48,14 +48,59 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
                 {
                     try
                     {
-                        var converted = Convert.ChangeType(valueResult.FirstValue, prop.PropertyType);
+                        var converted = ConvertValue(valueResult.FirstValue, prop.PropertyType);
                         prop.SetValue(result, converted);
                     }
-                    catch { /* skip unparseable values */ }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"HybridBinding failed on property '{prop.Name}' '{queryKey}'");
+                    }
                 }
             }
         }
 
         bindingContext.Result = ModelBindingResult.Success(result);
+    }
+    
+    private object ConvertValue(string raw, Type targetType)
+    {
+        if (string.IsNullOrEmpty(raw))
+        {
+            return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+        }
+
+        var underlying = Nullable.GetUnderlyingType(targetType);
+        if (underlying != null)
+        {
+            return ConvertValue(raw, underlying);
+        }
+
+        if (targetType.IsEnum)
+        {
+            return Enum.Parse(targetType, raw, ignoreCase: true);
+        }
+
+        if (targetType == typeof(Guid))
+        {
+            return Guid.Parse(raw);
+        }
+
+        if (targetType != typeof(string) && 
+            (targetType.IsClass || targetType.IsGenericType))
+        {
+            if (raw.TrimStart().StartsWith("[") || raw.TrimStart().StartsWith("{"))
+            {
+                return JsonSerializer.Deserialize(raw, targetType);
+            }
+
+            if (targetType == typeof(List<string>) || targetType == typeof(IList<string>))
+            {
+                return raw.Split([',', ';'])
+                    .Select(s => s.Trim())
+                    .ToList();
+            }
+        }
+
+        return Convert.ChangeType(raw, targetType);
     }
 }
