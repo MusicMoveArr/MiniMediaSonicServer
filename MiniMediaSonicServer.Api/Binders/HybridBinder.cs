@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -12,9 +13,26 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
         var request = bindingContext.HttpContext.Request;
         var result = new T();
 
-        if (request.ContentLength > 0 || request.Headers.TransferEncoding == "chunked")
+        var queries = bindingContext.HttpContext.Request.Query
+            .GroupBy(pair => pair.Key.ToLower())
+            .Select(pair => pair.First())
+            .ToDictionary(StringComparer.OrdinalIgnoreCase);
+        
+        if (request.HasFormContentType && request.Body?.Length > 0)
+        {
+            var form = await request.ReadFormAsync();
+            foreach (var key in form.Keys)
+            {
+                if (!queries.ContainsKey(key))
+                {
+                    queries[key] = form[key];
+                }
+            }
+        }
+        else if (request.Body?.Length > 0 || request.Headers.TransferEncoding == "chunked")
         {
             request.EnableBuffering();
+            
             var body = await JsonSerializer.DeserializeAsync<T>(
                 request.Body,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
@@ -25,8 +43,8 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
             }
             request.Body.Position = 0;
         }
-
-        if (bindingContext.HttpContext.Request.Query.Any())
+        
+        if (queries.Any())
         {
             foreach (var prop in typeof(T).GetProperties().Where(p => p.CanWrite))
             {
@@ -37,11 +55,20 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
                 if (valueResult == ValueProviderResult.None && jsonPropertyName != null)
                     valueResult = bindingContext.ValueProvider.GetValue(prop.Name);
 
-                if (valueResult != ValueProviderResult.None)
+                string value = valueResult.FirstValue;
+                if (valueResult == ValueProviderResult.None)
+                {
+                    if (queries.TryGetValue(queryKey, out var queryResult))
+                    {
+                        value = queryResult.FirstOrDefault();
+                    }
+                }
+                
+                if (value != null)
                 {
                     try
                     {
-                        var converted = ConvertValue(valueResult.FirstValue, prop.PropertyType);
+                        var converted = ConvertValue(value, prop.PropertyType);
                         prop.SetValue(result, converted);
                     }
                     catch (Exception ex)
