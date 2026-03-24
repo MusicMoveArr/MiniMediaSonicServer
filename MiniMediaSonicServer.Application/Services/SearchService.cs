@@ -1,6 +1,7 @@
 using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Repositories;
+using MiniMediaSonicServer.Application.Utils;
 
 namespace MiniMediaSonicServer.Application.Services;
 
@@ -28,11 +29,14 @@ public class SearchService
 
     public async Task<List<AlbumID3>> SearchAlbumsAsync(string query, int count, int offset, Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return await _searchSyncRepository.SearchAlbumsAsync(count, offset, userId);
-        }
-        return await _searchRepository.SearchAlbumsAsync(query, count, offset, userId);
+        List<AlbumID3> albums = string.IsNullOrWhiteSpace(query)
+            ? await _searchSyncRepository.SearchAlbumsAsync(count, offset, userId)
+            : await _searchRepository.SearchAlbumsAsync(query, count, offset, userId);
+
+
+        AlbumReleaseTypeUtil.SetAlbumReleaseTypes(albums);
+
+        return albums;
     }
 
     public async Task<List<TrackID3>> SearchTracksAsync(string query, int count, int offset, Guid userId)

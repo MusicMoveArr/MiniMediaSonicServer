@@ -81,6 +81,10 @@ public class AlbumID3
     [JsonPropertyName("isCompilation")]
     public bool IsCompilation { get; set; }
     
+    [XmlElement("releaseTypes")]
+    [JsonPropertyName("releaseTypes")]
+    public List<string> releaseTypes { get; set; }
+    
     [XmlAttribute("explicitStatus")]
     [JsonPropertyName("explicitStatus")]
     public string ExplicitStatus { get; set; }

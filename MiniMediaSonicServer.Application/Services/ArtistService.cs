@@ -3,6 +3,7 @@ using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
 using MiniMediaSonicServer.Application.Repositories;
+using MiniMediaSonicServer.Application.Utils;
 using Index = MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities.Index;
 
 namespace MiniMediaSonicServer.Application.Services;
@@ -18,7 +19,9 @@ public class ArtistService
 
     public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
-        return await _artistRepository.GetArtistByIdAsync(artistId, userId);
+        var artist = await _artistRepository.GetArtistByIdAsync(artistId, userId);
+        AlbumReleaseTypeUtil.SetAlbumReleaseTypes(artist.Albums);
+        return artist;
     }
 
     public async Task<ArtistsList> GetAllArtistsAsync(Guid userId)

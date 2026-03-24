@@ -64,7 +64,7 @@ public class ArtistID3
         name = name.TrimStart();
         
         string? ignoreArticle = name.Length > 3 ? IgnoredArticles.FirstOrDefault(n => name.ToLower().StartsWith(n.ToLower())) : string.Empty;
-        if (ignoreArticle != null)
+        if (!string.IsNullOrWhiteSpace(ignoreArticle))
         {
             name = name.Substring(ignoreArticle.Length + 1);
         }

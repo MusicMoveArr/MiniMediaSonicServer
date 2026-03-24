@@ -114,7 +114,7 @@ public class AlbumRepository
         return results;
     }
     
-    public async Task<AlbumID3> GetAlbumId3WithTracksAsync(Guid albumId, Guid userId)
+    public async Task<AlbumID3?> GetAlbumId3WithTracksAsync(Guid albumId, Guid userId)
     {
 	    string query = @"SELECT 
  							al.AlbumId as Id,

@@ -38,12 +38,17 @@ public class ArtistRepository
 						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created
+							m.file_creationtime as Created,
+ 							songCount.songs as songCount
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
  						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
+						 LEFT JOIN lateral (
+							select count(*) songs 
+							from metadata m 
+							where m.albumid = al.albumid) as songCount on true
 						 where a.ArtistId = @artistId";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);

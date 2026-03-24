@@ -64,6 +64,7 @@ public class SearchSyncRepository
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
 							recent_m.file_creationtime as Created,
+ 							songCount.songs as songCount,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
  							    then album_rated.StarredAt 
@@ -78,6 +79,10 @@ public class SearchSyncRepository
 						     where m.albumid = al.albumid 
 						     order by m.tag_year 
 						     desc limit 1) as m on true
+						 LEFT JOIN lateral (
+							select count(*) songs 
+							from metadata m 
+							where m.albumid = al.albumid) as songCount on true
 						     
 						 LEFT JOIN lateral (
 						     select m.file_creationtime as file_creationtime 
