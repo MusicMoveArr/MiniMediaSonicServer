@@ -120,6 +120,10 @@ public class SubsonicResponse
     [JsonPropertyName("starred")]
     public StarredResponse? Starred { get; set; }
 
+    [XmlElement("starred2")]
+    [JsonPropertyName("starred2")]
+    public StarredResponse? Starred2 { get; set; }
+
     [XmlElement("users")]
     [JsonPropertyName("users")]
     public UserListResponse? Users { get; set; }
