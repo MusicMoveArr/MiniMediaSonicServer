@@ -26,7 +26,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         
         if (hasAllowAnonymous)
         {
-            ctx.Items["format"] = authModel.AuthOutputFormat;
+            ctx.Items["format"] = authModel?.AuthOutputFormat;
             await next();
             return;
         }
