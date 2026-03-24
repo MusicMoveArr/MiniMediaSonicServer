@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Primitives;
 
 namespace MiniMediaSonicServer.Api.Binders;
 
@@ -55,20 +56,17 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
                 if (valueResult == ValueProviderResult.None && jsonPropertyName != null)
                     valueResult = bindingContext.ValueProvider.GetValue(prop.Name);
 
-                string value = valueResult.FirstValue;
+                StringValues stringValues = valueResult.Values;
                 if (valueResult == ValueProviderResult.None)
                 {
-                    if (queries.TryGetValue(queryKey, out var queryResult))
-                    {
-                        value = queryResult.FirstOrDefault();
-                    }
+                    queries.TryGetValue(queryKey, out stringValues);
                 }
                 
-                if (value != null)
+                if (stringValues.Count > 0)
                 {
                     try
                     {
-                        var converted = ConvertValue(value, prop.PropertyType);
+                        var converted = ConvertValue(stringValues, prop.PropertyType);
                         prop.SetValue(result, converted);
                     }
                     catch (Exception ex)
@@ -117,6 +115,14 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
             {
                 return raw.Split([',', ';'])
                     .Select(s => s.Trim())
+                    .ToList();
+            }
+
+            if (targetType == typeof(List<Guid>) || targetType == typeof(IList<Guid>))
+            {
+                return raw.Split([',', ';'])
+                    .Select(id => Guid.TryParse(id, out Guid guid) ? guid : Guid.Empty)
+                    .Where(id => id != Guid.Empty)
                     .ToList();
             }
         }
