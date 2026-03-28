@@ -62,12 +62,16 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "UserPasswordKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   },
   "Redis": {
-    "ConnectionString": ""
+    "ConnectionString": "",
+    "Expiry": "72:00:00",
+    "SlidingExpiration": "72:00:00"
   },
   "Jobs": {
-    "PlaylistImportCron": "0 0 * * * ?",
-    "PlaylistFixTracksCron": "0 0 * * * ?",
-    "ReIndexSearchCron": "0 0 * ? * *"
+    "PlaylistImportCron": "0 0 0 * * ?",
+    "NavidromeSmartPlaylistRefreshCron": "0 0 0 * * ?",
+    "PlaylistFixTracksCron": "0 0 0 * * ?",
+    "ReIndexSearchCron": "0 0 0 * * ?",
+    "ImportLastFmScrobblesCron": "0 0 0 * * ?"
   }
 }
 ```
@@ -80,7 +84,7 @@ By default the following jobs are scheduled hourly which can be changed in the a
 3. ReIndex Search: Keeping the search up-to-date whenever new tracks were added/remove/updated
 
 ## Implemented API's
-A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind you with missing API implementations
+A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are usable, mind you with missing API implementations
 
 | API | Implemented | Status | 
 | --- | --- | --- |
@@ -103,7 +107,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | DownloadPodcastEpisode     | Not yet |  |
 | GetAlbum                   | Working |  |
 | GetAlbumList2              | Working |  |
-| GetAlbumList               | Not yet |  |
+| GetAlbumList               | Working |  |
 | GetArtist                  | Working |  |
 | GetArtistInfo2             | Not yet |  |
 | GetArtistInfo              | Not yet |  |
@@ -130,16 +134,16 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | GetPlayQueue               | Not yet |  |
 | GetPodcastEpisode          | Not yet |  |
 | GetPodcasts                | Not yet |  |
-| GetRandomSongs             | Not yet |  |
+| GetRandomSongs             | Working |  |
 | GetScanStatus              | Not yet |  |
 | GetShares                  | Not yet |  |
 | GetSimilarSongs2           | Working |  |
-| GetSimilarSongs            | Not yet |  |
+| GetSimilarSongs            | Working |  |
 | GetSong                    | Working |  |
 | GetSongsByGenre            | Not yet |  |
 | GetStarred2                | Working |  |
 | GetStarred                 | Working |  |
-| GetTopSongs                | Not yet |  |
+| GetTopSongs                | Working |  |
 | GetTranscodeDecision       | Not yet |  |
 | GetTranscodeStream         | Not yet |  |
 | GetUser                    | Working |  |
@@ -151,8 +155,8 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo apps are usable, mind
 | Ping                       | Working |  |
 | RefreshPodcasts            | Not yet |  |
 | SavePlayQueueByIndex       | Not yet |  |
-| SavePlayQueue              | Not yet |  |
-| Scrobble                   | Working | Need to implement Last.fm. history via database and ListenBrainz work |
+| SavePlayQueue              | Working |  |
+| Scrobble                   | Working | History via database and scrobbling ListenBrainz, Maloja work |
 | Search2                    | Not yet |  |
 | Search3                    | Working |  |
 | Search                     | Not yet |  |
