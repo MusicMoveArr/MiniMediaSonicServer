@@ -26,11 +26,15 @@ public class PlaylistRepository
     						playlist.CreatedAt,
     						playlist.UpdatedAt,
     						track.SongCount as SongCount,
-    						1 as TotalDuration
+    						COALESCE(track.Duration, 0) as TotalDuration
 						 from sonicserver_playlist playlist
 						 left join lateral (
-						     select count(track.TrackId) as SongCount 
+						     select count(track.TrackId) as SongCount, 
+						     sum(EXTRACT(EPOCH FROM
+								(CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+									ELSE m.Tag_Length END)::interval))::int as Duration
 							 from sonicserver_playlist_track track 
+							 join metadata m on m.MetadataId = track.TrackId
 							 where track.PlaylistId = playlist.PlaylistId)
 							 track on true
 						 where userid = @userId
@@ -55,6 +59,7 @@ public class PlaylistRepository
     						playlist.CreatedAt, 
     						playlist.UpdatedAt,
     						COALESCE(ImportPlaylist.IsImport, false) AS ReadOnly,
+							COALESCE(sum_duration.Duration, 0) AS TotalDuration,
     
          					m.MetadataId as TrackId,
  							al.AlbumId as Parent,
@@ -143,6 +148,16 @@ public class PlaylistRepository
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
  							order by UpdatedAt desc
  							limit 1) playhistory on true
+ 							    
+						 left join lateral (
+							select sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+									    ELSE m.Tag_Length END)::interval))::int AS Duration
+							from sonicserver_playlist pl
+							JOIN sonicserver_playlist_track playlist_track on playlist_track.playlistid = pl.playlistid
+							JOIN metadata m on m.MetadataId = playlist_track.TrackId
+							where pl.PlayListId = playlist.PlayListId
+							) sum_duration on true
  							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
