@@ -10,6 +10,12 @@ public class CoverService
 {
     private readonly TrackCoverRepository _trackCoverRepository;
     private readonly Size DefaultCoverSize = new Size(400, 400);
+    private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions
+    {
+        IgnoreInaccessible = true,
+        RecurseSubdirectories = false,
+        AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
+    };
 
     public CoverService(TrackCoverRepository trackCoverRepository)
     {
@@ -26,11 +32,12 @@ public class CoverService
         }
         
         FileInfo trackFileInfo = new FileInfo(trackPath);
+        
 
         if (trackFileInfo.Directory?.Exists == true)
         {
             var coverFileInfo = trackFileInfo.Directory
-                .GetFiles("*.jpg", SearchOption.TopDirectoryOnly)
+                .GetFiles("*.jpg", _enumerationOptions)
                 .Select(dir => dir)
                 .FirstOrDefault();
 
@@ -55,12 +62,12 @@ public class CoverService
     public async Task<byte[]> GetAlbumCoverByAlbumIdAsync(Guid albumId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByAlbumIdAsync(albumId);
-
+        
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", SearchOption.TopDirectoryOnly))
+            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
             .Select(dir => dir)
             .FirstOrDefault();
 
@@ -84,12 +91,12 @@ public class CoverService
     public async Task<byte[]> GetArtistCoverByArtistIdAsync(Guid artistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByArtistIdAsync(artistId);
-
+        
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory.Parent)
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", SearchOption.TopDirectoryOnly))
+            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
             .Select(dir => dir)
             .FirstOrDefault();
 
@@ -112,12 +119,12 @@ public class CoverService
     public async Task<byte[]> GetPlaylistCoverByIdAsync(Guid playlistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByPlaylistIdAsync(playlistId);
-
+        
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", SearchOption.TopDirectoryOnly))
+            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
             .Select(dir => dir)
             .DistinctBy(dir => dir.FullName)
             .Take(4)
