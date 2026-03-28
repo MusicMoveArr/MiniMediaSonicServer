@@ -39,6 +39,10 @@ public class ListenBrainzScrobbleHandler : IScrobble
         RestRequest request = new RestRequest("submit-listens", Method.Post);
         request.AddHeader("Authorization", $"Token {user.ListenBrainzUserToken}");
         request.AddJsonBody(submitModel);
-        await client.ExecuteAsync(request);
+        var result = await client.ExecuteAsync(request);
+        if (!result.IsSuccessful)
+        {
+            Console.WriteLine($"Error scrobbling to ListenBrainz, ResponseStatus: '{result.ResponseStatus}', Error: '{result.ErrorException?.Message}', Content: '{result.Content}', Error Message: '{result.ErrorMessage}'");
+        }
     }
 }

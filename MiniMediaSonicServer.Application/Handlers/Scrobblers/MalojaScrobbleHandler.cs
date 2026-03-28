@@ -31,6 +31,10 @@ public class MalojaScrobbleHandler : IScrobble
         RestClient client = new RestClient(options);
         RestRequest request = new RestRequest("newscrobble", Method.Post);
         request.AddJsonBody(scrobbleModel);
-        await client.ExecuteAsync(request);
+        var result = await client.ExecuteAsync(request);
+        if (!result.IsSuccessful)
+        {
+            Console.WriteLine($"Error scrobbling to Maloja, ResponseStatus: '{result.ResponseStatus}', Error: '{result.ErrorException?.Message}', Content: '{result.Content}', Error Message: '{result.ErrorMessage}'");
+        }
     }
 }
