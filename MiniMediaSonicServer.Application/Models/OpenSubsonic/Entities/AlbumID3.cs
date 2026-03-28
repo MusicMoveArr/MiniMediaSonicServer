@@ -57,9 +57,9 @@ public class AlbumID3
     [JsonPropertyName("songCount")]
     public int SongCount { get; set; }
     
-    [XmlAttribute("played")]
+    [XmlElement("played")]
     [JsonPropertyName("played")]
-    public DateTime Played { get; set; }
+    public DateTime? Played { get; set; }
     
     [XmlAttribute("userRating")]
     [JsonPropertyName("userRating")]

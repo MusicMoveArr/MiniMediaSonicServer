@@ -34,10 +34,12 @@ public class AlbumRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created,
+							al_sum.file_creationtime_min as Created,
+							al_sum.Duration,
+							al_sum.SongCount,
+							al_sum.Year,
 							COALESCE(playhistory.AlbumPlaycount, 0) as PlayCount,
  							album_rated.Rating as UserRating,
 
@@ -50,26 +52,35 @@ public class AlbumRepository
  						 left join sonicserver_album_rated album_rated on 
 						     album_rated.AlbumId = al.AlbumId 
 						     and album_rated.UserId = @userId
-						     
-						 JOIN lateral (
-						     select * from metadata m 
-						     where m.albumid = al.albumid 
-						     order by m.tag_year desc
-						     limit 1) as m on true
-						     
-						 JOIN lateral (
-						     select m.file_creationtime as file_creationtime 
-						     from metadata m 
-						     where m.albumid = al.albumid 
-						     order by m.file_creationtime desc
-						     limit 1) as recent_m on true
-						                
+
 						 LEFT JOIN album_playhistory playhistory
 							ON playhistory.AlbumId = al.AlbumId
+						     
+						 JOIN lateral (
+						     select min(m.file_creationtime) as file_creationtime_min,
+								    max(m.file_creationtime) as file_creationtime_max,
+								    nullif(max(m.tag_year), 0) as Year, 
+								    sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+			    							ELSE m.Tag_Length END)::interval))::int as Duration,
+						     		max(hist.UpdatedAt) as LastPlayDate,
+								    count(distinct(m.MetadataId)) as SongCount
+							 from metadata m 
+						     left join (
+						         select TrackId, max(UpdatedAt) as UpdatedAt
+						         from sonicserver_user_playhistory
+						         where UserId = @userId
+						         group by TrackId
+						     ) hist on hist.TrackId = m.MetadataId
+						     where m.albumid = al.albumid
+							) as al_sum on true
 						 
 						where (CASE 
 					             WHEN @type = 'byGenre' THEN 
-									m.computed_genre ILIKE '%' || @genre || '%'
+             						exists(select 1 
+             							   from metadata m 
+	     								   where m.albumid = al.albumid
+	     								   and m.computed_genre ILIKE '%' || @genre || '%')
 					             WHEN @type in ('recent', 'frequent') THEN 
 									playhistory.AlbumId is not null
 								 WHEN @type in ('newest', 'random') THEN 1=1
@@ -81,7 +92,7 @@ public class AlbumRepository
 				         CASE 
 				             WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount
 				             WHEN @type = 'random' THEN random()
-				             WHEN @type = 'byYear' THEN m.tag_year
+				             WHEN @type = 'byYear' THEN al_sum.Year
 				             ELSE NULL
 				         END DESC,
 				         CASE 
@@ -89,7 +100,7 @@ public class AlbumRepository
 				         END ASC, 
 				         CASE 
 				             WHEN @type = 'recent' THEN playhistory.UpdatedAt
-				             WHEN @type = 'newest' THEN recent_m.file_creationtime
+				             WHEN @type = 'newest' THEN al_sum.file_creationtime_max
 				             WHEN @type = 'starred' THEN album_rated.StarredAt
 				         END DESC
                          limit @limit";
@@ -124,8 +135,13 @@ public class AlbumRepository
  							NULLIF(m.tag_year, 0) as Year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
- 							m.file_creationtime as Created,
+ 							al_sum.file_creationtime as Created,
+							al_sum.Duration,
+							al_sum.SongCount,
+							al_sum.Year,
  							album_rated.Rating as UserRating,
+ 							playhistory.LastPlayDate as Played,
+							al_sum.AlbumPlaycount as PlayCount,
  							
  							(case when album_rated.Starred = true 
  							    then album_rated.StarredAt 
@@ -207,11 +223,29 @@ public class AlbumRepository
  							limit 1) joined_artist on true
  							    
  						 left join lateral (
- 							select hist.UpdatedAt as LastPlayDate
+ 							select max(hist.UpdatedAt) as LastPlayDate
  							from sonicserver_user_playhistory hist
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
- 							order by UpdatedAt desc
- 							limit 1) playhistory on true
+ 							    ) playhistory on true
+ 							    
+						 JOIN lateral (
+						     select 
+								    min(m.file_creationtime) as file_creationtime,
+								    nullif(max(m.tag_year), 0) as Year, 
+								    sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+			    							ELSE m.Tag_Length END)::interval))::int as Duration,
+						     		max(hist.UpdatedAt) as LastPlayDate,
+									sum(hist.PlayCount) as AlbumPlaycount,
+								    count(distinct(m.MetadataId)) as SongCount
+							 from metadata m 
+						     left join (
+						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         from sonicserver_user_playhistory
+						         where UserId = @userId
+						         group by TrackId
+						     ) hist on hist.TrackId = m.MetadataId
+						     where m.albumid = al.albumid) as al_sum on true
  							    
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
@@ -277,10 +311,14 @@ public class AlbumRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	NULLIF(m.tag_year, 0) as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							m.file_creationtime as Created,
+							al_sum.file_creationtime as Created,
+							al_sum.Duration,
+							al_sum.SongCount,
+							al_sum.Year,
+							al_sum.LastPlayDate as Played,
+							al_sum.AlbumPlaycount as PlayCount,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
  							    then album_rated.StarredAt 
@@ -289,13 +327,25 @@ public class AlbumRepository
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
  						 join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId and album_rated.Starred = true
-						 JOIN lateral (select * from metadata m where m.albumid = al.albumid order by m.tag_year desc limit 1) as m on true
 						 JOIN lateral (
-						     select m.file_creationtime as file_creationtime 
-						     from metadata m 
-						     where m.albumid = al.albumid 
-						     order by m.file_creationtime desc
-						     limit 1) as recent_m on true";
+						     select 
+								    min(m.file_creationtime) as file_creationtime,
+								    nullif(max(m.tag_year), 0) as Year, 
+								    sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+									    	ELSE m.Tag_Length END)::interval))::int as Duration,
+						     		max(hist.UpdatedAt) as LastPlayDate,
+									sum(hist.PlayCount) as AlbumPlaycount,
+								    count(distinct(m.MetadataId)) as SongCount
+							 from metadata m 
+						     left join (
+						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         from sonicserver_user_playhistory
+						         where UserId = @userId
+						         group by TrackId
+						     ) hist on hist.TrackId = m.MetadataId
+						     where m.albumid = al.albumid
+						     ) as al_sum on true";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
