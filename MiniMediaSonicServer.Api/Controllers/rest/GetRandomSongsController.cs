@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
+using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Controllers.rest;
 
@@ -9,9 +11,29 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 [Route("/rest/[controller].view")]
 public class GetRandomSongsController : SonicControllerBase
 {
-    [HttpGet, HttpPost]
-    public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
+    private readonly TrackService _trackService;
+    public GetRandomSongsController(TrackService trackService)
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse());
+        _trackService = trackService;
+    }
+    
+    [HttpGet, HttpPost]
+    public async Task<IResult> Get([FromQuery] GetRandomSongsRequest request)
+    {
+        if (request.Size <= 0)
+        {
+            request.Size = 10;
+        }
+        if (request.Size > 500)
+        {
+            request.Size = 500;
+        }
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse
+        {
+            RandomSongs = new RandomSongsResponse
+            {
+                Tracks = await _trackService.GetRandomTracksAsync(request.Size, User.UserId)
+            }
+        });
     }
 }

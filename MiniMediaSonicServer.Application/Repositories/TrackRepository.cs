@@ -509,4 +509,23 @@ public class TrackRepository
 
         return await GetTracksAsync(trackIds, userId);
     }
+    
+    
+    
+    public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId)
+    {
+        string query = @"SELECT m.MetadataId
+						  FROM metadata m TABLESAMPLE SYSTEM (1)
+                          limit @count";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        var trackIds = (await conn.QueryAsync<Guid>(query, 
+	        param: new
+	        {
+		        count
+	        })).ToList();
+
+        return await GetTracksAsync(trackIds, userId);
+    }
 }

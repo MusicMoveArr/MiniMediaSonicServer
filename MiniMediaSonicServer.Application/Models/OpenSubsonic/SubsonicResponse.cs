@@ -131,4 +131,8 @@ public class SubsonicResponse
     [XmlElement("topSongs")]
     [JsonPropertyName("topSongs")]
     public TopSongsResponse? TopSongs { get; set; }
+
+    [XmlElement("randomSongs")]
+    [JsonPropertyName("randomSongs")]
+    public RandomSongsResponse? RandomSongs { get; set; }
 }
