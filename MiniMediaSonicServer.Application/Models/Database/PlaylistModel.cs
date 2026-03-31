@@ -10,6 +10,7 @@ public class PlaylistModel
     public bool Public { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string CoverArt { get; set; }
     public bool ReadOnly { get; set; }
     
     //extra

@@ -26,7 +26,8 @@ public class PlaylistRepository
     						playlist.CreatedAt,
     						playlist.UpdatedAt,
     						track.SongCount as SongCount,
-    						COALESCE(track.Duration, 0) as TotalDuration
+    						COALESCE(track.Duration, 0) as TotalDuration,
+    						'pl-' || playlist.PlaylistId as CoverArt
 						 from sonicserver_playlist playlist
 						 left join lateral (
 						     select count(track.TrackId) as SongCount, 
@@ -60,6 +61,7 @@ public class PlaylistRepository
     						playlist.UpdatedAt,
     						COALESCE(ImportPlaylist.IsImport, false) AS ReadOnly,
 							COALESCE(sum_duration.Duration, 0) AS TotalDuration,
+    						'pl-' || playlist.PlaylistId as CoverArt,
     
          					m.MetadataId as TrackId,
  							al.AlbumId as Parent,

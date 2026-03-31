@@ -42,6 +42,7 @@ public class GetPlaylistController : SonicControllerBase
                 Public = playlist.Public,
                 Entry = playlist.Tracks,
                 ReadOnly = playlist.ReadOnly,
+                CoverArt = playlist.CoverArt
             }
         });
     }

@@ -16,6 +16,7 @@ public class GetCoverArtController : SonicControllerBase
     private readonly CoverService _coverService;
     private readonly string[] artistPrefix = ["ar", "artist"];
     private readonly string[] albumPrefix = ["ab", "album"];
+    private readonly string[] playlistPrefix = ["pl", "playlist"];
     private readonly string[] trackPrefix = ["track"];
     private const string RedisPrefixKey = "image:";
     private readonly IRedisCacheService _redisCacheService;
@@ -70,6 +71,11 @@ public class GetCoverArtController : SonicControllerBase
             {
                 coverArt = await _coverService.GetAlbumCoverByTrackIdAsync(genericId);
                 searchedTrack = true;
+            }
+            else if(playlistPrefix.Any(prefix => request.Id.StartsWith(prefix)))
+            {
+                coverArt = await _coverService.GetPlaylistCoverByIdAsync(genericId);
+                searchedPlaylist = true;
             }
 
             if (!searchedArtist && coverArt == null)
