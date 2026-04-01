@@ -57,7 +57,7 @@ public class RatingRepository
     public async Task StarTrackAsync(Guid userId, Guid trackId, bool star)
     {
 	    string query = @"INSERT INTO sonicserver_track_rated (UserId, TrackId, Rating, Starred, Artist, 
-                                     AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt, StarredAt)
+                                     AlbumArtist, Artists, Album, Title, ISRC, CreatedAt, UpdatedAt, StarredAt, UnStarredAt)
 						 SELECT 
 							@userId,
 							@trackId,
@@ -71,7 +71,8 @@ public class RatingRepository
 						    COALESCE(t.tags->>'isrc', ''),
 						 	current_timestamp,
 						 	current_timestamp,
-						 	current_timestamp
+						 	current_timestamp,
+						    case when @star = false then current_timestamp else null end
 						 FROM metadata m
 						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
@@ -82,7 +83,8 @@ public class RatingRepository
 						 DO UPDATE SET
 						 	Starred = EXCLUDED.Starred,
 						 	UpdatedAt = current_timestamp,
-						 	StarredAt = current_timestamp";
+						 	StarredAt = current_timestamp,
+						 	UnStarredAt = EXCLUDED.UnStarredAt";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -129,7 +131,7 @@ public class RatingRepository
     
     public async Task StarArtistAsync(Guid userId, Guid artistId, bool star)
     {
-	    string query = @"INSERT INTO sonicserver_artist_rated (UserId, ArtistId, Rating, Starred, Artist, CreatedAt, UpdatedAt, StarredAt)
+	    string query = @"INSERT INTO sonicserver_artist_rated (UserId, ArtistId, Rating, Starred, Artist, CreatedAt, UpdatedAt, StarredAt, UnStarredAt)
 						 SELECT 
 							@userId,
 							@artistId,
@@ -138,14 +140,16 @@ public class RatingRepository
 						    a.Name,
 						 	current_timestamp,
 						 	current_timestamp,
-						 	current_timestamp
+						 	current_timestamp,
+						 	case when @star = false then current_timestamp else null end
 						 FROM artists a
 						 WHERE a.ArtistId = @artistId
 						 ON CONFLICT (UserId, ArtistId)
 						 DO UPDATE SET
 						 	Starred = EXCLUDED.Starred,
 						 	UpdatedAt = current_timestamp,
-						 	StarredAt = current_timestamp";
+						 	StarredAt = current_timestamp,
+						 	UnStarredAt = EXCLUDED.UnStarredAt";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -193,7 +197,7 @@ public class RatingRepository
     
     public async Task StarAlbumAsync(Guid userId, Guid albumId, bool star)
     {
-	    string query = @"INSERT INTO sonicserver_album_rated (UserId, AlbumId, Rating, Starred, Artist, Album, CreatedAt, UpdatedAt, StarredAt)
+	    string query = @"INSERT INTO sonicserver_album_rated (UserId, AlbumId, Rating, Starred, Artist, Album, CreatedAt, UpdatedAt, StarredAt, UnStarredAt)
 						 SELECT 
 							@userId,
 							@albumId,
@@ -203,7 +207,8 @@ public class RatingRepository
 						    album.Title,
 						 	current_timestamp,
 						 	current_timestamp,
-						 	current_timestamp
+						 	current_timestamp,
+						 	case when @star = false then current_timestamp else null end
 						 FROM albums album
 						 join artists artist on artist.artistid = album.artistid
 						 WHERE album.AlbumId = @albumId
@@ -211,7 +216,8 @@ public class RatingRepository
 						 DO UPDATE SET
 						 	Starred = EXCLUDED.Starred,
 						 	UpdatedAt = current_timestamp,
-						 	StarredAt = current_timestamp";
+						 	StarredAt = current_timestamp,
+						 	UnStarredAt = EXCLUDED.UnStarredAt";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
