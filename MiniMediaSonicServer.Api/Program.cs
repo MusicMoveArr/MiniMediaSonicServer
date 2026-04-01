@@ -10,9 +10,9 @@ using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
+using MiniMediaSonicServer.WebJob.AutoLike.Application.Extensions;
 using MiniMediaSonicServer.WebJob.Import.Application.Extensions;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Extensions;
-using MiniMediaSonicServer.WebJob.Playlists.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Extensions;
 using Quartz;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -44,6 +44,7 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddQuartz(q =>
 {
+    q.AddAutoLikeJobs(builder);
     q.AddPlaylistJobs(builder);
     q.AddIndexingJobs(builder);
     q.AddImportJobs(builder);
@@ -117,6 +118,8 @@ builder.Services.AddPlaylistDependencies();
 builder.Services.AddIndexingDependencies();
 //ImportLastFmWebJob
 builder.Services.AddImportDependencies();
+//AutoLikeJobs
+builder.Services.AddAutoLikeDependencies();
 
 
 var app = builder.Build();

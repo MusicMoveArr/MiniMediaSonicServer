@@ -29,6 +29,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MiniMediaSonicServer.Application\MiniMediaSonicServer.Application.csproj" />
+      <ProjectReference Include="..\MiniMediaSonicServer.WebJob.AutoLike.Application\MiniMediaSonicServer.WebJob.AutoLike.Application.csproj" />
       <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Import.Application\MiniMediaSonicServer.WebJob.Import.Application.csproj" />
       <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Indexing.Application\MiniMediaSonicServer.WebJob.Indexing.Application.csproj" />
       <ProjectReference Include="..\MiniMediaSonicServer.WebJob.Playlists.Application\MiniMediaSonicServer.WebJob.Playlists.Application.csproj" />

@@ -12,6 +12,12 @@ public class UserPropertyRepository
     {
         _databaseConfiguration = databaseConfiguration.Value;
     }
+
+    public async Task<bool> GetUserPropertyBoolAsync(Guid userId, string name)
+    {
+        string? value = await GetUserPropertyAsync(userId, name);
+        return value?.ToLower() == "true" || value?.ToLower() == "y";
+    }
     
     public async Task<string?> GetUserPropertyAsync(Guid userId, string name)
     {
