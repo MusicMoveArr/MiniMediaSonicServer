@@ -663,10 +663,14 @@ public class TrackRepository
     
     
     
-    public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId)
+    public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId, string? genre)
     {
         string query = @"SELECT m.MetadataId
-						  FROM metadata m TABLESAMPLE SYSTEM (1)
+						  FROM metadata m TABLESAMPLE SYSTEM (10)
+						  JOIN LATERAL unnest(string_to_array(m.computed_genre, ';')) AS gen(genre) ON TRUE
+						  WHERE length(@genre) = 0 or (m.computed_genre is not null
+ 						 	   and m.computed_genre ilike '%' || @genre || '%'
+ 						  	   and lower(gen.genre) = lower(@genre))
                           limit @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -674,7 +678,8 @@ public class TrackRepository
         var trackIds = (await conn.QueryAsync<Guid>(query, 
 	        param: new
 	        {
-		        count
+		        count,
+		        genre = genre ?? string.Empty
 	        })).ToList();
 
         return await GetTracksAsync(trackIds, userId);

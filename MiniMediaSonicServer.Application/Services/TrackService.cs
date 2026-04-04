@@ -43,9 +43,9 @@ public class TrackService
         return await _trackRepository.GetTopArtistTracksAsync(artistName, count, userId);
     }
 
-    public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId)
+    public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId, string genre)
     {
-        return await _trackRepository.GetRandomTracksAsync(count, userId);
+        return await _trackRepository.GetRandomTracksAsync(count, userId, genre);
     }
 
     public async Task<List<TrackID3>> GetTrackByGenreAsync(Guid userId, string genre, int count, int offset)

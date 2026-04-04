@@ -32,7 +32,7 @@ public class GetRandomSongsController : SonicControllerBase
         {
             RandomSongs = new RandomSongsResponse
             {
-                Tracks = await _trackService.GetRandomTracksAsync(request.Size, User.UserId)
+                Tracks = await _trackService.GetRandomTracksAsync(request.Size, User.UserId, request.Genre)
             }
         });
     }
