@@ -20,7 +20,7 @@ This roadmap will be ongoing as the project keeps going
 1. Android: Symfonium https://www.symfonium.app
 2. iPhone: Arpeggi
 3. iPhone: Narjo https://narjomusic.com
-4. iPhone Substreamer https://substreamer.org
+4. iPhone/Android Substreamer https://substreamer.org
 5. iPhone Armperfy
 
 ## Tested working projects
