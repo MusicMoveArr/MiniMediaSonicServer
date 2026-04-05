@@ -71,7 +71,7 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"HybridBinding failed on property '{prop.Name}' '{queryKey}', '{bindingContext.HttpContext.Request.Path}', {ex.Message}, {ex.StackTrace}");
+                        Console.WriteLine($"HybridBinding failed on property '{prop.Name}' '{queryKey}', '{stringValues}', '{bindingContext.HttpContext.Request.Path}', {ex.Message}, {ex.StackTrace}");
                     }
                 }
             }
