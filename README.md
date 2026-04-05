@@ -16,14 +16,14 @@ This roadmap will be ongoing as the project keeps going
 - [x] Redis caching
 - [x] Support for Navidrome's Smart Playlist (nsp) format
 
-# Tested Working Android/iPhone Apps
+## Tested Working Android/iPhone Apps
 1. Android: Symfonium https://www.symfonium.app
 2. iPhone: Arpeggi
 3. iPhone: Narjo https://narjomusic.com
 4. iPhone Substreamer https://substreamer.org
 5. iPhone Armperfy
 
-# Test other projects
+## Test other projects
 1. Feishin https://github.com/jeffvli/feishin
 
 If a app/project was not mentioned in the list it does not mean it won't work, it simply means I personally did not verify it working
