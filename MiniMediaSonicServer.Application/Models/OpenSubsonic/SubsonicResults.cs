@@ -55,7 +55,7 @@ public static class SubsonicResults
         return WriteActionResult(ctx, response);
     }
 
-    public static ActionResult FailActionResult(HttpContext ctx, int code, string message)
+    public static ActionResult FailActionResult(HttpContext ctx, SubsonicErrorCode errorCode, string message)
     {
         var r = new SubsonicResponse
         {
