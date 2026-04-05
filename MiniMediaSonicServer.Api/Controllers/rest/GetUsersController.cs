@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
@@ -22,7 +23,7 @@ public class GetUsersController : SonicControllerBase
     {
         if (!User.AdminRole)
         {
-            return SubsonicResults.Fail(HttpContext, 0, "No permissions.");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.UserNotAuthorized, "No permissions.");
         }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse

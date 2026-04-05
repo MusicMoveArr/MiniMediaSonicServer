@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -22,12 +23,12 @@ public class CreateUserController : SonicControllerBase
     {
         if (!GetUserModel().AdminRole)
         {
-            return SubsonicResults.Fail(HttpContext, 0, "You are not authorized to create this user.");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.UserNotAuthorized, "You are not authorized to create this user.");
         }
         bool success = await _userService.CreateUserAsync(request);
         if (!success)
         {
-            return SubsonicResults.Fail(HttpContext, 0, "Another user by this username already exists.");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.GenericError, "Another user by this username already exists.");
         }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse());

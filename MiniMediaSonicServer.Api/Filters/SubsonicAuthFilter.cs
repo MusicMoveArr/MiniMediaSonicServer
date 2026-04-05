@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using Microsoft.AspNetCore.Mvc.Filters;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
 
@@ -33,12 +34,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (string.IsNullOrWhiteSpace(authModel.AuthUsername))
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, 10, "Required parameter is missing");
-            return;
-        }
-        if (!Regex.IsMatch(authModel.AuthUsername, "^[a-zA-Z0-9_-]+$", RegexOptions.None, TimeSpan.FromMilliseconds(100)))
-        {
-            context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
             return;
         }
 
@@ -47,7 +43,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         
         if (user == null)
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
             return;
         }
         
@@ -62,7 +58,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (!authenticated)
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, 40, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
             return;
         }
 

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -26,7 +27,7 @@ public class StreamController : SonicControllerBase
 
         if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
         {
-            return SubsonicResults.Fail(HttpContext, 0, "Track not found");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Track not found");
         }
 
         if (!string.IsNullOrWhiteSpace(request.Format) && !path.EndsWith(request.Format))

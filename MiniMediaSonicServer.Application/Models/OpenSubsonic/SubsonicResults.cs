@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 
 namespace MiniMediaSonicServer.Application.Models.OpenSubsonic;
 
@@ -24,12 +25,12 @@ public static class SubsonicResults
         return Write(ctx, response);
     }
 
-    public static IResult Fail(HttpContext ctx, int code, string message)
+    public static IResult Fail(HttpContext ctx, SubsonicErrorCode errorCode, string message)
     {
         var r = new SubsonicResponse
         {
             Status = "failed",
-            Error = new Error { Code = code, Message = message }
+            Error = new Error { Code = (int)errorCode, Message = message }
         };
         return Write(ctx, r);
     }
@@ -59,7 +60,7 @@ public static class SubsonicResults
         var r = new SubsonicResponse
         {
             Status = "failed",
-            Error = new Error { Code = code, Message = message }
+            Error = new Error { Code = (int)errorCode, Message = message }
         };
         return WriteActionResult(ctx, r);
     }

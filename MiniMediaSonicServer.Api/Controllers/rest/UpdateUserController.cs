@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -22,7 +23,7 @@ public class UpdateUserController : SonicControllerBase
         var currentUser = GetUserModel();
         if (currentUser.Username != request.Username && !currentUser.AdminRole)
         {
-            return SubsonicResults.Fail(HttpContext, 0, "You are not authorized to update this user.");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.UserNotAuthorized, "You are not authorized to update this user.");
         }
         
         await _userRepository.UpdateUserAsync(request);

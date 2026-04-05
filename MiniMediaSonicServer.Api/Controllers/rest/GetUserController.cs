@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -29,7 +30,7 @@ public class GetUserController : SonicControllerBase
 
             if (userdb == null)
             {
-                return SubsonicResults.Fail(HttpContext, 0, "User not found.");
+                return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "User not found.");
             }
             
             user = GetUserModel(userdb);

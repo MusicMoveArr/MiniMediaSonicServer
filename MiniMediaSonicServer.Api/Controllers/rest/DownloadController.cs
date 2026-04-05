@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -23,7 +24,7 @@ public class DownloadController : SonicControllerBase
 
         if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
         {
-            return SubsonicResults.Fail(HttpContext, 0, "Track not found");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Track not found");
         }
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));

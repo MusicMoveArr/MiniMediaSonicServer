@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -25,7 +26,7 @@ public class GetPlaylistController : SonicControllerBase
 
         if (playlist == null)
         {
-            return SubsonicResults.Fail(HttpContext, 70, "Playlist not found");
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Playlist not found");
         }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
