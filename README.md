@@ -71,7 +71,8 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "NavidromeSmartPlaylistRefreshCron": "0 0 0 * * ?",
     "PlaylistFixTracksCron": "0 0 0 * * ?",
     "ReIndexSearchCron": "0 0 0 * * ?",
-    "ImportLastFmScrobblesCron": "0 0 0 * * ?"
+    "ImportLastFmScrobblesCron": "0 0 0 * * ?",
+    "AutoLikeCron": "0 0 0 * * ?"
   }
 }
 ```
@@ -82,6 +83,7 @@ By default the following jobs are scheduled hourly which can be changed in the a
 1. Playlist Import: Will look into the "/playlists" folder looking for .m3u files to import 
 2. Playlist Fix Tracks: will look for playlist track files that were replaced (e.g. mp3 > flac) so files don't exist anymore but are in your playlists, it will search & replace that track with another with 99% accuracy match
 3. ReIndex Search: Keeping the search up-to-date whenever new tracks were added/remove/updated
+4. AutoLike: Per user configurable, when listening an artist e.g. +100x, automatically favorite the artist. later I will implement it as well for albums
 
 ## Implemented API's
 A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are usable, mind you with missing API implementations
@@ -140,7 +142,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | GetSimilarSongs2           | Working |  |
 | GetSimilarSongs            | Working |  |
 | GetSong                    | Working |  |
-| GetSongsByGenre            | Not yet |  |
+| GetSongsByGenre            | Working |  |
 | GetStarred2                | Working |  |
 | GetStarred                 | Working |  |
 | GetTopSongs                | Working |  |
