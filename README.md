@@ -92,13 +92,13 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | --- | --- | --- |
 | AddChatMessage             | Not yet |  |
 | ChangePassword             | Not yet |  |
-| CreateBookmark             | Not yet |  |
+| CreateBookmark             | Working |  |
 | CreateInternetRadioStation | Not yet |  |
 | CreatePlaylist             | Working |  |
 | CreatePodcastChannel       | Not yet |  |
 | CreateShare                | Not yet |  |
 | CreateUser                 | Working |  |
-| DeleteBookmark             | Not yet |  |
+| DeleteBookmark             | Working |  |
 | DeleteInternetRadioStation | Not yet |  |
 | DeletePlaylist             | Working |  |
 | DeletePodcastChannel       | Not yet |  |
@@ -115,7 +115,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | GetArtistInfo              | Not yet |  |
 | GetArtists                 | Working |  |
 | GetAvatar                  | Not yet |  |
-| GetBookmarks               | Not yet |  |
+| GetBookmarks               | Working |  |
 | GetCaptions                | Not yet |  |
 | GetChatMessages            | Not yet |  |
 | GetCoverArt                | Working |  |
