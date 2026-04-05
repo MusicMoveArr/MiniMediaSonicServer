@@ -28,6 +28,11 @@ public class TrackService
         return await _trackRepository.GetAllGenresAsync();
     }
 
+    public async Task<List<TrackID3>> GetTrackByIdAsync(List<Guid> trackIds, Guid userId)
+    {
+        return await _trackRepository.GetTracksAsync(trackIds, userId);
+    }
+
     public async Task<TrackID3?> GetTrackByIdAsync(Guid trackId, Guid userId)
     {
         return await _trackRepository.GetTrackByIdAsync(trackId, userId);

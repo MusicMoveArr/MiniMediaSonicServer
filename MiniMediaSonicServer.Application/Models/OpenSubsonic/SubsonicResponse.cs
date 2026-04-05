@@ -139,4 +139,8 @@ public class SubsonicResponse
     [XmlElement("songsByGenre")]
     [JsonPropertyName("songsByGenre")]
     public SongsByGenreResponse? SongsByGenre { get; set; }
+
+    [XmlElement("bookmarks")]
+    [JsonPropertyName("bookmarks")]
+    public GetBookmarksResponse? Bookmarks { get; set; }
 }

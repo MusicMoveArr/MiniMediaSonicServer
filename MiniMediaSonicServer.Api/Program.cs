@@ -76,6 +76,7 @@ else
 
 
 //repositories
+builder.Services.AddScoped<BookmarkRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<AlbumRepository>();
 builder.Services.AddScoped<StreamRepository>();
@@ -91,6 +92,7 @@ builder.Services.AddScoped<UserPropertyRepository>();
 builder.Services.AddScoped<UserPlayQueueRepository>();
 
 //services
+builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AlbumService>();
 builder.Services.AddScoped<StreamService>();
 builder.Services.AddScoped<CoverService>();
