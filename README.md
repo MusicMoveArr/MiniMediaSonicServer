@@ -23,7 +23,7 @@ This roadmap will be ongoing as the project keeps going
 4. iPhone Substreamer https://substreamer.org
 5. iPhone Armperfy
 
-## Test other projects
+## Tested working projects
 1. Feishin https://github.com/jeffvli/feishin
 
 If a app/project was not mentioned in the list it does not mean it won't work, it simply means I personally did not verify it working
