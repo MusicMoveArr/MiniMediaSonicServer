@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Services;
 using Quartz;
 
@@ -15,6 +16,8 @@ public class NavidromeSmartPlaylistRefreshJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine($"Starting NavidromeSmartPlaylistRefreshJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Stopwatch sw = Stopwatch.StartNew();
         if (!Directory.Exists("/playlists"))
         {
             return;
@@ -24,5 +27,7 @@ public class NavidromeSmartPlaylistRefreshJob : IJob
         {
             await _navidromeSmartPlaylistService.ProcessNavidromeSmartPlaylist(path);
         }
+        sw.Stop();
+        Console.WriteLine($"Done NavidromeSmartPlaylistRefreshJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}, Took {sw.Elapsed.TotalSeconds} total seconds");
     }
 }

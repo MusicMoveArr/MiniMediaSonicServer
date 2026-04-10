@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Services;
 using Quartz;
 
@@ -14,6 +15,8 @@ public class PlaylistImportJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine($"Starting PlaylistImportJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Stopwatch sw = Stopwatch.StartNew();
         if (!Directory.Exists("/playlists"))
         {
             return;
@@ -23,5 +26,7 @@ public class PlaylistImportJob : IJob
         {
             await _playlistImportService.ImportPlaylistPathAsync(path);
         }
+        sw.Stop();
+        Console.WriteLine($"Done PlaylistImportJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}, Took {sw.Elapsed.TotalSeconds} total seconds");
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using IF.Lastfm.Core.Api;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Import.Application.Services;
@@ -16,6 +17,10 @@ public class ImportLastFmScrobblesJob : IJob
     
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine($"Starting ImportLastFmScrobblesJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Stopwatch sw = Stopwatch.StartNew();
         await _importLastFmScrobblesService.SyncAllUserScrobblesAsync();
+        sw.Stop();
+        Console.WriteLine($"Done ImportLastFmScrobblesJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}, Took {sw.Elapsed.TotalSeconds} total seconds");
     }
 }

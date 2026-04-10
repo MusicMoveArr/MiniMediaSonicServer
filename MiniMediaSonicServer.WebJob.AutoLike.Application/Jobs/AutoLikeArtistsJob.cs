@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MiniMediaSonicServer.WebJob.AutoLike.Application.Services;
 using Quartz;
 
@@ -14,6 +15,10 @@ public class AutoLikeArtistsJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine($"Starting AutoLikeService at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Stopwatch sw = Stopwatch.StartNew();
         await _autoLikeService.FavoriteArtistsAsync();
+        sw.Stop();
+        Console.WriteLine($"Done AutoLikeService at {DateTime.Now:yyyy-MM-dd HH:mm:ss}, Took {sw.Elapsed.TotalSeconds} total seconds");
     }
 }

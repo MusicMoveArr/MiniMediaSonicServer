@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Services;
 using Quartz;
 
@@ -14,6 +15,10 @@ public class FixMissingPlaylistTracksJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        Console.WriteLine($"Starting FixMissingPlaylistTracksJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Stopwatch sw = Stopwatch.StartNew();
         await _fixMissingPlaylistTracksService.FixMissingPlaylistTracks();
+        sw.Stop();
+        Console.WriteLine($"Done FixMissingPlaylistTracksJob at {DateTime.Now:yyyy-MM-dd HH:mm:ss}, Took {sw.Elapsed.TotalSeconds} total seconds");
     }
 }
