@@ -24,14 +24,19 @@ public class Search3Controller : SonicControllerBase
         {
             request.Query = string.Empty;
         }
+
+        var artistsTask = _searchService.SearchArtistsAsync(request.Query, request.ArtistCount, request.ArtistOffset, User.UserId);
+        var albumsTask =  _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset, User.UserId);
+        var tracksTask =  _searchService.SearchTracksAsync(request.Query, request.SongCount, request.SongOffset, User.UserId);
+        await Task.WhenAll(artistsTask, albumsTask, tracksTask);
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             SearchResult3 = new SearchResult3
             {
-                Artists = await _searchService.SearchArtistsAsync(request.Query, request.ArtistCount, request.ArtistOffset, User.UserId),
-                Albums = await _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset, User.UserId),
-                Tracks = await _searchService.SearchTracksAsync(request.Query, request.SongCount, request.SongOffset, User.UserId),
+                Artists = artistsTask.Result,
+                Albums = albumsTask.Result,
+                Tracks = tracksTask.Result,
             }
         });
     }
