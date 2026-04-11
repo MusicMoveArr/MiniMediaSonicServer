@@ -61,6 +61,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidat
 builder.Services.Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"));
 builder.Services.Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"));
 builder.Services.Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"));
+builder.Services.Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"));
 
 string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnectionString))
@@ -90,6 +91,7 @@ builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<UserPlayHistoryRepository>();
 builder.Services.AddScoped<UserPropertyRepository>();
 builder.Services.AddScoped<UserPlayQueueRepository>();
+builder.Services.AddScoped<ShareRepository>();
 
 //services
 builder.Services.AddScoped<BookmarkService>();
@@ -102,6 +104,7 @@ builder.Services.AddScoped<PlaylistService>();
 builder.Services.AddScoped<SearchService>();
 builder.Services.AddScoped<RatingService>();
 builder.Services.AddScoped<ScrobbleService>();
+builder.Services.AddScoped<ShareService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserPlayQueueService>();
 builder.Services.AddScoped<TranscodeService>();

@@ -1,6 +1,3 @@
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using Microsoft.AspNetCore.Mvc.Filters;

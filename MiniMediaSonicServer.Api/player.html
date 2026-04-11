@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniMedia Player</title>
+  <!-- __SHARE_DATA__ -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1a1a18; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Courier New', monospace; }
+
+    #player { background: #111210; border: 2px solid #BA7517; border-radius: 3px; padding: 1.5rem; width: 100%; max-width: 480px; color: #EF9F27; }
+
+    .brand { text-align: center; letter-spacing: 6px; font-size: 10px; color: #5F5E5A; margin-bottom: 14px; }
+
+    /* Share info bar */
+    #share-bar { background: #0d0d0c; border: 1px solid #2C2C2A; border-radius: 2px; padding: 7px 10px; margin-bottom: 12px; font-size: 11px; color: #5F5E5A; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+    #share-bar span { color: #EF9F27; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Display */
+    #disp { background: #0a130a; border: 2px solid #27500A; padding: 12px; margin-bottom: 10px; border-radius: 2px; min-height: 88px; }
+    #tname { color: #97C459; font-size: 13px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #tmeta { font-size: 11px; color: #3B6D11; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #3B6D11; flex-shrink: 0; }
+    .dot.on { background: #97C459; }
+    #prog { background: #0d1f0d; height: 6px; cursor: pointer; margin-bottom: 6px; border-radius: 1px; }
+    #pfill { background: #639922; height: 100%; width: 0%; border-radius: 1px; pointer-events: none; }
+    .trow { display: flex; justify-content: space-between; font-size: 11px; color: #3B6D11; }
+
+    /* VU meter */
+    #vu { display: flex; gap: 2px; height: 26px; align-items: flex-end; margin-bottom: 10px; }
+    .vb { flex: 1; background: #173404; height: 2px; }
+
+    /* Controls */
+    .ctrls { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
+    .btn { background: #1a1a18; border: 1px solid #5F5E5A; color: #EF9F27; padding: 8px 12px; cursor: pointer; font-family: 'Courier New', monospace; font-size: 13px; border-radius: 2px; letter-spacing: 1px; }
+    .btn:hover { background: #2C2C2A; border-color: #BA7517; }
+    .btn:active { background: #0d0d0c; transform: scale(0.97); }
+    #pbtn { padding: 8px 18px; font-size: 15px; border-color: #BA7517; }
+    #mbtn { font-size: 10px; padding: 6px 10px; letter-spacing: 2px; }
+
+    /* Volume */
+    .vrow { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .lbl { font-size: 11px; color: #5F5E5A; letter-spacing: 2px; min-width: 30px; }
+    #vdisp { font-size: 11px; min-width: 32px; text-align: right; }
+    input[type=range] { flex: 1; accent-color: #639922; }
+
+    /* Playlist */
+    .sep { border-top: 1px solid #1a1a18; padding-top: 10px; }
+    #plist { max-height: 160px; overflow-y: auto; }
+    #plist::-webkit-scrollbar { width: 4px; }
+    #plist::-webkit-scrollbar-track { background: #0a0a09; }
+    #plist::-webkit-scrollbar-thumb { background: #2C2C2A; }
+    .pi { padding: 5px 8px; font-size: 11px; color: #888780; cursor: pointer; border-bottom: 1px solid #1a1a18; display: flex; gap: 8px; align-items: center; }
+    .pi:hover { color: #EF9F27; background: #1a1a18; }
+    .pi.active { color: #97C459; background: #0d1a0d; }
+    .pn { min-width: 18px; color: #444441; flex-shrink: 0; }
+    .pt { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .pdur { margin-left: auto; color: #444441; flex-shrink: 0; }
+
+    #status-msg { font-size: 11px; color: #E24B4A; min-height: 18px; margin-bottom: 8px; letter-spacing: .5px; }
+
+    .empty { padding: 8px; font-size: 11px; color: #444441; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+<div id="player">
+  <div class="brand">▐▌ MINIMEDIA SONIC SERVER ▐▌</div>
+
+  <div id="share-bar">
+    SHARE: <span id="share-label">Loading…</span>
+  </div>
+
+  <div id="status-msg"></div>
+
+  <div id="disp">
+    <div id="tname">-- LOADING --</div>
+    <div id="tmeta"><span class="dot" id="dot"></span><span id="stxt">READY</span></div>
+    <div id="prog" onclick="seek(event)"><div id="pfill"></div></div>
+    <div class="trow"><span id="ctime">0:00</span><span id="ttime">0:00</span></div>
+  </div>
+
+  <div id="vu"></div>
+
+  <div class="ctrls">
+    <button class="btn" onclick="prevT()">|◄◄</button>
+    <button class="btn" id="pbtn" onclick="togglePlay()">▶</button>
+    <button class="btn" onclick="stopT()">■</button>
+    <button class="btn" onclick="nextT(false)">►►|</button>
+    <button class="btn" id="mbtn" onclick="cycleMode()">SEQ</button>
+  </div>
+
+  <div class="vrow">
+    <span class="lbl">VOL</span>
+    <input type="range" min="0" max="1" step="0.01" value="0.8" id="vslider" oninput="setVol(this.value)">
+    <span id="vdisp">80%</span>
+  </div>
+
+  <div class="sep">
+    <div id="plist"><div class="empty">LOADING TRACKS…</div></div>
+  </div>
+</div>
+
+<script>
+  const aud = new Audio();
+  let pl = [], cur = 0, mode = 'SEQ', vuT = null, playing = false;
+
+  const share = window.__SHARE__ || {};
+  const BASE = (share.baseUrl || '').replace(/\/+$/, '');
+  const SHARE_ID = share.id || '';
+
+  document.getElementById('share-label').textContent =
+    share.description || share.id || 'Unknown share';
+
+  // VU meter
+  const vuEl = document.getElementById('vu');
+  for (let i = 0; i < 22; i++) {
+    const b = document.createElement('div');
+    b.className = 'vb';
+    b.id = 'vb' + i;
+    vuEl.appendChild(b);
+  }
+  function animVU() {
+    for (let i = 0; i < 22; i++) {
+      const d = Math.abs(i - 10.5) / 10.5;
+      const h = Math.max(2, Math.random() * (1 - d * 0.35) * 26);
+      const p = h / 26;
+      const b = document.getElementById('vb' + i);
+      b.style.height = h + 'px';
+      b.style.background = p > .85 ? '#E24B4A' : p > .62 ? '#EF9F27' : '#639922';
+    }
+  }
+  function startVU() { if (!vuT) vuT = setInterval(animVU, 80); }
+  function stopVU() {
+    clearInterval(vuT); vuT = null;
+    for (let i = 0; i < 22; i++) {
+      const b = document.getElementById('vb' + i);
+      b.style.height = '2px';
+      b.style.background = '#173404';
+    }
+  }
+
+  // Helpers
+  function fmt(s) {
+    if (!s || isNaN(s)) return '0:00';
+    return Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2);
+  }
+  function setStat(txt, on) {
+    document.getElementById('stxt').textContent = txt;
+    document.getElementById('dot').className = 'dot' + (on ? ' on' : '');
+  }
+  function setErr(msg) {
+    document.getElementById('status-msg').textContent = msg;
+  }
+
+  function streamUrl(songId) {
+    return `${BASE}/share/stream?id=${encodeURIComponent(songId)}&shareName=${encodeURIComponent(SHARE_ID)}&v=1.16.1&c=MiniMediaPlayer`;
+  }
+
+  async function initShare() {
+    if (!SHARE_ID) {
+      setErr('NO SHARE ID — page must be served by the API');
+      document.getElementById('plist').innerHTML = '<div class="empty">NO SHARE LOADED</div>';
+      document.getElementById('tname').textContent = '-- NO SHARE --';
+      return;
+    }
+    try {
+      const r = await fetch(`${BASE}/share/${encodeURIComponent(SHARE_ID)}/tracks`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      pl = data.map(t => ({
+        id: t.id,
+        name: t.title || t.name || 'Unknown',
+        artist: t.artist || '',
+        album: t.album || '',
+        duration: t.duration || 0
+      }));
+      if (!pl.length) throw new Error('Share contains no tracks');
+      renderPL();
+      loadTrack(0, false);
+    } catch (e) {
+      setErr('ERROR: ' + e.message);
+      document.getElementById('plist').innerHTML = '<div class="empty">FAILED TO LOAD TRACKS</div>';
+      document.getElementById('tname').textContent = '-- ERROR --';
+    }
+  }
+
+  function renderPL() {
+    const el = document.getElementById('plist');
+    if (!pl.length) { el.innerHTML = '<div class="empty">NO TRACKS</div>'; return; }
+    el.innerHTML = pl.map((t, i) =>
+      `<div class="pi${i === cur ? ' active' : ''}" onclick="loadTrack(${i},true)">
+        <span class="pn">${String(i + 1).padStart(2, '0')}</span>
+        <span class="pt">${t.name}${t.artist ? ' — ' + t.artist : ''}</span>
+        <span class="pdur">${fmt(t.duration)}</span>
+      </div>`
+    ).join('');
+  }
+
+  function loadTrack(idx, autoplay) {
+    cur = idx;
+    const t = pl[idx];
+    if (!t) return;
+    aud.src = streamUrl(t.id);
+    document.getElementById('tname').textContent = t.name;
+    const meta = [t.artist, t.album].filter(Boolean).join(' — ');
+    setStat(meta || 'READY', false);
+    document.getElementById('pfill').style.width = '0%';
+    document.getElementById('ctime').textContent = '0:00';
+    document.getElementById('ttime').textContent = fmt(t.duration);
+    renderPL();
+    if (autoplay) {
+      aud.play();
+      playing = true;
+      document.getElementById('pbtn').textContent = '▐▐';
+      setStat(meta || 'PLAYING', true);
+      startVU();
+    } else {
+      playing = false;
+      document.getElementById('pbtn').textContent = '▶';
+      stopVU();
+    }
+  }
+
+  function togglePlay() {
+    if (!pl.length) return;
+    if (playing) {
+      aud.pause(); playing = false;
+      document.getElementById('pbtn').textContent = '▶';
+      stopVU();
+    } else {
+      aud.play(); playing = true;
+      document.getElementById('pbtn').textContent = '▐▐';
+      startVU();
+    }
+  }
+  function stopT() {
+    aud.pause(); aud.currentTime = 0; playing = false;
+    document.getElementById('pbtn').textContent = '▶';
+    document.getElementById('pfill').style.width = '0%';
+    document.getElementById('ctime').textContent = '0:00';
+    setStat('STOPPED', false); stopVU();
+  }
+  function nextT(auto) {
+    if (!pl.length) return;
+    let i;
+    if (mode === 'RND') i = Math.floor(Math.random() * pl.length);
+    else if (mode === 'REP') i = cur;
+    else i = (cur + 1) % pl.length;
+    loadTrack(i, playing || auto);
+  }
+  function prevT() {
+    if (!pl.length) return;
+    if (aud.currentTime > 3) { aud.currentTime = 0; return; }
+    loadTrack((cur - 1 + pl.length) % pl.length, playing);
+  }
+  function cycleMode() {
+    const m = ['SEQ', 'RND', 'REP'];
+    mode = m[(m.indexOf(mode) + 1) % m.length];
+    document.getElementById('mbtn').textContent = mode;
+  }
+  function setVol(v) { aud.volume = v; document.getElementById('vdisp').textContent = Math.round(v * 100) + '%'; }
+  function seek(e) {
+    if (!aud.duration) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    aud.currentTime = ((e.clientX - r.left) / r.width) * aud.duration;
+  }
+
+  aud.addEventListener('timeupdate', () => {
+    if (!aud.duration) return;
+    document.getElementById('pfill').style.width = (aud.currentTime / aud.duration * 100) + '%';
+    document.getElementById('ctime').textContent = fmt(aud.currentTime);
+  });
+  aud.addEventListener('loadedmetadata', () => {
+    document.getElementById('ttime').textContent = fmt(aud.duration);
+  });
+  aud.addEventListener('ended', () => nextT(true));
+  aud.addEventListener('error', () => {
+    setStat('STREAM ERROR', false); stopVU(); playing = false;
+    document.getElementById('pbtn').textContent = '▶';
+  });
+
+  // ── Boot ─────────────────────────────────────────────────────────────────────
+  initShare();
+</script>
+</body>
+</html>

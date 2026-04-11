@@ -143,4 +143,8 @@ public class SubsonicResponse
     [XmlElement("bookmarks")]
     [JsonPropertyName("bookmarks")]
     public GetBookmarksResponse? Bookmarks { get; set; }
+
+    [XmlElement("shares")]
+    [JsonPropertyName("shares")]
+    public SharesResponse? Shares { get; set; }
 }
