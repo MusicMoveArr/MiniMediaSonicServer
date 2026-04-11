@@ -27,13 +27,18 @@ public class GetStarredController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
     {
+        var artistsTask = _artistService.GetStarredArtistsAsync(User.UserId);
+        var albumsTask = _albumService.GetStarredAlbumsAsync(User.UserId);
+        var tracksTask = _trackService.GetStarredTracksAsync(User.UserId);
+        await Task.WhenAll(artistsTask, albumsTask, tracksTask);
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             Starred = new StarredResponse
             {
-                Artists = await _artistService.GetStarredArtistsAsync(User.UserId),
-                Albums = await _albumService.GetStarredAlbumsAsync(User.UserId),
-                Tracks = await _trackService.GetStarredTracksAsync(User.UserId)
+                Artists = artistsTask.Result,
+                Albums = albumsTask.Result,
+                Tracks = tracksTask.Result
             }
         });
     }
