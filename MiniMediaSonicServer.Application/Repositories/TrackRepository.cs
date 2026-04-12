@@ -241,25 +241,20 @@ public class TrackRepository
  							order by UpdatedAt desc
  							limit 1) playhistory on true
  							    
- 						 left join lateral (
- 							select DISTINCT unnest(string_to_array(
-							        replace(replace(
-									            COALESCE(tag_alljsontags->>'Artists', tag_alljsontags->>'ARTISTS'), 
-									            '&', ';'), 
-									            '/', ';'),
-									        ';'
-									    )) AS artist
+						 LEFT JOIN LATERAL (
+							 SELECT jsonb_object_agg(lower(key), value) AS tags
+							 FROM jsonb_each_text(m.tag_alljsontags)
+							 ) t ON true
+							 
+						 left join lateral (
+							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
 						 ) all_artists ON true
+ 							    
  						left join lateral (
  							select artistid, name 
  							from artists join_artist 
  							where lower(join_artist.name) = lower(all_artists.artist)
- 							limit 1) joined_artist on true
- 							    
- 						 LEFT JOIN LATERAL (
-						    SELECT jsonb_object_agg(lower(key), value) AS tags
-						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE";
+ 							limit 1) joined_artist on true";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -379,15 +374,14 @@ public class TrackRepository
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
  							order by UpdatedAt desc
  							limit 1) playhistory on true
- 							    
- 						 left join lateral (
- 							select DISTINCT unnest(string_to_array(
-							        replace(replace(
-									            COALESCE(tag_alljsontags->>'Artists', tag_alljsontags->>'ARTISTS'), 
-									            '&', ';'), 
-									            '/', ';'),
-									        ';'
-									    )) AS artist
+ 						
+						 LEFT JOIN LATERAL (
+							 SELECT jsonb_object_agg(lower(key), value) AS tags
+							 FROM jsonb_each_text(m.tag_alljsontags)
+							 ) t ON true
+							 
+						 left join lateral (
+							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
 						 ) all_artists ON true
  							    
  						left join lateral (
@@ -395,11 +389,6 @@ public class TrackRepository
  							from artists join_artist 
  							where lower(join_artist.name) = lower(all_artists.artist)
  							limit 1) joined_artist on true
- 							    
- 						 LEFT JOIN LATERAL (
-						    SELECT jsonb_object_agg(lower(key), value) AS tags
-						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE
  							    
 						 JOIN LATERAL unnest(string_to_array(m.computed_genre, ';')) AS gen(genre) ON TRUE
 						 WHERE m.computed_genre is not null
@@ -521,15 +510,16 @@ public class TrackRepository
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
  						 join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId and track_rated.Starred = true
- 						 left join lateral (
- 							select DISTINCT unnest(string_to_array(
-							        replace(replace(
-									            COALESCE(tag_alljsontags->>'Artists', tag_alljsontags->>'ARTISTS'), 
-									            '&', ';'), 
-									            '/', ';'),
-									        ';'
-									    )) AS artist
+ 						 
+						 LEFT JOIN LATERAL (
+							 SELECT jsonb_object_agg(lower(key), value) AS tags
+							 FROM jsonb_each_text(m.tag_alljsontags)
+							 ) t ON true
+							 
+						 left join lateral (
+							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
 						 ) all_artists ON true
+ 							    
  						left join lateral (
  							select artistid, name 
  							from artists join_artist 
@@ -542,11 +532,7 @@ public class TrackRepository
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
  							order by UpdatedAt desc
  							limit 1) playhistory on true
- 							    
- 						 LEFT JOIN LATERAL (
-						    SELECT jsonb_object_agg(lower(key), value) AS tags
-						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE
+ 						
  					      order by track_rated.StarredAt desc";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);

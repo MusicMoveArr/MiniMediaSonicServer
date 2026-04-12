@@ -167,15 +167,16 @@ public class SearchSyncRepository
 						 JOIN artists a on a.ArtistId = al.ArtistId
 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  							    
- 						 left join lateral (
- 							select DISTINCT unnest(string_to_array(
-							        replace(replace(
-									            COALESCE(tag_alljsontags->>'Artists', tag_alljsontags->>'ARTISTS'), 
-									            '&', ';'), 
-									            '/', ';'),
-									        ';'
-									    )) AS artist
+ 						 
+						 LEFT JOIN LATERAL (
+							 SELECT jsonb_object_agg(lower(key), value) AS tags
+							 FROM jsonb_each_text(m.tag_alljsontags)
+							 ) t ON true
+						 
+						 left join lateral (
+							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
 						 ) all_artists ON true
+ 							    
  						left join lateral (
  							select artistid, name 
  							from artists join_artist 
@@ -189,10 +190,6 @@ public class SearchSyncRepository
  							order by UpdatedAt desc
  							limit 1) playhistory on true
  							    
- 						 LEFT JOIN LATERAL (
-						    SELECT jsonb_object_agg(lower(key), value) AS tags
-						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE
 					     where 
 						 	m.record_id >= @offset 
 						 	and m.record_id <= @offset + @count";

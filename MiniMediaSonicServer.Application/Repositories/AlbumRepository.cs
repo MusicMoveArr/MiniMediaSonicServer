@@ -206,16 +206,16 @@ public class AlbumRepository
 						 JOIN metadata m on m.albumid = al.albumid
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and track_rated.UserId = @userId
- 							    
- 						 left join lateral (
- 							select DISTINCT unnest(string_to_array(
-							        replace(replace(
-									            COALESCE(tag_alljsontags->>'Artists', tag_alljsontags->>'ARTISTS'), 
-									            '&', ';'), 
-									            '/', ';'),
-									        ';'
-									    )) AS artist
+ 						 
+						 LEFT JOIN LATERAL (
+							 SELECT jsonb_object_agg(lower(key), value) AS tags
+							 FROM jsonb_each_text(m.tag_alljsontags)
+							 ) t ON true
+							 
+						 left join lateral (
+							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
 						 ) all_artists ON true
+ 							    
  						left join lateral (
  							select artistid, name 
  							from artists join_artist 
@@ -247,10 +247,6 @@ public class AlbumRepository
 						     ) hist on hist.TrackId = m.MetadataId
 						     where m.albumid = al.albumid) as al_sum on true
  							    
- 						 LEFT JOIN LATERAL (
-						    SELECT jsonb_object_agg(lower(key), value) AS tags
-						    FROM jsonb_each_text(m.tag_alljsontags)
-						  ) t ON TRUE
 						 where al.albumid = @id";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
