@@ -27,7 +27,7 @@ public class ArtistService
     public async Task<ArtistsList> GetAllArtistsAsync(Guid userId)
     {
         var allArtists = await _artistRepository.GetAllArtistsAsync(userId);
-
+        
         var artistsIndexes = allArtists
             .Select(artist => new
             {
@@ -37,9 +37,13 @@ public class ArtistService
             .GroupBy(index => index.Key)
             .Select(index => new Index
             {
-                Artist = index.Select(artist => artist.Artist).ToList(),
+                Artist = index
+                    .Select(artist => artist.Artist)
+                    .OrderBy(artist => artist.Name)
+                    .ToList(),
                 Name = index.Key
             })
+            .OrderBy(index => index.Name)
             .ToList();
 
         var artists = new ArtistsList
@@ -54,8 +58,8 @@ public class ArtistService
     {
         name = name.TrimStart();
         
-        string? ignoreArticle = name.Length > 3 ? ArtistID3.IgnoredArticles.FirstOrDefault(n => name.ToLower().StartsWith(n.ToLower())) : string.Empty;
-        if (ignoreArticle != null)
+        string? ignoreArticle = ArtistID3.IgnoredArticles.FirstOrDefault(n => name.ToLower().StartsWith(n.ToLower()));
+        if (ignoreArticle != null && name.Length > ignoreArticle.Length + 1)
         {
             name = name.Substring(ignoreArticle.Length + 1);
         }
