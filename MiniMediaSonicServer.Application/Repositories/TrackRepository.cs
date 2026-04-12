@@ -31,7 +31,7 @@ public class TrackRepository
  							sim_m.Tag_Track as TrackNumber,
  							NULLIF(sim_m.Tag_Year, 0) as Year,
  							sim_m.computed_genre as Genre,
- 							9999 as Size,
+ 							sim_m.File_Size as Size,
  							case 
  								when sim_m.Path ilike '%.mp3' then 'audio/mpeg'
  								when sim_m.Path ilike '%.m4a' then 'audio/mp4'
@@ -95,6 +95,7 @@ public class TrackRepository
 		  							sim_m.computed_genre,
 		  							sim_m.File_CreationTime,
 		  							sim_m.tag_alljsontags,
+		  							sim_m.File_Size,
 		  							sim_al.AlbumId,
 		  							sim_al.Title as AlbumTitle,
 		  							sim_ta.ArtistId,
@@ -186,7 +187,7 @@ public class TrackRepository
  							m.Tag_Track as TrackNumber,
  							NULLIF(m.Tag_Year, 0) as Year,
  							m.Computed_Genre as Genre,
- 							0 as Size,
+ 							m.File_Size as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
  								when m.Path ilike '%.m4a' then 'audio/mp4'
@@ -321,7 +322,7 @@ public class TrackRepository
  							m.Tag_Track as TrackNumber,
  							NULLIF(m.Tag_Year, 0) as Year,
  							m.Computed_Genre as Genre,
- 							0 as Size,
+ 							m.File_Size as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
  								when m.Path ilike '%.m4a' then 'audio/mp4'
@@ -464,7 +465,7 @@ public class TrackRepository
  							m.Tag_Track as TrackNumber,
  							NULLIF(m.Tag_Year, 0) as Year,
  							m.Computed_Genre as Genre,
- 							0 as Size,
+ 							m.File_Size as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
  								when m.Path ilike '%.m4a' then 'audio/mp4'
@@ -617,6 +618,7 @@ public class TrackRepository
 		  							sim_m.Tag_Year, 
 		  							sim_m.Tag_Isrc, 
 		  							sim_m.computed_genre,
+		  							sim_m.File_Size,
 		  							sim_m.File_CreationTime,
 		  							sim_m.tag_alljsontags,
 		  							sim_al.AlbumId,

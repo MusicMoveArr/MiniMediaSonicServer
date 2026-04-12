@@ -159,7 +159,7 @@ public class AlbumRepository
  							m.Tag_Track as TrackNumber,
  							NULLIF(m.tag_year, 0) as Year,
  							m.Computed_Genre as Genre,
- 							0 as Size,
+ 							m.File_Size as Size,
  							case 
  								when m.Path ilike '%.mp3' then 'audio/mpeg'
  								when m.Path ilike '%.m4a' then 'audio/mp4'
