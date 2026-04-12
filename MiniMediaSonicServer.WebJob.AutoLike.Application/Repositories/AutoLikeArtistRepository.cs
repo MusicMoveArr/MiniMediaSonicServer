@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
+using MiniMediaSonicServer.WebJob.AutoLike.Application.Models.Database;
 using Npgsql;
 
 namespace MiniMediaSonicServer.WebJob.AutoLike.Application.Repositories;

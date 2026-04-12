@@ -11,8 +11,10 @@ public static class DependencyExtension
 {
     public static IServiceCollection AddAutoLikeDependencies(this IServiceCollection services) =>
         services.AddScoped<AutoLikeService>()
+            .AddScoped<AutoRateAlbumsService>()
             .AddScoped<AutoLikeArtistsJob>()
-            .AddScoped<AutoLikeArtistRepository>();
+            .AddScoped<AutoLikeArtistRepository>()
+            .AddScoped<AutoRateAlbumsRepository>();
     
     public static IServiceCollectionQuartzConfigurator AddAutoLikeJobs(
         this IServiceCollectionQuartzConfigurator config,
@@ -25,6 +27,13 @@ public static class DependencyExtension
             .WithIdentity($"{nameof(AutoLikeArtistsJob)}-trigger")
             .WithCronSchedule(builder.Configuration.GetSection("Jobs")["AutoLikeCron"]));
         
+        var albumsJobKey = new JobKey(nameof(AutoRateAlbumsJob));
+        config.AddJob<AutoRateAlbumsJob>(opts => opts.WithIdentity(albumsJobKey));
+        config.AddTrigger(opts => opts
+            .ForJob(albumsJobKey)
+            .WithIdentity($"{nameof(AutoRateAlbumsJob)}-trigger")
+            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["AutoLikeCron"]));
+
         return config;
     }
 }
