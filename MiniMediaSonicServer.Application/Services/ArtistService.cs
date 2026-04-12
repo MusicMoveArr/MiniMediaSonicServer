@@ -58,7 +58,7 @@ public class ArtistService
     {
         name = name.TrimStart();
         
-        string? ignoreArticle = ArtistID3.IgnoredArticles.FirstOrDefault(art => name.StartsWith($"{art} "));
+        string? ignoreArticle = ArtistID3.IgnoredArticles.FirstOrDefault(art => name.StartsWith($"{art} ", StringComparison.OrdinalIgnoreCase));
         if (ignoreArticle != null && name.Length > ignoreArticle.Length + 1)
         {
             name = name.Substring(ignoreArticle.Length + 1);
