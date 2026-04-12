@@ -190,6 +190,6 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | Unstar                     | Working |  |
 | UpdateInternetRadioStation | Not yet |  |
 | UpdatePlaylist             | Working |  |
-| UpdateShare                | Not yet |  |
+| UpdateShare                | Working |  |
 | UpdateUser                 | Working |  |
                              
