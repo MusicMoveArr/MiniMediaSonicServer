@@ -18,7 +18,7 @@ public class PlaylistRepository
     
     public async Task<List<PlaylistModel>> GetAllPlaylistsAsync(Guid userId)
     {
-        string query = @"SELECT distinct on (playlist.PlaylistId)
+        string query = @"SELECT
     						playlist.PlaylistId,
     						playlist.UserId,
     						playlist.Name,
@@ -31,15 +31,15 @@ public class PlaylistRepository
 						 from sonicserver_playlist playlist
 						 left join lateral (
 						     select count(track.TrackId) as SongCount, 
-						     sum(EXTRACT(EPOCH FROM
-								(CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
-									ELSE m.Tag_Length END)::interval))::int as Duration
+						    	    sum(EXTRACT(EPOCH FROM
+								    	(CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+								    		ELSE m.Tag_Length END)::interval))::int as Duration
 							 from sonicserver_playlist_track track 
 							 join metadata m on m.MetadataId = track.TrackId
-							 where track.PlaylistId = playlist.PlaylistId)
-							 track on true
+							 where track.PlaylistId = playlist.PlaylistId) track on true
 						 where userid = @userId
-						 	   and playlist.IsDeleted = false";
+						 	   and playlist.IsDeleted = false
+						 order by playlist.Name asc";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 

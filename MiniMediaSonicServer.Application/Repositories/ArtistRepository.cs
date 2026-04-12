@@ -109,22 +109,30 @@ public class ArtistRepository
     
     public async Task<List<ArtistID3>> GetAllArtistsAsync(Guid userId)
     {
-	    string query = @"SELECT distinct on (a.ArtistId)
-    						a.ArtistId as Id,
-    						a.Name as Name,
-    						'artist_' || a.ArtistId as CoverArt,
-    						'' as ArtistImageUrl,
-    						album_count.albums as AlbumCount,
- 							artist_rated.Rating as UserRating,
- 							(case when artist_rated.Starred = true 
- 							    then artist_rated.StarredAt 
- 							    else null 
- 							 end) as Starred
-    						--musicbrainzid
+	    string query = @"SELECT 
+							a.ArtistId as Id,
+							a.Name as Name,
+							'artist_' || a.ArtistId as CoverArt,
+							'' as ArtistImageUrl,
+							al_sum.albums as AlbumCount,
+							artist_rated.Rating as UserRating,
+							(case when artist_rated.Starred = true 
+							    then artist_rated.StarredAt 
+							    else null 
+							 end) as Starred
+							--musicbrainzid
 						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
-						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true";
+						 left join sonicserver_artist_rated artist_rated on 
+ 							artist_rated.ArtistId = a.ArtistId 
+ 							and artist_rated.UserId = @userId
+ 							
+						 JOIN lateral (
+	 							select 
+	 								count(ab.albumid) as albums
+	 							from albums ab 
+	 							where ab.artistid = a.artistid
+ 							) as al_sum on true
+						 order by a.Name asc";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -137,22 +145,31 @@ public class ArtistRepository
     
     public async Task<List<ArtistID3>> GetStarredArtistsAsync(Guid userId)
     {
-	    string query = @"SELECT distinct on (a.ArtistId)
-    						a.ArtistId as Id,
-    						a.Name as Name,
-    						'artist_' || a.ArtistId as CoverArt,
-    						'' as ArtistImageUrl,
-    						album_count.albums as AlbumCount,
- 							artist_rated.Rating as UserRating,
- 							(case when artist_rated.Starred = true 
- 							    then artist_rated.StarredAt 
- 							    else null 
- 							 end) as Starred
-    						--musicbrainzid
+	    string query = @"SELECT
+							a.ArtistId as Id,
+							a.Name as Name,
+							'artist_' || a.ArtistId as CoverArt,
+							'' as ArtistImageUrl,
+							album_count.albums as AlbumCount,
+							artist_rated.Rating as UserRating,
+							(case when artist_rated.Starred = true 
+							    then artist_rated.StarredAt 
+							    else null 
+							 end) as Starred
+							--musicbrainzid
 						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
- 						 join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId and artist_rated.Starred = true
-						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true";
+						 join sonicserver_artist_rated artist_rated on 
+ 							artist_rated.ArtistId = a.ArtistId 
+ 							and artist_rated.UserId = @userId
+ 							and artist_rated.Starred = true
+ 							
+						 JOIN lateral (
+ 							select 
+ 								count(ab.albumid) as albums 
+ 							from albums ab 
+ 							where ab.artistid = a.artistid
+ 							) as album_count on true
+						 order by a.Name asc";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
