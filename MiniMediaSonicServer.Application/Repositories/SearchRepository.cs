@@ -88,14 +88,15 @@ public class SearchRepository
  							al_sum.Year as year,
  							'album_' || al.AlbumId as CoverArt,
 							a.artistid AS ArtistId,
-							al_sum.file_creationtime_min as Created,
+							al_sum.file_creationtime as Created,
+							al_sum.Duration,
 							al_sum.SongCount as songCount,
+							al_sum.AlbumPlaycount as PlayCount,
 							album_rated.Rating as UserRating,
 							(case when album_rated.Starred = true 
 							    then album_rated.StarredAt 
 							    else null 
-							 end) as Starred,
-							search.SearchTerm
+							 end) as Starred
 						 FROM sonicserver_indexed_search search
 						 join albums al on al.AlbumId = search.Id
 						 JOIN artists a on a.ArtistId = al.ArtistId
@@ -103,14 +104,23 @@ public class SearchRepository
  							album_rated.AlbumId = al.AlbumId 
  							and album_rated.UserId = @userId
  							
-						 LEFT JOIN lateral (
-							 select
-	 							nullif(max(m.tag_year), 0) as Year, 
-	 							min(m.file_creationtime) as file_creationtime_min,
-	 							count(distinct(m.MetadataId)) as SongCount
+						 JOIN lateral (
+						     select 
+								    min(m.file_creationtime) as file_creationtime,
+								    nullif(max(m.tag_year), 0) as Year, 
+								    sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+			    							ELSE m.Tag_Length END)::interval))::int as Duration,
+									sum(hist.PlayCount) as AlbumPlaycount,
+								    count(distinct(m.MetadataId)) as SongCount
 							 from metadata m 
-							 where m.albumid = al.albumid
-							 ) as al_sum on true
+						     left join (
+						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         from sonicserver_user_playhistory
+						         where UserId = @userId
+						         group by TrackId
+						     ) hist on hist.TrackId = m.MetadataId
+						     where m.albumid = al.albumid) as al_sum on true
 						     
 						 where search.SearchTerm % lower(@searchquery)
 						 order by similarity(search.SearchTerm, lower(@searchquery)) desc

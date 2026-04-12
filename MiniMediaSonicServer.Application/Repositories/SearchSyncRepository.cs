@@ -60,11 +60,13 @@ public class SearchSyncRepository
 						 	al.Title as Name,
 						 	'' as version,
 						 	a.Name as Artist,
-						 	NULLIF(m.tag_year, 0) as year,
+						 	al_sum.Year as year,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
-							recent_m.file_creationtime as Created,
- 							songCount.songs as songCount,
+							al_sum.file_creationtime as Created,
+							al_sum.Duration,
+ 							al_sum.SongCount as songCount,
+							al_sum.AlbumPlaycount as PlayCount,
  							album_rated.Rating as UserRating,
  							(case when album_rated.Starred = true 
  							    then album_rated.StarredAt 
@@ -73,23 +75,25 @@ public class SearchSyncRepository
 						 FROM albums al
 						 JOIN artists a on a.ArtistId = al.ArtistId
  						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId
-						 LEFT JOIN lateral (
-						     select m.tag_year
-						     from metadata m 
-						     where m.albumid = al.albumid 
-						     order by m.tag_year 
-						     desc limit 1) as m on true
-						 LEFT JOIN lateral (
-							select count(*) songs 
-							from metadata m 
-							where m.albumid = al.albumid) as songCount on true
+						    
+						 JOIN lateral (
+						     select 
+								    min(m.file_creationtime) as file_creationtime,
+								    nullif(max(m.tag_year), 0) as Year, 
+								    sum(EXTRACT(EPOCH FROM
+									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
+			    							ELSE m.Tag_Length END)::interval))::int as Duration,
+									sum(hist.PlayCount) as AlbumPlaycount,
+								    count(distinct(m.MetadataId)) as SongCount
+							 from metadata m 
+						     left join (
+						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         from sonicserver_user_playhistory
+						         where UserId = @userId
+						         group by TrackId
+						     ) hist on hist.TrackId = m.MetadataId
+						     where m.albumid = al.albumid) as al_sum on true
 						     
-						 LEFT JOIN lateral (
-						     select m.file_creationtime as file_creationtime 
-						     from metadata m 
-						     where m.albumid = al.albumid 
-						     order by m.file_creationtime desc
-						     limit 1) as recent_m on true
 					     where 
 						 	al.record_id >= @offset 
 						 	and al.record_id <= @offset + @count";
