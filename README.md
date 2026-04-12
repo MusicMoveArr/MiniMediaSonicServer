@@ -73,6 +73,9 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   "EncryptionKeys": {
     "UserPasswordKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   },
+  "Shares": {
+    "BaseUrl": "http://192.168.1.2:8080"
+  },
   "Redis": {
     "ConnectionString": "",
     "Expiry": "72:00:00",
@@ -88,6 +91,11 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   }
 }
 ```
+
+# Shares
+After sharing your url with another user, you'll get to see this retro webplayer
+<img width="642" height="671" alt="image" src="https://github.com/user-attachments/assets/68e44164-ac43-4afc-a91e-dfe84af2161b" />
+
 
 ## Webjobs (Scheduled Tasks)
 By default the following jobs are scheduled hourly which can be changed in the appsettings.json
@@ -108,14 +116,14 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | CreateInternetRadioStation | Not yet |  |
 | CreatePlaylist             | Working |  |
 | CreatePodcastChannel       | Not yet |  |
-| CreateShare                | Not yet |  |
+| CreateShare                | Working |  |
 | CreateUser                 | Working |  |
 | DeleteBookmark             | Working |  |
 | DeleteInternetRadioStation | Not yet |  |
 | DeletePlaylist             | Working |  |
 | DeletePodcastChannel       | Not yet |  |
 | DeletePodcastEpisode       | Not yet |  |
-| DeleteShare                | Not yet |  |
+| DeleteShare                | Working |  |
 | DeleteUser                 | Working |  |
 | Download                   | Working |  |
 | DownloadPodcastEpisode     | Not yet |  |
@@ -150,7 +158,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | GetPodcasts                | Not yet |  |
 | GetRandomSongs             | Working |  |
 | GetScanStatus              | Not yet |  |
-| GetShares                  | Not yet |  |
+| GetShares                  | Working |  |
 | GetSimilarSongs2           | Working |  |
 | GetSimilarSongs            | Working |  |
 | GetSong                    | Working |  |
