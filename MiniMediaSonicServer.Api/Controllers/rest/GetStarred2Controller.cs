@@ -34,7 +34,7 @@ public class GetStarred2Controller : SonicControllerBase
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
-            Starred = new StarredResponse
+            Starred2 = new StarredResponse
             {
                 Artists = artistsTask.Result,
                 Albums = albumsTask.Result,
