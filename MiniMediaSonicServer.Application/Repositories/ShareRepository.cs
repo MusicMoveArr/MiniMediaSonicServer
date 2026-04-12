@@ -37,7 +37,7 @@ public class ShareRepository
 	    string query = @"select *
 						 from sonicserver_user_share
 						 where shareName = @shareName
-						 and IsDeleted=false";
+						 and IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -61,7 +61,7 @@ public class ShareRepository
                                     						 CreatedAt, UpdatedAt)
 						 VALUES(@shareId, @userId, @shareName, @description, 
                                 @expiresAt, @type, @mediaId,
-                                current_timestamp, current_timestamp)
+                                @createdAt, @updatedAt)
 						 ON CONFLICT (ShareId, UserId, ShareName)
 						 DO UPDATE SET
 						 	Description = EXCLUDED.Description,
@@ -78,16 +78,20 @@ public class ShareRepository
 				description = description ?? string.Empty, 
 				expiresAt, 
 				type, 
-				mediaId
+				mediaId,
+				createdAt = DateTime.Now,
+				updatedAt = DateTime.Now
             });
     }
     
     public async Task DeleteShareAsync(Guid userId, Guid shareId)
     {
-	    string query = @"UPDATE sonicserver_user_share SET DeletedAt = current_timestamp, IsDeleted=true
-						 where shareId=@shareId 
-						   and userId=@userId
-						   and IsDeleted=false";
+	    string query = @"UPDATE sonicserver_user_share 
+						 SET DeletedAt = @deletedAt, 
+						     IsDeleted = true
+						 where shareId = @shareId 
+						   and userId = @userId
+						   and IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -95,22 +99,48 @@ public class ShareRepository
 		    param: new
 		    {
 			    shareId, 
-			    userId
+			    userId,
+			    deletedAt = DateTime.Now
 		    });
     }
     
     public async Task IncrementVisitorCountAsync(Guid shareId)
     {
-	    string query = @"UPDATE sonicserver_user_share SET VisitCount = VisitCount + 1, LastVisitedAt = current_timestamp
-						 where shareId=@shareId 
-						   and IsDeleted=false";
+	    string query = @"UPDATE sonicserver_user_share
+						 SET VisitCount = VisitCount + 1, 
+						     LastVisitedAt = @lastVisitedAt
+						 where shareId = @shareId 
+						   and IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
 	    await conn.ExecuteAsync(query, 
 		    param: new
 		    {
-			    shareId
+			    shareId,
+			    lastVisitedAt = DateTime.Now
+		    });
+    }
+    
+    public async Task UpdateShareAsync(Guid shareId, Guid userId, string? description, DateTime? expiresAt)
+    {
+	    string query = @"UPDATE sonicserver_user_share 
+						 SET Description = @description, 
+						     ExpiresAt = @expiresAt,
+						     UpdatedAt = @updatedAt
+						 where shareId = @shareId and UserId = @userId
+						   and IsDeleted = false";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    await conn.ExecuteAsync(query, 
+		    param: new
+		    {
+			    shareId,
+			    userId,
+			    description,
+			    expiresAt,
+			    updatedAt = DateTime.Now
 		    });
     }
 }

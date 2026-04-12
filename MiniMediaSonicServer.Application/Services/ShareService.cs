@@ -42,6 +42,12 @@ public class ShareService
         return shareName;
     }
 
+    public async Task UpdateShareAsync(Guid shareId, Guid userId, string? description, long? expiresAt)
+    {
+        DateTime? expireAt = expiresAt.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(expiresAt.Value).DateTime : null;
+        await _shareRepository.UpdateShareAsync(shareId, userId, description, expireAt);
+    }
+
     public async Task<bool> IsExpiredAsync(ShareModel share)
     {
         if (!share.ExpiresAt.HasValue)
