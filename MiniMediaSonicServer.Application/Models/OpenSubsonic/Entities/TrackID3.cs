@@ -111,7 +111,7 @@ public class TrackID3
 
     [XmlAttribute("created")]
     [JsonPropertyName("created")]
-    public string Created { get; set; }
+    public DateTime Created { get; set; }
 
     [XmlElement("starred")]
     [JsonPropertyName("starred")]
