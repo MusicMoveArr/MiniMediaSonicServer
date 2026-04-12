@@ -45,4 +45,9 @@ public class RedisCacheService : IRedisCacheService
         }
         return value;
     }
+
+    public async Task<bool> KeyExistsAsync(string prefixKey, string key)
+    {
+        return await _db.KeyExistsAsync(new RedisKey($"{prefixKey}{key}"));
+    }
 }

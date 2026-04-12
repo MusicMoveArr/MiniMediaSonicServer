@@ -15,4 +15,7 @@ public class RedisCacheDisabledService : IRedisCacheService
 
     public Task<string?> GetStringAsync(string prefixKey, string key) => 
         Task.FromResult<string?>(null);
+
+    public Task<bool> KeyExistsAsync(string prefixKey, string key) => 
+        Task.FromResult<bool>(false);
 }
