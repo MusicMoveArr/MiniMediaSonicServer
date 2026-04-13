@@ -37,7 +37,8 @@ public class AutoRateAlbumsRepository
 							  from sonicserver_album_rated rated
 							  where 
 								  rated.albumid = al.albumid 
-								  and rated.userid = @userId)
+								  and rated.userid = @userId
+							  	  and rated.Rating >= 1)
 						  and avg_rating.AvgRating >= @minimumRating
 						  and avg_rating.TracksPercentage >= @trackRatingPercentage";
 
