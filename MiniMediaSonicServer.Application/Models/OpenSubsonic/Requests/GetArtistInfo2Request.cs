@@ -7,5 +7,5 @@ public class GetArtistInfo2Request : SubsonicAuthModel
 {
     public Guid Id { get; set; }
     public int Count { get; set; }
-    public bool IncludeNotPresent { get; set; }
+    public string IncludeNotPresent { get; set; }
 }
