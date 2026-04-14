@@ -27,7 +27,7 @@ public class StarController : SonicControllerBase
         {
             foreach (Guid genericId in request.Id)
             {
-                ID3Type? type = await _searchService.GetID3TypeAsync(genericId);
+                ID3Type? type = await _searchService.GetId3TypeAsync(genericId);
                 switch (type)
                 {
                     case ID3Type.Artist:
@@ -47,7 +47,7 @@ public class StarController : SonicControllerBase
         {
             foreach (Guid genericId in request.AlbumId)
             {
-                ID3Type? type = await _searchService.GetID3TypeAsync(genericId);
+                ID3Type? type = await _searchService.GetId3TypeAsync(genericId);
                 if (type == ID3Type.Album)
                 {
                     await _ratingService.StarAlbumAsync(User.UserId, genericId, true);
@@ -59,7 +59,7 @@ public class StarController : SonicControllerBase
         {
             foreach (Guid genericId in request.ArtistId)
             {
-                ID3Type? type = await _searchService.GetID3TypeAsync(genericId);
+                ID3Type? type = await _searchService.GetId3TypeAsync(genericId);
                 if (type == ID3Type.Artist)
                 {
                     await _ratingService.StarArtistAsync(User.UserId, genericId, true);

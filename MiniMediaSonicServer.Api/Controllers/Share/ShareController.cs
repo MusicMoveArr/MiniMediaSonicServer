@@ -13,19 +13,14 @@ namespace MiniMediaSonicServer.Api.Controllers.Share;
 [Route("share")]
 public class ShareController : ControllerBase
 {
-    private readonly IWebHostEnvironment _env;
     private readonly ShareService _shareService;
-    private readonly AlbumService _albumService;
     private readonly ShareConfiguration _shareConfiguration;
  
-    public ShareController(IWebHostEnvironment env,
+    public ShareController(
         ShareService shareService,
-        AlbumService albumService,
         IOptions<ShareConfiguration> shareConfiguration)
     {
-        _env = env;
         _shareService = shareService;
-        _albumService = albumService;
         _shareConfiguration = shareConfiguration.Value;
     }
 

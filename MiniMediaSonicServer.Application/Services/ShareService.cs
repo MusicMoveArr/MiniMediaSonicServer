@@ -17,6 +17,7 @@ public class ShareService
     
     private readonly AlbumService _albumService;
     private readonly ShareRepository _shareRepository;
+    private readonly PlaylistRepository _playlistRepository;
     private readonly SearchRepository _searchRepository;
     private readonly TrackService _trackService;
     private readonly Random _random = new Random();
@@ -24,17 +25,19 @@ public class ShareService
     public ShareService(ShareRepository shareRepository, 
         SearchRepository searchRepository,
         AlbumService albumService,
-        TrackService trackService)
+        TrackService trackService,
+        PlaylistRepository playlistRepository)
     {
         _shareRepository = shareRepository;
         _searchRepository = searchRepository;
         _albumService = albumService;
         _trackService = trackService;
+        _playlistRepository = playlistRepository;
     }
 
     public async Task<string> CreateShareAsync(Guid trackId, Guid userId, string? description, long? expiresAt)
     {
-        var id3Type = await _searchRepository.GetID3TypeAsync(trackId);
+        var id3Type = await _searchRepository.GetId3TypeAsync(trackId);
         string shareName = GetShareName();
         
         DateTime? expireAt = expiresAt.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(expiresAt.Value).DateTime : null;
@@ -75,7 +78,6 @@ public class ShareService
 
     public async Task<List<Guid>> GetPlayableTrackIdsAsync(string shareName)
     {
-        List<Guid> trackIds = new List<Guid>();
         var share = await GetShareAsync(shareName);
 
         if (share == null)
@@ -87,16 +89,30 @@ public class ShareService
         {
             return [share.MediaId];
         }
-        return (await _albumService.GetAlbumByIdResponseAsync(share.MediaId, Guid.NewGuid()))
-            ?.Song
-            ?.Select(song => song.TrackId)
-            ?.ToList() ?? [];
+        if (share.Type == nameof(ID3Type.Album))
+        {
+            return (await _albumService.GetAlbumByIdResponseAsync(share.MediaId, Guid.Empty))
+                ?.Song
+                ?.Select(song => song.TrackId)
+                ?.ToList() ?? [];
+        }
+        if (share.Type == nameof(ID3Type.Playlist))
+        {
+            return (await _playlistRepository.GetPlaylistTrackIdsAsync(share.MediaId)).ToList();
+        }
+        if (share.Type == nameof(ID3Type.Artist))
+        {
+            return (await _trackService.GetAllTrackIdsAsync(share.MediaId)).ToList();
+        }
+
+        return [];
     }
 
     public async Task<List<TrackID3>> GetSharedTrackAsync(string shareName)
     {
         List<Guid> trackIds = await GetPlayableTrackIdsAsync(shareName);
-        return await _trackService.GetTrackByIdAsync(trackIds, Guid.NewGuid());
+        var tracks = await _trackService.GetTrackByIdAsync(trackIds, Guid.Empty);
+        return tracks.OrderBy(track => trackIds.IndexOf(track.TrackId)).ToList();
     }
 
     public async Task DeleteShareAsync(Guid userId, Guid shareId)

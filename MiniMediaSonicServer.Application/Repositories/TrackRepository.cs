@@ -672,4 +672,23 @@ public class TrackRepository
 
         return await GetTracksAsync(trackIds, userId);
     }
+    
+    public async Task<List<Guid>> GetAllTrackIdsAsync(Guid artistId)
+    {
+	    string query = @"SELECT m.MetadataId
+ 						 from artists a
+ 					     JOIN albums al on al.ArtistId = a.ArtistId
+ 					     JOIN metadata m on m.AlbumId = al.AlbumId
+						 where a.ArtistId = @artistId
+						 order by al.Title, tag_Track, tag_Disc asc";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<Guid>(query,
+			    param: new
+			    {
+				    artistId
+			    }))
+		    .ToList();
+    }
 }

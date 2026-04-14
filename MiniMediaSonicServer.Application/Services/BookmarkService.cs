@@ -20,7 +20,7 @@ public class BookmarkService
 
     public async Task<bool> CreateBookmarkAsync(Guid userId, Guid trackId, long position, string comment)
     {
-        ID3Type? type = await _searchService.GetID3TypeAsync(trackId);
+        ID3Type? type = await _searchService.GetId3TypeAsync(trackId);
         if (type != ID3Type.Track)
         {
             return false;

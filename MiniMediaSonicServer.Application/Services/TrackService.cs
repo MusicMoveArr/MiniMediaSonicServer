@@ -19,7 +19,7 @@ public class TrackService
 
     public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count, Guid userId)
     {
-        var id3Type = await _searchRepository.GetID3TypeAsync(trackId);
+        var id3Type = await _searchRepository.GetId3TypeAsync(trackId);
         return await _trackRepository.GetSimilarTracksAsync(trackId, count, id3Type, userId);
     }
 
@@ -56,5 +56,10 @@ public class TrackService
     public async Task<List<TrackID3>> GetTrackByGenreAsync(Guid userId, string genre, int count, int offset)
     {
         return await _trackRepository.GetTracksByGenreAsync(userId, genre, count, offset);
+    }
+
+    public async Task<List<Guid>> GetAllTrackIdsAsync(Guid artistId)
+    {
+        return await _trackRepository.GetAllTrackIdsAsync(artistId);
     }
 }

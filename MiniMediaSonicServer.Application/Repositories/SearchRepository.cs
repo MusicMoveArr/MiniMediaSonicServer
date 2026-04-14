@@ -314,13 +314,14 @@ public class SearchRepository
     }
     
     
-    public async Task<ID3Type> GetID3TypeAsync(Guid id)
+    public async Task<ID3Type> GetId3TypeAsync(Guid id)
     {
 	    string query = @"select
 						 	case 
 						 	    when exists (select 1 from artists where artistid = @id)  then 1
 						 		when exists (select 1 from albums where albumid = @id) then 2
 						 		when exists (select 1 from metadata where metadataid = @id) then 3
+						 		when exists (select 1 from sonicserver_playlist where playlistid = @id) then 4
 						 		else 0
 						 	end";
 

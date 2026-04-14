@@ -58,6 +58,10 @@ public class PlaylistService
             }
             await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId, DateTime.Now);
         }
-        
+    }
+
+    public async Task<List<Guid>> GetPlaylistTrackIdsAsync(Guid playlistId)
+    {
+        return await _playlistRepository.GetPlaylistTrackIdsAsync(playlistId);
     }
 }

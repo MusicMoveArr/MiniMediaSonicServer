@@ -363,4 +363,23 @@ public class PlaylistRepository
 			    playlistId
 		    });
     }
+    public async Task<List<Guid>> GetPlaylistTrackIdsAsync(Guid playlistId)
+    {
+	    string query = @"SELECT m.MetadataId
+ 						 from sonicserver_playlist playlist
+ 						 LEFT JOIN sonicserver_playlist_track playlist_track on playlist_track.playlistid = playlist.playlistid
+ 					     LEFT JOIN metadata m on m.MetadataId = playlist_track.TrackId
+						 where playlist.PlaylistId = @playlistId
+						 	   and playlist.IsDeleted = false
+						 order by playlist_track.TrackOrder asc";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<Guid>(query,
+		    param: new
+		    {
+			    playlistId
+		    }))
+		    .ToList();
+    }
 }
