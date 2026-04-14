@@ -205,7 +205,7 @@ public class AlbumRepository
 						 JOIN albums al ON al.artistid = a.artistid
 						 JOIN metadata m on m.albumid = al.albumid
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
- 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and track_rated.UserId = @userId
+ 						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId
  						 
 						 LEFT JOIN LATERAL (
 							 SELECT jsonb_object_agg(lower(key), value) AS tags

@@ -37,6 +37,11 @@ public class ArtistRepository
 						 	a.Name as Artist,
 						 	'album_' || al.AlbumId as CoverArt,
  							a.artistid AS ArtistId,
+ 							album_rated.Rating as UserRating,
+ 							(case when album_rated.Starred = true 
+ 							    then album_rated.StarredAt 
+ 							    else null 
+ 							 end) as Starred,
 							al_sum.file_creationtime as Created,
 							al_sum.Duration,
 							al_sum.SongCount,
@@ -45,8 +50,20 @@ public class ArtistRepository
 							al_sum.AlbumPlaycount as PlayCount
 						 FROM artists a
 						 JOIN albums al ON al.artistid = a.artistid
- 						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
-						 JOIN lateral (select count(ab.albumid) as albums from albums ab where ab.artistid = a.artistid limit 1) as album_count on true
+ 						 left join sonicserver_artist_rated artist_rated on 
+ 						     artist_rated.ArtistId = a.ArtistId 
+ 						         and artist_rated.UserId = @userId
+						     
+						 left join sonicserver_album_rated album_rated on 
+						     album_rated.AlbumId = al.AlbumId 
+						     and album_rated.UserId = @userId
+						     
+						 JOIN lateral (
+						     select count(ab.albumid) as albums 
+						     from albums ab 
+						     where ab.artistid = a.artistid 
+						     limit 1) as album_count on true
+						         
 						 JOIN lateral (
 						     select 
 								    min(m.file_creationtime) as file_creationtime,
