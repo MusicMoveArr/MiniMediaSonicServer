@@ -25,5 +25,7 @@ public class ReIndexSearchService
         await _indexedSearchRepository.AddMissingAlbums_ArtistAlbumAsync();
         //artist
         await _indexedSearchRepository.AddMissingArtistsAsync();
+        
+        await _indexedSearchRepository.UpdateAlbumsYearAsync();
     }
 }

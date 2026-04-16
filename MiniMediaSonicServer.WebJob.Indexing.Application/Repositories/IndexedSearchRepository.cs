@@ -160,4 +160,18 @@ public class IndexedSearchRepository
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.ExecuteAsync(query);
     }
+
+    public async Task UpdateAlbumsYearAsync()
+    {
+	    string query = @"update albums al set (year) = (
+						     select coalesce(max(tag_year), 0)
+						     from metadata m
+						     where m.AlbumId = al.AlbumId
+						       and m.tag_year > 0
+						 )
+						 where al.year = 0";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query);
+    }
 }

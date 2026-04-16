@@ -24,79 +24,81 @@ public class AlbumRepository
 						         COUNT(*) AS AlbumPlaycount,
 						         MAX(playhistory.UpdatedAt) AS UpdatedAt
 						     FROM sonicserver_user_playhistory playhistory
-						     JOIN metadata m
-						         ON m.MetadataId = playhistory.TrackId
+						     JOIN metadata m ON m.MetadataId = playhistory.TrackId
 						     WHERE playhistory.UserId = @userId
 						     GROUP BY m.AlbumId
-						 )
-						 SELECT 
-						 	al.AlbumId as Id,
-						 	al.Title as Name,
-						 	'' as version,
-						 	a.Name as Artist,
-						 	'album_' || al.AlbumId as CoverArt,
- 							a.artistid AS ArtistId,
-							al_sum.file_creationtime_min as Created,
-							al_sum.Duration,
-							al_sum.SongCount,
-							al_sum.Year,
-							COALESCE(playhistory.AlbumPlaycount, 0) as PlayCount,
- 							album_rated.Rating as UserRating,
-
- 							(case when album_rated.Starred = true 
- 							    then album_rated.StarredAt
- 							    else null 
- 							 end) as Starred
-						 from albums al TABLESAMPLE SYSTEM(CASE WHEN @type = 'random' THEN 1 ELSE 100 END)
-						 join artists a on a.artistid = al.artistid 
- 						 left join sonicserver_album_rated album_rated on 
-						     album_rated.AlbumId = al.AlbumId 
-						     and album_rated.UserId = @userId
-
-						 LEFT JOIN album_playhistory playhistory
-							ON playhistory.AlbumId = al.AlbumId
+						 ),
+						 candidate_albums AS (
+						     SELECT
+						         al.AlbumId,
+						         al.Title,
+						         al.artistid,
+						         al.record_id,
+						         al.year,
+						         album_rated.Rating AS UserRating,
+						         album_rated.Starred,
+						         album_rated.StarredAt,
+						         playhistory.AlbumPlaycount,
+						         playhistory.UpdatedAt AS PlayUpdatedAt
+						     FROM albums al TABLESAMPLE SYSTEM(CASE WHEN @type = 'random' THEN 1 ELSE 100 END)
+						     LEFT JOIN sonicserver_album_rated album_rated
+						            ON album_rated.AlbumId = al.AlbumId
+						           AND album_rated.UserId = @userId
+						     LEFT JOIN album_playhistory playhistory ON playhistory.AlbumId = al.AlbumId
 						     
-						 JOIN lateral (
-						     select m.albumid,
-								    min(m.file_creationtime) as file_creationtime_min,
-								    nullif(max(m.tag_year), 0) as Year, 
-								    sum(EXTRACT(EPOCH FROM
-									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
-			    							ELSE m.Tag_Length END)::interval))::int as Duration,
-								    count(distinct(m.MetadataId)) as SongCount
-							 from metadata m
-							 group by m.albumid
-							) as al_sum on al_sum.albumid = al.albumid
-						 
-						where (CASE 
-					             WHEN @type = 'byGenre' THEN 
-             						exists(select 1 
-             							   from metadata m 
-	     								   where m.albumid = al.albumid
-	     								   and m.computed_genre ILIKE '%' || @genre || '%')
-					             WHEN @type in ('recent', 'frequent') THEN 
-									playhistory.AlbumId is not null
-								 WHEN @type in ('newest', 'random') THEN 1=1
-								 WHEN @type = 'starred' THEN album_rated.Starred
-					             ELSE al.record_id >= @offset and al.record_id <= @offset + @limit
-					         END)
- 						
-						ORDER BY
-				         CASE 
-				             WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount
-				             WHEN @type = 'random' THEN random()
-				             WHEN @type = 'byYear' THEN al_sum.Year
-							 WHEN @type = 'newest' THEN al.record_id
-				             ELSE NULL
-				         END DESC,
-				         CASE 
-				             WHEN @type = 'alphabeticalByName' THEN al.Title
-				         END ASC, 
-				         CASE 
-				             WHEN @type = 'recent' THEN playhistory.UpdatedAt
-				             WHEN @type = 'starred' THEN album_rated.StarredAt
-				         END DESC
-                         limit @limit";
+						     WHERE (CASE
+						                WHEN @type = 'byGenre'  THEN exists(
+						                    select 1 from metadata m
+						                    where m.albumid = al.albumid
+						                      and m.computed_genre ILIKE '%' || @genre || '%')
+						                WHEN @type IN ('recent', 'frequent') THEN playhistory.AlbumId IS NOT NULL
+						                WHEN @type IN ('newest', 'random') THEN 1=1
+						                WHEN @type = 'starred' THEN album_rated.Starred
+						                WHEN @type = 'byYear' THEN al.year between @toYear and @fromYear
+						                ELSE al.record_id >= @offset AND al.record_id <= @offset + @limit
+						            END)
+						     ORDER BY
+						         CASE WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount END DESC,
+						         CASE WHEN @type = 'random' THEN random() END DESC,
+						         CASE WHEN @type = 'byYear' THEN al.year END DESC,
+						         CASE WHEN @type = 'newest' THEN al.record_id END DESC,
+						         CASE WHEN @type = 'alphabeticalByName' THEN al.Title END ASC,
+						         CASE WHEN @type = 'recent' THEN playhistory.UpdatedAt END DESC,
+						         CASE WHEN @type = 'starred' THEN album_rated.StarredAt END DESC
+						     LIMIT @limit
+						 )
+						 SELECT
+						     ca.AlbumId AS Id,
+						     ca.Title AS Name,
+						     '' AS version,
+						     a.Name AS Artist,
+						     'album_' || ca.AlbumId AS CoverArt,
+						     a.artistid AS ArtistId,
+						     al_sum.file_creationtime_min AS Created,
+						     al_sum.Duration,
+						     al_sum.SongCount,
+						     NULLIF(ca.year, 0),
+						     COALESCE(ca.AlbumPlaycount, 0) AS PlayCount,
+						     ca.UserRating,
+						     CASE WHEN ca.Starred = true
+						 		THEN ca.StarredAt 
+						 		ELSE NULL 
+						 	END AS Starred
+						 FROM candidate_albums ca
+						 JOIN artists a ON a.artistid = ca.artistid
+ 
+						 JOIN LATERAL (
+						     SELECT
+						         min(m.file_creationtime) AS file_creationtime_min,
+						         sum(EXTRACT(EPOCH FROM
+						             (CASE WHEN length(m.Tag_Length) = 5
+						                   THEN '00:' || m.Tag_Length
+						                   ELSE m.Tag_Length END)::interval))::int AS Duration,
+						         count(distinct m.MetadataId) AS SongCount
+						     FROM metadata m
+						     WHERE m.albumid = ca.AlbumId
+						 ) AS al_sum ON true
+						 ORDER by CASE WHEN @type = 'byYear' THEN ca.year END DESC";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -107,6 +109,8 @@ public class AlbumRepository
 		        type = request.Type,
 		        offset = request.Offset,
 		        genre = request.Genre,
+		        fromYear = request.FromYear,
+		        toYear = request.ToYear,
 		        userId
 	        })).ToList();
 
