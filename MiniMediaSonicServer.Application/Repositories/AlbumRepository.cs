@@ -57,23 +57,16 @@ public class AlbumRepository
 							ON playhistory.AlbumId = al.AlbumId
 						     
 						 JOIN lateral (
-						     select min(m.file_creationtime) as file_creationtime_min,
-								    max(m.file_creationtime) as file_creationtime_max,
+						     select m.albumid,
+								    min(m.file_creationtime) as file_creationtime_min,
 								    nullif(max(m.tag_year), 0) as Year, 
 								    sum(EXTRACT(EPOCH FROM
 									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
 			    							ELSE m.Tag_Length END)::interval))::int as Duration,
-						     		max(hist.UpdatedAt) as LastPlayDate,
 								    count(distinct(m.MetadataId)) as SongCount
-							 from metadata m 
-						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt
-						         from sonicserver_user_playhistory
-						         where UserId = @userId
-						         group by TrackId
-						     ) hist on hist.TrackId = m.MetadataId
-						     where m.albumid = al.albumid
-							) as al_sum on true
+							 from metadata m
+							 group by m.albumid
+							) as al_sum on al_sum.albumid = al.albumid
 						 
 						where (CASE 
 					             WHEN @type = 'byGenre' THEN 
@@ -93,6 +86,7 @@ public class AlbumRepository
 				             WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount
 				             WHEN @type = 'random' THEN random()
 				             WHEN @type = 'byYear' THEN al_sum.Year
+							 WHEN @type = 'newest' THEN al.record_id
 				             ELSE NULL
 				         END DESC,
 				         CASE 
@@ -100,7 +94,6 @@ public class AlbumRepository
 				         END ASC, 
 				         CASE 
 				             WHEN @type = 'recent' THEN playhistory.UpdatedAt
-				             WHEN @type = 'newest' THEN al_sum.file_creationtime_max
 				             WHEN @type = 'starred' THEN album_rated.StarredAt
 				         END DESC
                          limit @limit";
