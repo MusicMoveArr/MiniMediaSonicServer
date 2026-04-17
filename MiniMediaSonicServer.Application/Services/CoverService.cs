@@ -1,5 +1,6 @@
 using MiniMediaSonicServer.Application.Repositories;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -22,7 +23,7 @@ public class CoverService
         _trackCoverRepository = trackCoverRepository;
     }
 
-    public async Task<byte[]> GetAlbumCoverByTrackIdAsync(Guid trackId)
+    public async Task<byte[]?> GetAlbumCoverByTrackIdAsync(Guid trackId)
     {
         string? trackPath = await _trackCoverRepository.GetTrackPathByTrackIdAsync(trackId);
         
@@ -33,7 +34,6 @@ public class CoverService
         
         FileInfo trackFileInfo = new FileInfo(trackPath);
         
-
         if (trackFileInfo.Directory?.Exists == true)
         {
             var coverFileInfo = trackFileInfo.Directory
@@ -43,7 +43,11 @@ public class CoverService
 
             if (coverFileInfo != null)
             {
-                return GetBytesOfResizedImage(coverFileInfo.FullName);
+                byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
+                if (coverData != null)
+                {
+                    return coverData;
+                }
             }
         }
         
@@ -52,14 +56,14 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
+                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
             }
         }
 
         return null;
     }
 
-    public async Task<byte[]> GetAlbumCoverByAlbumIdAsync(Guid albumId)
+    public async Task<byte[]?> GetAlbumCoverByAlbumIdAsync(Guid albumId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByAlbumIdAsync(albumId);
         
@@ -73,7 +77,11 @@ public class CoverService
 
         if (coverFileInfo != null)
         {
-            return GetBytesOfResizedImage(coverFileInfo.FullName);
+            byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
+            if (coverData != null)
+            {
+                return coverData;
+            }
         }
         
         foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
@@ -81,14 +89,18 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
+                byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
+                if (coverData != null)
+                {
+                    return coverData;
+                }
             }
         }
 
         return null;
     }
 
-    public async Task<byte[]> GetArtistCoverByArtistIdAsync(Guid artistId)
+    public async Task<byte[]?> GetArtistCoverByArtistIdAsync(Guid artistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByArtistIdAsync(artistId);
         
@@ -102,7 +114,11 @@ public class CoverService
 
         if (coverFileInfo != null)
         {
-            return GetBytesOfResizedImage(coverFileInfo.FullName);
+            byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
+            if (coverData != null)
+            {
+                return coverData;
+            }
         }
         
         foreach (string trackPath in trackPaths.Where(file => File.Exists(file)))
@@ -110,13 +126,17 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData);
+                byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
+                if (coverData != null)
+                {
+                    return coverData;
+                }
             }
         }
         return null;
     }
 
-    public async Task<byte[]> GetPlaylistCoverByIdAsync(Guid playlistId)
+    public async Task<byte[]?> GetPlaylistCoverByIdAsync(Guid playlistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByPlaylistIdAsync(playlistId);
         
@@ -141,8 +161,18 @@ public class CoverService
         }
 
         List<Image> covers = coverFileInfo
-            .Select(cover => Image.Load(cover.FullName))
-            .ToList();
+            .Select(cover => TryLoadImage(cover.FullName))
+            .Where(cover => cover != null)
+            .ToList()!;
+
+        if (covers.Count < 4)
+        {
+            foreach (Image cover in covers)
+            {
+                cover.Dispose();
+            }
+            return GetBytesOfResizedImage(coverFileInfo.First().FullName);
+        }
 
         int singleImageWidth = this.DefaultCoverSize.Width / 2;
         int singleImageHeight = this.DefaultCoverSize.Height / 2;
@@ -177,9 +207,15 @@ public class CoverService
         }
     }
 
-    private byte[] GetBytesOfResizedImage(string path)
+    private byte[]? GetBytesOfResizedImage(string path)
     {
-        using var image = Image.Load(path);
+        using var image = TryLoadImage(path);
+        
+        if (image == null)
+        {
+            return null;
+        }
+        
         using MemoryStream stream = new MemoryStream();
         image.Mutate(ctx =>
         {
@@ -188,14 +224,20 @@ public class CoverService
         image.Save(stream, new JpegEncoder());
         return stream.ToArray();
     }
-    private byte[]? GetBytesOfResizedImage(byte[]? imageData)
+    private byte[]? GetBytesOfResizedImage(byte[]? imageData, string path)
     {
         if (imageData == null)
         {
             return null;
         }
         
-        using var image = Image.Load(imageData);
+        using var image = TryLoadImage(imageData, path);
+
+        if (image == null)
+        {
+            return null;
+        }
+        
         using MemoryStream stream = new MemoryStream();
         image.Mutate(ctx =>
         {
@@ -203,5 +245,30 @@ public class CoverService
         });
         image.Save(stream, new JpegEncoder());
         return stream.ToArray();
+    }
+
+    private Image? TryLoadImage(string path)
+    {
+        try
+        {
+            return Image.Load(path);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Cover possibly corrupt, path: '{path}', error: '{e.Message}'");
+        }
+        return null;
+    }
+    private Image? TryLoadImage(byte[] imageData, string path)
+    {
+        try
+        {
+            return Image.Load(imageData);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Cover possibly corrupt, image data from memory, path: '{path}', error: '{e.Message}'");
+        }
+        return null;
     }
 }
