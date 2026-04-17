@@ -10,5 +10,5 @@ public class UpdatePlaylistRequest : SubsonicAuthModel
     public string? Comment { get; set; }
     public bool? Public { get; set; }
     public List<Guid>? SongIdToAdd { get; set; }
-    public List<Guid>? SongIndexToRemove { get; set; }
+    public string? SongIndexToRemove { get; set; }
 }

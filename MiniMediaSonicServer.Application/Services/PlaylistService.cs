@@ -50,6 +50,22 @@ public class PlaylistService
             return;
         }
         
+        if (!string.IsNullOrWhiteSpace(request.SongIndexToRemove))
+        {
+            int[] indexes = request.SongIndexToRemove
+                .Split(',')
+                .Select(index => int.TryParse(index, out int i) ? i : -1)
+                .Where(index => index >= 0)
+                .OrderByDescending(index => index)
+                .ToArray();
+            
+            foreach (var index in indexes)
+            {
+                await _playlistRepository.RemoveTrackAtIndexAsync(request.PlaylistId, index);
+            }
+            await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId, DateTime.Now);
+        }
+        
         if (request.SongIdToAdd?.Any() == true)
         {
             foreach (var trackId in request.SongIdToAdd)

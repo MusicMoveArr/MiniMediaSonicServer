@@ -382,4 +382,42 @@ public class PlaylistRepository
 		    }))
 		    .ToList();
     }
+    public async Task RemoveTrackAtIndexAsync(Guid playlistId, int index)
+    {
+	    string deleteQuery = @"delete from sonicserver_playlist_track 
+						       where PlaylistId = @playlistId 
+						       and TrackOrder = @index+1";
+
+	    string updateQuery = @"update sonicserver_playlist_track
+							   set TrackOrder = TrackOrder - 1
+						       where PlaylistId = @playlistId 
+						       and TrackOrder > @index";
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.OpenAsync();
+	    var transaction = await conn.BeginTransactionAsync();
+
+	    try
+	    {
+		    await conn.ExecuteAsync(deleteQuery,
+			    param: new
+			    {
+				    playlistId,
+				    index
+			    },
+			    transaction: transaction);
+		    
+		    await conn.ExecuteAsync(updateQuery,
+			    param: new
+			    {
+				    playlistId,
+				    index
+			    },
+			    transaction: transaction);
+		    await transaction.CommitAsync();
+	    }
+	    catch (Exception e)
+	    {
+		    await transaction.RollbackAsync();
+	    }
+    }
 }
