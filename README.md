@@ -103,9 +103,9 @@ By default the following jobs are scheduled hourly which can be changed in the a
 1. Playlist Import: Will look into the "/playlists" folder looking for .m3u files to import 
 2. Playlist Fix Tracks: will look for playlist track files that were replaced (e.g. mp3 > flac) so files don't exist anymore but are in your playlists, it will search & replace that track with another with 99% accuracy match
 3. ReIndex Search: Keeping the search up-to-date whenever new tracks were added/remove/updated
-4. AutoLike: Per user configurable, when listening an artist e.g. +100x, automatically favorite the artist. later I will implement it as well for albums
-5. AutoRate: Per user configurable, when you've rated tracks in a album by e.g. >50% and minimum rating comes out as 4/5 stars. rate the album 4 or 5 stars automatically
-6. AutoRate: Per user configurable, When you've rated a track from an album/single(etc), rate all other duplicate with +99% accuracy based on Acoustid Fingerprint tracks with the same rating
+4. AutoLike: Per user configurable, when listening an artist e.g. +100x, automatically favorite the artist. later I will implement it as well for albums. User properties available (AutoLike_Artists_Enabled, AutoLike_Artists_DaysRecent, AutoLike_Artists_ListenCount)
+5. AutoRate: Per user configurable, when you've rated tracks in a album by e.g. >50% and minimum rating comes out as 4/5 stars. rate the album 4 or 5 stars automatically. User properties available (AutoRate_Albums_Enabled, AutoRate_Albums_MinimumRating, AutoRate_Albums_TracksRatedPercentage)
+6. AutoRate: Per user configurable, When you've rated a track from an album/single(etc), rate all other duplicate with +99% accuracy based on Acoustid Fingerprint tracks with the same rating. When matching based on Acoustid Fingerprint, this is an cpu intense task using multiple cpu cores. User properties available (AutoRate_DuplicateTracks_Enabled)
 
 ## Implemented API's
 A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are usable, mind you with missing API implementations
