@@ -23,6 +23,9 @@
       <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
         <HintPath>..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\9.0.13\ref\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
       </Reference>
+      <Reference Include="Newtonsoft.Json">
+        <HintPath>..\..\..\.nuget\packages\newtonsoft.json\13.0.1\lib\netstandard2.0\Newtonsoft.Json.dll</HintPath>
+      </Reference>
       <Reference Include="Quartz">
         <HintPath>..\..\..\.nuget\packages\quartz\3.15.1\lib\net9.0\Quartz.dll</HintPath>
       </Reference>

@@ -12,9 +12,12 @@ public static class DependencyExtension
     public static IServiceCollection AddAutoLikeDependencies(this IServiceCollection services) =>
         services.AddScoped<AutoLikeService>()
             .AddScoped<AutoRateAlbumsService>()
+            .AddScoped<FingerPrintService>()
+            .AddScoped<AutoRateDuplicateTracksService>()
             .AddScoped<AutoLikeArtistsJob>()
             .AddScoped<AutoLikeArtistRepository>()
-            .AddScoped<AutoRateAlbumsRepository>();
+            .AddScoped<AutoRateAlbumsRepository>()
+            .AddScoped<AutoRateDuplicateTracksRepository>();
     
     public static IServiceCollectionQuartzConfigurator AddAutoLikeJobs(
         this IServiceCollectionQuartzConfigurator config,
@@ -32,6 +35,13 @@ public static class DependencyExtension
         config.AddTrigger(opts => opts
             .ForJob(albumsJobKey)
             .WithIdentity($"{nameof(AutoRateAlbumsJob)}-trigger")
+            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["AutoLikeCron"]));
+        
+        var duplicateTracksJobKey = new JobKey(nameof(AutoRateDuplicateTracksJob));
+        config.AddJob<AutoRateDuplicateTracksJob>(opts => opts.WithIdentity(duplicateTracksJobKey));
+        config.AddTrigger(opts => opts
+            .ForJob(duplicateTracksJobKey)
+            .WithIdentity($"{nameof(AutoRateDuplicateTracksJob)}-trigger")
             .WithCronSchedule(builder.Configuration.GetSection("Jobs")["AutoLikeCron"]));
 
         return config;
