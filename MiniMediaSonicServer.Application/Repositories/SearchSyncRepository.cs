@@ -86,12 +86,11 @@ public class SearchSyncRepository
 									sum(hist.PlayCount) as AlbumPlaycount,
 								    count(distinct(m.MetadataId)) as SongCount
 							 from metadata m 
-						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
-						         from sonicserver_user_playhistory
-						         where UserId = @userId
-						         group by TrackId
-						     ) hist on hist.TrackId = m.MetadataId
+						     left join lateral (
+						         select count(hist.*) as PlayCount
+						         from sonicserver_user_playhistory hist
+						         where hist.UserId = @userId and hist.TrackId = m.MetadataId
+						     ) hist on true
 						     where m.albumid = al.albumid) as al_sum on true
 						     
 					     where 
