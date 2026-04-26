@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 using DbUp;
 using FluentValidation;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Api.Binders;
+using MiniMediaSonicServer.Api.Certificates;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Api.Filters;
 using MiniMediaSonicServer.Api.Validators;
@@ -20,17 +22,56 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
+var tlsConfiguration = new TlsConfiguration();
+builder.Configuration.Bind("tls", tlsConfiguration);
+builder.Services.AddSingleton<ICertificateReader>(x =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    if (tlsConfiguration.HasCertificate)
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        return new CachingMountedCertificateReader(new MountedCertificateReader(tlsConfiguration));
+    }
+    else
+    {
+        return new NullCertificateReader();
+    }
+});
+
+builder.WebHost.UseKestrel((_, options) =>
+{
+    options.ListenAnyIP(8080, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1;
+    });
+    options.ListenAnyIP(8081, listenOptions =>
+    {
+        var certificateReader = listenOptions.ApplicationServices.GetRequiredService<ICertificateReader>();
+        if (tlsConfiguration.HasCertificate)
+        {
+            listenOptions.Protocols = HttpProtocols.Http2 | HttpProtocols.Http3;
+            listenOptions.UseHttps(httpsOptions =>
+            {
+                httpsOptions.ServerCertificateSelector = (_, _) => certificateReader.Read();
+            });
+        }
+        else
+        {
+            listenOptions.Protocols = HttpProtocols.Http1;
+        }
     });
 });
-builder.Services.AddControllers(options =>
+
+builder
+    .Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+    })
+    .AddControllers(options =>
     {
         options.ModelValidatorProviders.Clear();
         options.Filters.Add(typeof(SubsonicAuthFilter));
@@ -40,28 +81,23 @@ builder.Services.AddControllers(options =>
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
-
-builder.Services.AddQuartz(q =>
-{
-    q.AddAutoLikeJobs(builder);
-    q.AddPlaylistJobs(builder);
-    q.AddIndexingJobs(builder);
-    q.AddImportJobs(builder);
-});
-
-builder.Services.AddQuartzHostedService();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddFluentValidationAutoValidation();
-
-builder.Services.AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidator>();
-
-builder.Services.Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"));
-builder.Services.Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"));
-builder.Services.Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"));
-builder.Services.Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"));
+    })
+    .Services.AddQuartz(q =>
+    {
+        q.AddAutoLikeJobs(builder);
+        q.AddPlaylistJobs(builder);
+        q.AddIndexingJobs(builder);
+        q.AddImportJobs(builder);
+    })
+    .AddQuartzHostedService()
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen()
+    .AddFluentValidationAutoValidation()
+    .AddValidatorsFromAssemblyContaining<GetAlbumList2RequestValidator>()
+    .Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"))
+    .Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"))
+    .Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"))
+    .Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"));
 
 string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnectionString))
@@ -73,8 +109,6 @@ else
 {
     builder.Services.AddSingleton<IRedisCacheService, RedisCacheDisabledService>();
 }
-
-
 
 //repositories
 builder.Services.AddScoped<BookmarkRepository>();
@@ -155,6 +189,4 @@ app.Use(next => context =>
 });
 
 app.UseEndpoints(endpoints => endpoints.MapControllers());
-
-
 app.Run();

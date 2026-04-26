@@ -1,0 +1,9 @@
+using System.Security.Cryptography.X509Certificates;
+
+namespace MiniMediaSonicServer.Api.Certificates;
+
+//thanks to, https://github.com/joseftw/jos.echo
+public interface ICertificateReader
+{
+    X509Certificate2? Read();
+}
