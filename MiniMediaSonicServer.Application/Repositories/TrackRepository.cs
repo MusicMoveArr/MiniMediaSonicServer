@@ -151,13 +151,13 @@ public class TrackRepository
     public async Task<List<GenreCountModel>> GetAllGenresAsync()
     {
         string query = @"SELECT
-						     TRIM(t.genre) AS Genre,
+						     initcap(lower(TRIM(t.genre))) AS Genre,
 						     COUNT(*) AS SongCount,
-    						 COUNT(DISTINCT m.albumid) AS AlbumCount
+							 COUNT(DISTINCT m.albumid) AS AlbumCount
 						 FROM metadata m
 						 JOIN LATERAL unnest(string_to_array(m.computed_genre, ';')) AS t(genre) ON TRUE
 						 WHERE m.computed_genre is not null
-						 GROUP BY TRIM(t.genre)";
+						 GROUP BY lower(TRIM(t.genre))";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
         
