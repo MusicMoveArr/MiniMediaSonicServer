@@ -79,13 +79,13 @@ public static class AlbumReleaseTypeUtil
 
     private static bool IsSingle(AlbumID3 album)
     {
-        if (!album.Song.Any())
-        {
-            return false;
-        }
-        if (album.Song.Count == 1)
+        if (album.SongCount == 1)
         {
             return true;
+        }
+        if (album.SongCount == 0)
+        {
+            return false;
         }
         
         TrackID3 firstTrack = album.Song.First();
