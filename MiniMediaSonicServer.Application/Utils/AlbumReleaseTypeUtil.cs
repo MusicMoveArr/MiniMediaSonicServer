@@ -83,7 +83,7 @@ public static class AlbumReleaseTypeUtil
         {
             return true;
         }
-        if (album.SongCount == 0)
+        if (album.SongCount == 0 || !album.Song.Any())
         {
             return false;
         }
