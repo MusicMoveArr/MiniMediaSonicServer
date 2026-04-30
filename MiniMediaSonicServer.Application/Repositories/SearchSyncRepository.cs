@@ -140,6 +140,7 @@ public class SearchSyncRepository
 							'music' AS Type,
 							'song' AS MediaType,
  							playhistory.LastPlayDate as Played,
+ 							playhistory.PlayCount as PlayCount,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -187,11 +188,11 @@ public class SearchSyncRepository
  							limit 1) joined_artist on true
  							    
  						 left join lateral (
- 							select hist.UpdatedAt as LastPlayDate
+ 							select 	max(hist.UpdatedAt) as LastPlayDate,
+    								sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount
  							from sonicserver_user_playhistory hist
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
- 							order by UpdatedAt desc
- 							limit 1) playhistory on true
+ 							) playhistory on true
  							    
 					     where 
 						 	m.record_id >= @offset 

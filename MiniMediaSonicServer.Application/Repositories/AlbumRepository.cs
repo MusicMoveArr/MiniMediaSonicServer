@@ -25,7 +25,7 @@ public class AlbumRepository
 						         MAX(playhistory.UpdatedAt) AS UpdatedAt
 						     FROM sonicserver_user_playhistory playhistory
 						     JOIN metadata m ON m.MetadataId = playhistory.TrackId
-						     WHERE playhistory.UserId = @userId
+						     WHERE playhistory.UserId = @userId and playhistory.Scrobble = true
 						     GROUP BY m.AlbumId
 						 ),
 						 candidate_albums AS (
@@ -173,6 +173,7 @@ public class AlbumRepository
 							'music' AS Type,
 							'song' AS MediaType,
  							playhistory.LastPlayDate as Played,
+ 							playhistory.PlayCount as PlayCount,
  							    
  							EXTRACT(EPOCH FROM
 							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -220,7 +221,8 @@ public class AlbumRepository
  							limit 1) joined_artist on true
  							    
  						 left join lateral (
- 							select max(hist.UpdatedAt) as LastPlayDate
+ 							select 	max(hist.UpdatedAt) as LastPlayDate,
+    								sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount
  							from sonicserver_user_playhistory hist
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
  							    ) playhistory on true
@@ -239,7 +241,7 @@ public class AlbumRepository
 						     left join (
 						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
 						         from sonicserver_user_playhistory
-						         where UserId = @userId
+						         where UserId = @userId and Scrobble = true
 						         group by TrackId
 						     ) hist on hist.TrackId = m.MetadataId
 						     where m.albumid = al.albumid) as al_sum on true
@@ -334,7 +336,7 @@ public class AlbumRepository
 						     left join (
 						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
 						         from sonicserver_user_playhistory
-						         where UserId = @userId
+						         where UserId = @userId and Scrobble = true
 						         group by TrackId
 						     ) hist on hist.TrackId = m.MetadataId
 						     where m.albumid = al.albumid
