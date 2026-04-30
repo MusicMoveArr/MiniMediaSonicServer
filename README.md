@@ -73,6 +73,14 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   "EncryptionKeys": {
     "UserPasswordKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   },
+  "tls": {
+    "Certificate":
+    {
+      "CertificateFile": "",
+      "KeyFile": "",
+      "Password": ""
+    }
+  },
   "Shares": {
     "BaseUrl": "http://192.168.1.2:8080"
   },
