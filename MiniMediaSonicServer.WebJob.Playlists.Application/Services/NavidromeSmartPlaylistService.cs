@@ -77,7 +77,7 @@ public class NavidromeSmartPlaylistService
             }
             
             string sortBy = nsp.Sort == "random" ? "random" :
-                string.Join(',', nsp.Sort
+                string.Join($" {nsp.Order},", nsp.Sort
                 .Replace("-", string.Empty)
                 .Split(",", StringSplitOptions.RemoveEmptyEntries)
                 .Select(order => GetDbColumn(order))
@@ -141,7 +141,7 @@ public class NavidromeSmartPlaylistService
 
     private string GetDbColumn(string propertyName)
     {
-        switch (propertyName.ToLower())
+        switch (propertyName.ToLower().Trim())
         {
             case "title": return "m.Title";
             case "album": return "al.Title";
@@ -193,6 +193,7 @@ public class NavidromeSmartPlaylistService
             case "genre": return "m.Computed_Genre";
             case "artistloved": return "artist_rated.Starred";
             case "albumloved": return "album_rated.Starred";
+            case "artist": return "a.Name";
             default:
                 return string.Empty;
         }
