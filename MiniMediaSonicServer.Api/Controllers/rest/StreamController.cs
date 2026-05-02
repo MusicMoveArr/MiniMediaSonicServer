@@ -32,16 +32,9 @@ public class StreamController : SonicControllerBase
 
         if (!string.IsNullOrWhiteSpace(request.Format) && !path.EndsWith(request.Format))
         {
-            byte[]? bytes = await _transcodeService.TranscodeAsync(path, request.Format, request.MaxBitRate);
-            if (bytes?.Length > 0)
-            {
-                if (request.Format == "aac")
-                {
-                    request.Format = "m4a";
-                }
-                var transcodedContentType = ContentTypeFromSuffix(request.Format);
-                return Results.File(bytes, transcodedContentType, enableRangeProcessing: true);
-            }
+            Stream stream = await _transcodeService.TranscodeAsync(path, request.Format, request.MaxBitRate);
+            var transcodedContentType = ContentTypeFromSuffix(request.Format);
+            return Results.File(stream, transcodedContentType, enableRangeProcessing: true);
         }
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));
@@ -55,6 +48,7 @@ public class StreamController : SonicControllerBase
         {
             "mp3" => "audio/mpeg",
             "m4a" => "audio/mp4",
+            "aac" => "audio/mp4",
             "mp4" => "audio/mp4",
             "flac" => "audio/flac",
             "ogg" => "audio/ogg",

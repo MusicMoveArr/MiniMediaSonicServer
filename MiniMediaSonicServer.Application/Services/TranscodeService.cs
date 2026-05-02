@@ -4,7 +4,7 @@ namespace MiniMediaSonicServer.Application.Services;
 
 public class TranscodeService
 {
-    public async Task<byte[]?> TranscodeAsync(string filePath, string targetFormat, int bitrate)
+    public async Task<Stream> TranscodeAsync(string filePath, string targetFormat, int bitrate)
     {
         string parameters = string.Empty;
         switch (targetFormat)
@@ -27,8 +27,8 @@ public class TranscodeService
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "ffmpeg",  // Command to call
-                Arguments = $"-i \"{escapedFilePath}\" -map 0:a:0 -b:a {bitrate}k -v 0 {parameters}",  // Path to the audio file
+                FileName = "ffmpeg",
+                Arguments = $"-i \"{escapedFilePath}\" -map 0:a:0 -b:a {bitrate}k -v 0 {parameters}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 RedirectStandardError = true,
@@ -37,11 +37,6 @@ public class TranscodeService
         };
 
         process.Start();
-        
-        using MemoryStream stream = new MemoryStream();
-        await process.StandardOutput.BaseStream.CopyToAsync(stream);
-        
-        await process.WaitForExitAsync();
-        return stream.ToArray();
+        return process.StandardOutput.BaseStream;
     }
 }
