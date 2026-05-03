@@ -14,6 +14,7 @@ public class LibreFmScrobbleHandler : IScrobble
     public const string LibreFmApiKeySettingName = "LibreFm_ApiKey";
     public const string LibreFmApiSecretSettingName = "LibreFm_ApiSecret";
     public const string LibreFmTokenSettingName = "LibreFm_Token";
+    public const string LibreFmSessionKeySettingName = "LibreFm_SessionKey";
 
     public LibreFmScrobbleHandler(UserPropertyRepository userPropertyRepository)
     {
@@ -33,8 +34,15 @@ public class LibreFmScrobbleHandler : IScrobble
         {
             return;
         }
+
+        string? sessionKey = await _userPropertyRepository.GetUserPropertyAsync(user.UserId, LibreFmSessionKeySettingName);
+
+        if (string.IsNullOrWhiteSpace(sessionKey))
+        {
+            sessionKey = await GetSessionAsync(token, apiKey, apiSecret);
+            await _userPropertyRepository.SetUserPropertyAsync(user.UserId, LibreFmSessionKeySettingName, sessionKey);
+        }
         
-        var sessionKey = await GetSessionAsync(token, apiKey, apiSecret);
         var parameters = new SortedDictionary<string, string>
         {
             ["api_key"]       = apiKey,

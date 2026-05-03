@@ -37,7 +37,6 @@ public class ScrobbleService
         {
             return;
         }
-        
 
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
