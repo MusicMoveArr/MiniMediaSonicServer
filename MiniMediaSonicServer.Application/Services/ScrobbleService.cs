@@ -11,17 +11,20 @@ public class ScrobbleService
     private readonly UserPlayHistoryRepository _userPlayHistoryRepository;
     private readonly ListenBrainzScrobbleHandler _listenBrainzScrobbleHandler;
     private readonly MalojaScrobbleHandler _malojaScrobbleHandler;
+    private readonly LibreFmScrobbleHandler _libreFmScrobbleHandler;
 
     public ScrobbleService(
         TrackRepository trackRepository,
         ListenBrainzScrobbleHandler listenBrainzScrobbleHandler,
         UserPlayHistoryRepository userPlayHistoryRepository,
-        MalojaScrobbleHandler malojaScrobbleHandler)
+        MalojaScrobbleHandler malojaScrobbleHandler,
+        LibreFmScrobbleHandler libreFmScrobbleHandler)
     {
         _trackRepository = trackRepository;
         _listenBrainzScrobbleHandler = listenBrainzScrobbleHandler;
         _userPlayHistoryRepository = userPlayHistoryRepository;
         _malojaScrobbleHandler = malojaScrobbleHandler;
+        _libreFmScrobbleHandler = libreFmScrobbleHandler;
     }
 
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
@@ -34,6 +37,7 @@ public class ScrobbleService
         {
             return;
         }
+        
 
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
@@ -44,7 +48,7 @@ public class ScrobbleService
         {
             await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, true, scrobbleAt, DateTime.Now);
         }
-        
+
         if (!string.IsNullOrWhiteSpace(user.ListenBrainzUserToken))
         {
             await _listenBrainzScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
@@ -54,6 +58,8 @@ public class ScrobbleService
         {
             await _malojaScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
         }
+        
+        await _libreFmScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
     }
 
     public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)

@@ -39,12 +39,14 @@ public class UserPropertyRepository
     
     public async Task SetUserPropertyAsync(Guid userId, string name, string value)
     {
-        string query = @"UPDATE sonicserver_user_property
-                         SET Value = @value,
-                             UpdatedAt = current_timestamp
-                         where UserId = @userId
-                               and Name = @name";
-
+        string query = @"
+            INSERT INTO sonicserver_user_property (UserId, Name, Value)
+            VALUES (@userId, @name, @value)
+            ON CONFLICT (UserId, Name)
+            DO UPDATE SET
+			    Value = EXCLUDED.Value,
+			    UpdatedAt = current_timestamp";
+        
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
         
         await conn.ExecuteAsync(query, param: new

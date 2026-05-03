@@ -146,6 +146,7 @@ builder.Services.AddScoped<TranscodeService>();
 //handlers
 builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
 builder.Services.AddScoped<MalojaScrobbleHandler>();
+builder.Services.AddScoped<LibreFmScrobbleHandler>();
 
 
 builder.Services.AddScoped<SubsonicAuthFilter>();

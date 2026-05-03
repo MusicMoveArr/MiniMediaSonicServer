@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.Database;
-using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 
 namespace MiniMediaSonicServer.Api.Controllers;
