@@ -13,6 +13,7 @@ public class NavidromeSmartPlaylistService
     private readonly PlaylistImportRepository _playlistImportRepository;
     private readonly UserRepository _userRepository;
     private readonly PlaylistRepository _playlistRepository;
+    private const int DeDuplicationOverFetch = 50;
 
     private readonly Dictionary<string, object> _parameters;
     
@@ -83,19 +84,30 @@ public class NavidromeSmartPlaylistService
                 .Select(order => GetDbColumn(order))
                 .Where(order => !string.IsNullOrWhiteSpace(order)));
             
-            var trackIds = await _navidromeSmartPlaylistRepository.GetTrackIdsForPlaylistAsync(
+            var tracks = await _navidromeSmartPlaylistRepository.GetTrackIdsForPlaylistAsync(
                 userId,
                 filter.ToString(), 
                 _parameters, 
                 sortBy,
                 nsp.Order, 
-                nsp.Limit);
+                nsp.Limit + DeDuplicationOverFetch);
 
             await _playlistRepository.DeleteAllTracksFromPlaylistAsync(userPlaylistId.Value);
+
+            tracks = tracks
+                .GroupBy(t => 
+                    new {
+                        Artist = t.Artist.ToLower(),
+                        Title = t.Title.ToLower()
+                    })
+                .Select(t => t.FirstOrDefault())
+                .Where(t => t != null)
+                .Take(nsp.Limit)
+                .ToList()!;
             
-            foreach (var trackId in trackIds.Distinct())
+            foreach (var track in tracks)
             {
-                await _playlistRepository.AddTrackToPlaylistAsync(userPlaylistId.Value, trackId);
+                await _playlistRepository.AddTrackToPlaylistAsync(userPlaylistId.Value, track.MetadataId);
             }
 
             await _playlistRepository.UpdatePlaylistUpdatedAtAsync(userPlaylistId.Value, DateTime.Now);

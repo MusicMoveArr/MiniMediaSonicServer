@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Models.Database;
+using MiniMediaSonicServer.WebJob.Playlists.Application.Models.Database;
 using Npgsql;
 
 namespace MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
@@ -15,7 +16,7 @@ public class NavidromeSmartPlaylistRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
 
-    public async Task<List<Guid>> GetTrackIdsForPlaylistAsync(
+    public async Task<List<NavidromeSmartPlaylistTrackModel>> GetTrackIdsForPlaylistAsync(
 	    Guid userId,
         string filter, 
         Dictionary<string, object> parameters,
@@ -43,7 +44,7 @@ public class NavidromeSmartPlaylistRepository
 						     WHERE playhistory.UserId = @userId
 						     GROUP BY m.MetadataId
 						 )
-						 SELECT m.MetadataId
+						 SELECT m.MetadataId, m.Title, a.Name as Artist
 						 from (
 	 						select *
 	 						from metadata
@@ -70,7 +71,7 @@ public class NavidromeSmartPlaylistRepository
         await conn.OpenAsync();
 
         return (await conn
-                .QueryAsync<Guid>(query, param: parameters))
+                .QueryAsync<NavidromeSmartPlaylistTrackModel>(query, param: parameters))
                 .ToList();
     }
 }
