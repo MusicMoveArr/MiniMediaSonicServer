@@ -210,5 +210,6 @@ public class TrackID3
     public string ExplicitStatus { get; set; }
     
     [JsonIgnore]
+    [XmlIgnore]
     public string Isrc_Single { get; set; }
 }

@@ -12,9 +12,12 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class GetRandomSongsController : SonicControllerBase
 {
     private readonly TrackService _trackService;
-    public GetRandomSongsController(TrackService trackService)
+    private readonly MusicCacheService _musicCacheService;
+    public GetRandomSongsController(TrackService trackService,
+        MusicCacheService musicCacheService)
     {
         _trackService = trackService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -28,11 +31,21 @@ public class GetRandomSongsController : SonicControllerBase
         {
             request.Size = 500;
         }
+
+        var randomTracks = await _trackService.GetRandomTracksAsync(request.Size, User.UserId, request.Genre);
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in randomTracks)
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             RandomSongs = new RandomSongsResponse
             {
-                Tracks = await _trackService.GetRandomTracksAsync(request.Size, User.UserId, request.Genre)
+                Tracks = randomTracks
             }
         });
     }

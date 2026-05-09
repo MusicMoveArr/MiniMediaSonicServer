@@ -16,14 +16,17 @@ public class StreamController : SonicControllerBase
     private readonly ShareService _shareService;
     private readonly StreamService _streamService;
     private readonly TranscodeService _transcodeService;
+    private readonly MusicCacheService _musicCacheService;
     
     public StreamController(StreamService streamService,
         TranscodeService transcodeService,
-        ShareService shareService)
+        ShareService shareService,
+        MusicCacheService musicCacheService)
     {
         _streamService = streamService;
         _transcodeService = transcodeService;
         _shareService = shareService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -38,6 +41,9 @@ public class StreamController : SonicControllerBase
         {
             return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Track not found");
         }
+        
+        await _musicCacheService.SaveFileToCacheAsync(path, request.Id);
+        path = await _musicCacheService.GetCachedOrOriginalFilePathAsync(path, request.Id);
 
         if (!string.IsNullOrWhiteSpace(request.Format) && !path.EndsWith(request.Format))
         {

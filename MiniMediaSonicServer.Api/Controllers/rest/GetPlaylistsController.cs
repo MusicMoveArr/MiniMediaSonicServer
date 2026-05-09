@@ -12,34 +12,49 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class GetPlaylistsController : SonicControllerBase
 {
     private readonly PlaylistService _playlistService;
-    public GetPlaylistsController(PlaylistService playlistService)
+    private readonly MusicCacheService _musicCacheService;
+    public GetPlaylistsController(PlaylistService playlistService,
+        MusicCacheService musicCacheService)
     {
         _playlistService = playlistService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
     {
         var userModel = GetUserModel();
+
+        var playlists = (await _playlistService
+                .GetAllPlaylistsAsync(User.UserId))
+                .Select(playlist => new Playlist
+                {
+                    Name = playlist.Name,
+                    SongCount = playlist.SongCount,
+                    Changed = playlist.UpdatedAt,
+                    Created = playlist.CreatedAt,
+                    Duration = playlist.TotalDuration,
+                    Id = playlist.PlaylistId,
+                    Owner = userModel.Username,
+                    Public = playlist.Public,
+                    Entry = playlist.Tracks,
+                    CoverArt = playlist.CoverArt
+                })
+                .ToList();
+        
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in playlists.SelectMany(p => p.Entry))
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             Playlists = new Playlists
             {
-                Playlist = (await _playlistService
-                    .GetAllPlaylistsAsync(User.UserId))
-                    .Select(playlist => new Playlist
-                    {
-                        Name = playlist.Name,
-                        SongCount =  playlist.SongCount,
-                        Changed = playlist.UpdatedAt,
-                        Created = playlist.CreatedAt,
-                        Duration = playlist.TotalDuration,
-                        Id = playlist.PlaylistId,
-                        Owner = userModel.Username,
-                        Public = playlist.Public,
-                        Entry = playlist.Tracks,
-                        CoverArt = playlist.CoverArt
-                    }).ToList()
+                Playlist = playlists
             }
         });
     }

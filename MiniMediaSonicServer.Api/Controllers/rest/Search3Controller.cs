@@ -12,9 +12,12 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class Search3Controller : SonicControllerBase
 {
     private readonly SearchService _searchService;
-    public Search3Controller(SearchService searchService)
+    private readonly MusicCacheService _musicCacheService;
+    public Search3Controller(SearchService searchService,
+        MusicCacheService musicCacheService)
     {
         _searchService = searchService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -29,6 +32,14 @@ public class Search3Controller : SonicControllerBase
         var albumsTask =  _searchService.SearchAlbumsAsync(request.Query, request.AlbumCount, request.AlbumOffset, User.UserId);
         var tracksTask =  _searchService.SearchTracksAsync(request.Query, request.SongCount, request.SongOffset, User.UserId);
         await Task.WhenAll(artistsTask, albumsTask, tracksTask);
+
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in tracksTask.Result)
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {

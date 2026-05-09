@@ -12,9 +12,12 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class GetTopSongsController : SonicControllerBase
 {
     private readonly TrackService _trackService;
-    public GetTopSongsController(TrackService trackService)
+    private readonly MusicCacheService _musicCacheService;
+    public GetTopSongsController(TrackService trackService,
+        MusicCacheService musicCacheService)
     {
         _trackService = trackService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -24,11 +27,20 @@ public class GetTopSongsController : SonicControllerBase
         {
             request.Count = 20;
         }
+
+        var tracks = await _trackService.GetTopTracksByArtistNameAsync(request.Artist, request.Count, User.UserId);
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in tracks)
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             TopSongs = new TopSongsResponse
             {
-                Tracks = await _trackService.GetTopTracksByArtistNameAsync(request.Artist, request.Count, User.UserId)
+                Tracks = tracks
             }
         });
     }

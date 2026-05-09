@@ -11,17 +11,30 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class GetAlbumController : SonicControllerBase
 {
     private readonly AlbumService _albumService;
-    public GetAlbumController(AlbumService albumService)
+    private readonly MusicCacheService _musicCacheService;
+    public GetAlbumController(AlbumService albumService,
+        MusicCacheService musicCacheService)
     {
         _albumService = albumService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetAlbumRequest request)
     {
+        var album = await _albumService.GetAlbumByIdResponseAsync(request.Id, User.UserId);
+        
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in album.Song)
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
-            Album = await _albumService.GetAlbumByIdResponseAsync(request.Id, User.UserId)
+            Album = album
         });
     }
 }

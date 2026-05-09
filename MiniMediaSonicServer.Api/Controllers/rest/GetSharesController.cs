@@ -15,12 +15,15 @@ public class GetSharesController : SonicControllerBase
 {
     private readonly ShareService _shareService;
     private readonly ShareConfiguration _shareConfiguration;
+    private readonly MusicCacheService _musicCacheService;
 
     public GetSharesController(ShareService shareService,
-        IOptions<ShareConfiguration> shareConfiguration)
+        IOptions<ShareConfiguration> shareConfiguration,
+        MusicCacheService musicCacheService)
     {
         _shareService = shareService;
         _shareConfiguration = shareConfiguration.Value;
+        _musicCacheService = musicCacheService;
     }
 
     [HttpGet, HttpPost]
@@ -32,6 +35,15 @@ public class GetSharesController : SonicControllerBase
         foreach (var share in allShares)
         {
             var tracks = await _shareService.GetSharedTrackAsync(share.ShareName);
+            
+            if (_musicCacheService.IsCachedFilePathExposed)
+            {
+                foreach (var track in tracks)
+                {
+                    track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+                }
+            }
+            
             sharesResponse.Add(new ShareResponse
             {
                 Id = share.ShareId,

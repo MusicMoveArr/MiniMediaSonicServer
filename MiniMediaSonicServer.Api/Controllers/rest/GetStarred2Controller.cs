@@ -14,14 +14,18 @@ public class GetStarred2Controller : SonicControllerBase
     private readonly ArtistService _artistService;
     private readonly AlbumService _albumService;
     private readonly TrackService _trackService;
+    private readonly MusicCacheService _musicCacheService;
+    
     public GetStarred2Controller(
         ArtistService artistService,
         AlbumService albumService,
-        TrackService trackService)
+        TrackService trackService,
+        MusicCacheService musicCacheService)
     {
         _artistService = artistService;
         _albumService = albumService;
         _trackService = trackService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -31,6 +35,14 @@ public class GetStarred2Controller : SonicControllerBase
         var albumsTask = _albumService.GetStarredAlbumsAsync(User.UserId);
         var tracksTask = _trackService.GetStarredTracksAsync(User.UserId);
         await Task.WhenAll(artistsTask, albumsTask, tracksTask);
+        
+        if (_musicCacheService.IsCachedFilePathExposed)
+        {
+            foreach (var track in tracksTask.Result)
+            {
+                track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+            }
+        }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {

@@ -97,7 +97,8 @@ builder
     .Configure<DatabaseConfiguration>(builder.Configuration.GetSection("DatabaseConfiguration"))
     .Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"))
     .Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"))
-    .Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"));
+    .Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"))
+    .Configure<MusicCacheConfiguration>(builder.Configuration.GetSection("MusicCache"));
 
 string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnectionString))
@@ -142,6 +143,7 @@ builder.Services.AddScoped<ShareService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserPlayQueueService>();
 builder.Services.AddScoped<TranscodeService>();
+builder.Services.AddScoped<MusicCacheService>();
 
 //handlers
 builder.Services.AddScoped<ListenBrainzScrobbleHandler>();

@@ -11,17 +11,26 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class GetSongController : SonicControllerBase
 {
     private readonly TrackService _trackService;
-    public GetSongController(TrackService trackService)
+    private readonly MusicCacheService _musicCacheService;
+    public GetSongController(TrackService trackService,
+        MusicCacheService musicCacheService)
     {
         _trackService = trackService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetSongRequest request)
     {
+        var track = await _trackService.GetTrackByIdAsync(request.Id, User.UserId);
+        if (track != null)
+        {
+            track.Path = _musicCacheService.GetExposedCachedPath(track.Path, track);
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
-            Song = await _trackService.GetTrackByIdAsync(request.Id, User.UserId)
+            Song = track
         });
     }
 }

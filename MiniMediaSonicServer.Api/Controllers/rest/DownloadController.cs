@@ -12,9 +12,12 @@ namespace MiniMediaSonicServer.Api.Controllers.rest;
 public class DownloadController : SonicControllerBase
 {
     private readonly StreamService _streamService;
-    public DownloadController(StreamService streamService)
+    private readonly MusicCacheService _musicCacheService;
+    public DownloadController(StreamService streamService,
+        MusicCacheService musicCacheService)
     {
         _streamService = streamService;
+        _musicCacheService = musicCacheService;
     }
     
     [HttpGet, HttpPost]
@@ -26,6 +29,9 @@ public class DownloadController : SonicControllerBase
         {
             return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Track not found");
         }
+        
+        await _musicCacheService.SaveFileToCacheAsync(path, request.Id);
+        path = await _musicCacheService.GetCachedOrOriginalFilePathAsync(path, request.Id);
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));
         return Results.File(path, contentType, enableRangeProcessing: true);
