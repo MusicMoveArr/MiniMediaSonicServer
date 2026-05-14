@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_playlist (
+CREATE TABLE if not exists public.sonicserver_playlist (
     PlaylistId uuid NOT NULL,
     UserId uuid NOT NULL,
     Name text NOT NULL,
@@ -8,11 +8,11 @@ CREATE TABLE public.sonicserver_playlist (
     CONSTRAINT sonicserver_playlist_pkey PRIMARY KEY (PlaylistId)
 );
 
-CREATE TABLE public.sonicserver_playlist_track (
+CREATE TABLE if not exists public.sonicserver_playlist_track (
     PlaylistId uuid NOT NULL,
     TrackId uuid NOT NULL,
     TrackOrder int NOT NULL,
     CreatedAt timestamp DEFAULT current_timestamp,
     CONSTRAINT sonicserver_playlist_track_pkey PRIMARY KEY (PlaylistId, TrackId)
 );
-CREATE INDEX idx_sonicserver_playlist_userid ON public.sonicserver_playlist (UserId);
+CREATE INDEX if not exists  idx_sonicserver_playlist_userid ON public.sonicserver_playlist (UserId);

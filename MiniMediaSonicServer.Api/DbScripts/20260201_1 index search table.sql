@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_indexed_search (
+CREATE TABLE if not exists public.sonicserver_indexed_search (
     SearchId uuid NOT NULL,
     Type text NOT NULL,
     Id uuid NOT NULL,
@@ -6,8 +6,8 @@ CREATE TABLE public.sonicserver_indexed_search (
     CONSTRAINT sonicserver_indexed_search_pkey PRIMARY KEY (SearchId)
 );
 
-CREATE INDEX idx_sonicserver_indexed_search_type ON public.sonicserver_indexed_search (Type);
-CREATE INDEX idx_sonicserver_indexed_search_searchterm_trgm ON sonicserver_indexed_search USING gin (SearchTerm gin_trgm_ops);
+CREATE INDEX if not exists idx_sonicserver_indexed_search_type ON public.sonicserver_indexed_search (Type);
+CREATE INDEX if not exists idx_sonicserver_indexed_search_searchterm_trgm ON sonicserver_indexed_search USING gin (SearchTerm gin_trgm_ops);
 
 
 --tracks

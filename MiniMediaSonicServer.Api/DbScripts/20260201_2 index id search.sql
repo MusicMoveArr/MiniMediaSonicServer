@@ -1,1 +1,1 @@
-CREATE INDEX idx_sonicserver_indexed_search_id ON public.sonicserver_indexed_search (Id);
+CREATE INDEX if not exists idx_sonicserver_indexed_search_id ON public.sonicserver_indexed_search (Id);

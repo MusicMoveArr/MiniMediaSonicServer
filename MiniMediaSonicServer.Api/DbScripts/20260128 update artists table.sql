@@ -1,4 +1,4 @@
-ALTER TABLE artists ADD COLUMN record_id BIGINT;
+ALTER TABLE artists ADD COLUMN if not exists record_id BIGINT;
 
 CREATE SEQUENCE IF NOT EXISTS artists_record_id_seq;
 

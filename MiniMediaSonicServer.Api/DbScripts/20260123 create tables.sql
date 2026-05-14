@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user (
+CREATE TABLE if not exists public.sonicserver_user (
     UserId uuid NOT NULL,
     Username text NOT NULL,
     Password text NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE public.sonicserver_user (
     CONSTRAINT sonicserver_user_pkey PRIMARY KEY (UserId)
 );
 
-CREATE TABLE public.sonicserver_usertokens (
+CREATE TABLE if not exists public.sonicserver_usertokens (
     UserId uuid NOT NULL,
     Token text NOT NULL,
     ValidTill timestamp NOT NULL,

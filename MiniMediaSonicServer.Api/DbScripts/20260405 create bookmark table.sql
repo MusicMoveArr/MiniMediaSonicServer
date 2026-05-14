@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user_bookmark_track (
+CREATE TABLE if not exists public.sonicserver_user_bookmark_track (
     UserId uuid NOT NULL,
     TrackId uuid NOT NULL,
     Position bigint NOT NULL,

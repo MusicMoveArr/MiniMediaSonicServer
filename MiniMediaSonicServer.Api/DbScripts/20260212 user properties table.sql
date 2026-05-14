@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user_property (
+CREATE TABLE if not exists public.sonicserver_user_property (
     UserId uuid NOT NULL,
     Name text NOT NULL,
     Value text NOT NULL,

@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user_playqueue (
+CREATE TABLE if not exists public.sonicserver_user_playqueue (
     UserId uuid NOT NULL,
     CurrentTrackId uuid,
     TrackPosition bigint NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE public.sonicserver_user_playqueue (
     CONSTRAINT sonicserver_user_playqueue_pkey PRIMARY KEY (UserId)
 );
 
-CREATE TABLE public.sonicserver_user_playqueue_track (
+CREATE TABLE if not exists public.sonicserver_user_playqueue_track (
     UserId uuid NOT NULL,
     TrackId uuid,
     Index int,

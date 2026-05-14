@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user_share (
+CREATE TABLE if not exists public.sonicserver_user_share (
     ShareId uuid NOT NULL,
     UserId uuid NOT NULL,
     ShareName text NOT NULL,

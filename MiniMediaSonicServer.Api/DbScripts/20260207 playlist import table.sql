@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_playlist_import (
+CREATE TABLE if not exists public.sonicserver_playlist_import (
     ImportId uuid NOT NULL,
     Path text NOT NULL,
     IsGlobal bool NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE public.sonicserver_playlist_import (
     CONSTRAINT sonicserver_playlist_import_path_key UNIQUE (Path),
     CONSTRAINT sonicserver_playlist_import_pkey PRIMARY KEY (ImportId)
 );
-CREATE TABLE public.sonicserver_playlist_import_user (
+CREATE TABLE if not exists public.sonicserver_playlist_import_user (
     ImportId uuid NOT NULL,
     UserId uuid NOT NULL,
     PlaylistId uuid NOT NULL,

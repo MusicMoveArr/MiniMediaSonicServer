@@ -1,10 +1,10 @@
-alter table sonicserver_artist_rated add column StarredAt timestamp default null;
-alter table sonicserver_album_rated add column StarredAt timestamp default null;
-alter table sonicserver_track_rated add column StarredAt timestamp default null;
+alter table sonicserver_artist_rated add column if not exists StarredAt timestamp default null;
+alter table sonicserver_album_rated add column if not exists StarredAt timestamp default null;
+alter table sonicserver_track_rated add column if not exists StarredAt timestamp default null;
 
-alter table sonicserver_artist_rated add column RatedAt timestamp default null;
-alter table sonicserver_album_rated add column RatedAt timestamp default null;
-alter table sonicserver_track_rated add column RatedAt timestamp default null;
+alter table sonicserver_artist_rated add column if not exists RatedAt timestamp default null;
+alter table sonicserver_album_rated add column if not exists RatedAt timestamp default null;
+alter table sonicserver_track_rated add column if not exists RatedAt timestamp default null;
 
 update sonicserver_artist_rated 
 set StarredAt = UpdatedAt

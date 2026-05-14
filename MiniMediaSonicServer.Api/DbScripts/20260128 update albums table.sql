@@ -1,4 +1,4 @@
-ALTER TABLE albums ADD COLUMN record_id BIGINT;
+ALTER TABLE albums ADD COLUMN if not exists record_id BIGINT;
 
 CREATE SEQUENCE IF NOT EXISTS albums_record_id_seq;
 
@@ -11,7 +11,7 @@ SELECT setval(
     (SELECT max(record_id) FROM albums)
 );
 
-ALTER TABLE albums ALTER COLUMN record_id SET NOT NULL;
+ALTER TABLE albums ALTER COLUMN if not exists record_id SET NOT NULL;
 
 ALTER TABLE albums
 ALTER COLUMN record_id

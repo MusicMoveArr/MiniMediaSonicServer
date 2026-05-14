@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_user_playhistory (
+CREATE TABLE if not exists public.sonicserver_user_playhistory (
     HistoryId uuid NOT NULL,
     UserId uuid NOT NULL,
     TrackId uuid NOT NULL,
@@ -14,4 +14,4 @@ CREATE TABLE public.sonicserver_user_playhistory (
     UpdatedAt timestamp DEFAULT current_timestamp,
     CONSTRAINT sonicserver_user_playhistory_pkey PRIMARY KEY (HistoryId)
 );
-CREATE INDEX idx_sonicserver_user_playhistory_userid ON public.sonicserver_user_playhistory USING btree (UserId);
+CREATE INDEX if not exists idx_sonicserver_user_playhistory_userid ON public.sonicserver_user_playhistory USING btree (UserId);

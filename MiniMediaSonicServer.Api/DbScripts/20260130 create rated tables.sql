@@ -1,4 +1,4 @@
-CREATE TABLE public.sonicserver_track_rated (
+CREATE TABLE if not exists public.sonicserver_track_rated (
     UserId uuid NOT NULL,
     TrackId uuid NOT NULL,
     Rating int NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE public.sonicserver_track_rated (
     CONSTRAINT sonicserver_track_rated_pkey PRIMARY KEY (UserId, TrackId)
 );
 
-CREATE TABLE public.sonicserver_artist_rated (
+CREATE TABLE if not exists public.sonicserver_artist_rated (
     UserId uuid NOT NULL,
     ArtistId uuid NOT NULL,
     Rating int NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE public.sonicserver_artist_rated (
     CONSTRAINT sonicserver_artist_rated_pkey PRIMARY KEY (UserId, ArtistId)
 );
 
-CREATE TABLE public.sonicserver_album_rated (
+CREATE TABLE if not exists public.sonicserver_album_rated (
     UserId uuid NOT NULL,
     AlbumId uuid NOT NULL,
     Rating int NOT NULL,

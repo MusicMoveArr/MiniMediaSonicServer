@@ -1,4 +1,4 @@
-alter table albums add column year int default 0 not null;
+alter table albums add column if not exists year int default 0 not null;
 
 update albums al set (year) = (
     select coalesce(max(tag_year), 0)
@@ -8,4 +8,4 @@ update albums al set (year) = (
 )
 where al.year = 0
 
-CREATE INDEX idx_albums_year ON albums USING btree (year);
+CREATE INDEX if not exists idx_albums_year ON albums USING btree (year);

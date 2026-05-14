@@ -1,4 +1,4 @@
-ALTER TABLE metadata ADD COLUMN record_id BIGINT;
+ALTER TABLE metadata ADD COLUMN if not exists record_id BIGINT;
 
 CREATE SEQUENCE IF NOT EXISTS metadata_record_id_seq;
 

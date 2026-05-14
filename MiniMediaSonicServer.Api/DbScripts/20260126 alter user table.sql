@@ -1,1 +1,1 @@
-alter table sonicserver_user add column TokenBasedAuth text default null;
+alter table sonicserver_user add column if not exists TokenBasedAuth text default null;
