@@ -1,4 +1,4 @@
-ALTER TABLE metadata if exists drop COLUMN computed_genre;
+ALTER TABLE metadata drop COLUMN if exists computed_genre;
 
 ALTER TABLE metadata ADD COLUMN if not exists computed_genre text GENERATED ALWAYS AS (
     regexp_replace(tag_alljsontags->>'Genre', '[,/&|]', ';', 'g')
