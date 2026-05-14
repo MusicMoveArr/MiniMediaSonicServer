@@ -89,6 +89,15 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "Expiry": "72:00:00",
     "SlidingExpiration": "72:00:00"
   },
+  "MusicCache": {
+    "Path": "/cache",
+    "DirectoryFormat": "{CleanArtistUpper:substr(0,1)}/{CleanArtistUpper:substr(1,1)}/{CleanArtist}/{Album}",
+    "DirectorySeparator": "_",
+    "FileFormat": "{CleanArtist} - {Album} - {DiscNumber:cond:<=1?{TrackNumber:00}|{DiscNumber:00}-{TrackNumber:00}} - {Title}",
+    "MaxCacheSize": 1000000000,
+    "MaxFileSize": 50000000,
+    "ExposeCachedFilePath": false
+  },
   "Jobs": {
     "PlaylistImportCron": "0 0 0 * * ?",
     "NavidromeSmartPlaylistRefreshCron": "0 0 0 * * ?",
