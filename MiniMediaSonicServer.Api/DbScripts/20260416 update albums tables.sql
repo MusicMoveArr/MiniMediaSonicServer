@@ -6,6 +6,6 @@ update albums al set (year) = (
     where m.AlbumId = al.AlbumId
       and m.tag_year > 0
 )
-where al.year = 0
+where al.year = 0;
 
 CREATE INDEX if not exists idx_albums_year ON albums USING btree (year);
