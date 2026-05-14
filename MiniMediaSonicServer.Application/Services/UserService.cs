@@ -110,7 +110,38 @@ public class UserService
 
         return Convert.ToBase64String(combined);
     }
-    
+
+    public async Task CreateFirstUserAsync()
+    {
+        bool anyUserExists = await _userRepository.AnyUserExistsAsync();
+        if (!anyUserExists)
+        {
+            CreateUserRequest newUserRequest = new CreateUserRequest
+            {
+                AdminRole = true,
+                CommentRole = true,
+                CoverArtRole = true,
+                DownloadRole = true,
+                Email = "1",
+                JukeboxRole = true,
+                Password = Guid.NewGuid().ToString(),
+                PodcastRole = true,
+                ShareRole = true,
+                SettingsRole = true,
+                StreamRole = true,
+                UploadRole = true,
+                Username = "admin",
+                VideoConversionRole = true,
+                MusicFolderId = 1,
+                MaxBitRate = 0
+            };
+            bool success = await CreateUserAsync(newUserRequest);
+            if (success)
+            {
+                Console.WriteLine($"First account is created, username: {newUserRequest.Username}, password: {newUserRequest.Password}");
+            }
+        }
+    }
 
     private string Md5Hex(string input)
     {

@@ -192,4 +192,9 @@ app.Use(next => context =>
 });
 
 app.UseEndpoints(endpoints => endpoints.MapControllers());
+
+using var scope = app.Services.CreateScope();
+var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+await userService.CreateFirstUserAsync();
+
 app.Run();
