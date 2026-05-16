@@ -26,6 +26,8 @@ public class ReIndexSearchService
         //artist
         await _indexedSearchRepository.AddMissingArtistsAsync();
         
+        await _indexedSearchRepository.CleanupNonExistingSearchIdsAsync();
+        
         await _indexedSearchRepository.UpdateAlbumsYearAsync();
 
         //fix record_id numbering

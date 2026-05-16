@@ -161,6 +161,28 @@ public class IndexedSearchRepository
 	    await conn.ExecuteAsync(query);
     }
 
+    public async Task CleanupNonExistingSearchIdsAsync()
+    {
+	    string cleanupMetadataQuery = @"delete from sonicserver_indexed_search sis 
+										where sis.type ='track' 
+										and not exists(select 1 from metadata m
+											           where m.metadataid = sis.id)";
+
+	    string cleanupArtistsQuery = @"delete from sonicserver_indexed_search sis 
+									   where sis.type ='artist' 
+									   and not exists(select 1 from artists a
+									   		          where a.artistid = sis.id)";
+	    
+	    string cleanupAlbumsQuery = @"delete from sonicserver_indexed_search sis 
+									  where sis.type ='album' 
+									  and not exists(select 1 from albums ab
+									  		         where ab.albumid = sis.id)";
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(cleanupMetadataQuery);
+	    await conn.ExecuteAsync(cleanupArtistsQuery);
+	    await conn.ExecuteAsync(cleanupAlbumsQuery);
+    }
+
     public async Task UpdateAlbumsYearAsync()
     {
 	    string query = @"update albums al set (year) = (
