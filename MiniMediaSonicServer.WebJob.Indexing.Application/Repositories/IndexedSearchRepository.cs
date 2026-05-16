@@ -174,4 +174,135 @@ public class IndexedSearchRepository
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.ExecuteAsync(query);
     }
+    public async Task UpdateGappedRecordIdMetadataAsync()
+    {
+	    //what this essentially does is grabbing the highest record_id's
+	    //moving them into deleted record_id's (gaps)
+	    //some projects when they ask for 200 records, they except 200 records (kind of obvious)
+	    //when there are gaps and say you have 200 albums it might show statistically only 49
+	    //because record_id was deleted/cleaned up
+	    //then second query to reset the record_id sequence ordering for new records
+	    
+	    string query = @"WITH gaps AS (
+						   SELECT
+						     record_id AS gap_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+						   FROM (
+						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     FROM metadata
+						     EXCEPT
+						     SELECT record_id FROM metadata
+						   ) missing
+						 ),
+						 highs AS (
+						   SELECT
+						     record_id AS high_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
+						   FROM metadata
+						   ORDER BY record_id DESC
+						   LIMIT (SELECT COUNT(*) FROM gaps)
+						 )
+						 UPDATE metadata m
+						 SET record_id = g.gap_id
+						 FROM gaps g
+						 JOIN highs h ON g.rn = h.rn
+						 WHERE m.record_id = h.high_id";
+
+	    string resetIdentityQuery = @"SELECT setval(
+									      'metadata_record_id_seq',
+									      (SELECT max(record_id) FROM metadata)
+									  );";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(resetIdentityQuery);
+    }
+    
+    public async Task UpdateGappedRecordIdArtistsAsync()
+    {
+	    //what this essentially does is grabbing the highest record_id's
+	    //moving them into deleted record_id's (gaps)
+	    //some projects when they ask for 200 records, they except 200 records (kind of obvious)
+	    //when there are gaps and say you have 200 albums it might show statistically only 49
+	    //because record_id was deleted/cleaned up
+	    //then second query to reset the record_id sequence ordering for new records
+	    
+	    string query = @"WITH gaps AS (
+						   SELECT
+						     record_id AS gap_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+						   FROM (
+						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     FROM artists
+						     EXCEPT
+						     SELECT record_id FROM artists
+						   ) missing
+						 ),
+						 highs AS (
+						   SELECT
+						     record_id AS high_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
+						   FROM artists
+						   ORDER BY record_id DESC
+						   LIMIT (SELECT COUNT(*) FROM gaps)
+						 )
+						 UPDATE artists m
+						 SET record_id = g.gap_id
+						 FROM gaps g
+						 JOIN highs h ON g.rn = h.rn
+						 WHERE m.record_id = h.high_id";
+	    
+	    string resetIdentityQuery = @"SELECT setval(
+									      'artists_record_id_seq',
+									      (SELECT max(record_id) FROM artists)
+									  );";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(resetIdentityQuery);
+    }
+    
+    public async Task UpdateGappedRecordIdAlbumsAsync()
+    {
+	    //what this essentially does is grabbing the highest record_id's
+	    //moving them into deleted record_id's (gaps)
+	    //some projects when they ask for 200 records, they except 200 records (kind of obvious)
+	    //when there are gaps and say you have 200 albums it might show statistically only 49
+	    //because record_id was deleted/cleaned up
+	    //then second query to reset the record_id sequence ordering for new records
+	    
+	    string query = @"WITH gaps AS (
+						   SELECT
+						     record_id AS gap_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+						   FROM (
+						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     FROM albums
+						     EXCEPT
+						     SELECT record_id FROM albums
+						   ) missing
+						 ),
+						 highs AS (
+						   SELECT
+						     record_id AS high_id,
+						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
+						   FROM albums
+						   ORDER BY record_id DESC
+						   LIMIT (SELECT COUNT(*) FROM gaps)
+						 )
+						 UPDATE albums m
+						 SET record_id = g.gap_id
+						 FROM gaps g
+						 JOIN highs h ON g.rn = h.rn
+						 WHERE m.record_id = h.high_id";
+
+	    string resetIdentityQuery = @"SELECT setval(
+									      'albums_record_id_seq',
+									      (SELECT max(record_id) FROM albums)
+									  );";
+	    
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(resetIdentityQuery);
+    }
 }

@@ -27,5 +27,10 @@ public class ReIndexSearchService
         await _indexedSearchRepository.AddMissingArtistsAsync();
         
         await _indexedSearchRepository.UpdateAlbumsYearAsync();
+
+        //fix record_id numbering
+        await _indexedSearchRepository.UpdateGappedRecordIdAlbumsAsync();
+        await _indexedSearchRepository.UpdateGappedRecordIdArtistsAsync();
+        await _indexedSearchRepository.UpdateGappedRecordIdMetadataAsync();
     }
 }
