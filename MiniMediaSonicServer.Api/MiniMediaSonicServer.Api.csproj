@@ -15,8 +15,9 @@
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
         <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="Microsoft.Extensions.Primitives" Version="10.0.5" />
-        <PackageReference Include="Quartz" Version="3.17.0" />
-        <PackageReference Include="Quartz.AspNetCore" Version="3.17.0" />
+        <PackageReference Include="Quartz" Version="3.18.1" />
+        <PackageReference Include="Quartz.AspNetCore" Version="3.18.1" />
+        <PackageReference Include="Quartz.Serialization.Json" Version="3.18.1" />
         <PackageReference Include="SharpGrip.FluentValidation.AutoValidation.Mvc" Version="2.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
     </ItemGroup>
@@ -148,6 +149,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="DbScripts\20260201_4 rating indexes.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DbScripts\20260516 add quartz persistence.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

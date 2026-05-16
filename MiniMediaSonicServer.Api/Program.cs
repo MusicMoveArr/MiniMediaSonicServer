@@ -22,6 +22,14 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+DeployChanges.To
+    .PostgresqlDatabase(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"])
+    .WithExecutionTimeout(TimeSpan.FromMinutes(15))
+    .WithScriptsFromFileSystem("./DbScripts")
+    .LogToConsole()
+    .Build()
+    .PerformUpgrade();
+
 var tlsConfiguration = new TlsConfiguration();
 builder.Configuration.Bind("tls", tlsConfiguration);
 builder.Services.AddSingleton<ICertificateReader>(x =>
@@ -88,6 +96,11 @@ builder
         q.AddPlaylistJobs(builder);
         q.AddIndexingJobs(builder);
         q.AddImportJobs(builder);
+        q.UsePersistentStore(options =>
+        {
+            options.UsePostgres(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"]);
+            options.UseNewtonsoftJsonSerializer();
+        });
     })
     .AddQuartzHostedService()
     .AddEndpointsApiExplorer()
@@ -165,14 +178,6 @@ builder.Services.AddAutoLikeDependencies();
 
 
 var app = builder.Build();
-
-DeployChanges.To
-    .PostgresqlDatabase(app.Services.GetRequiredService<IOptions<DatabaseConfiguration>>().Value.ConnectionString)
-    .WithExecutionTimeout(TimeSpan.FromMinutes(15))
-    .WithScriptsFromFileSystem("./DbScripts")
-    .LogToConsole()
-    .Build()
-    .PerformUpgrade();
 
 app.UseCors(builder => builder
     .AllowAnyOrigin()
