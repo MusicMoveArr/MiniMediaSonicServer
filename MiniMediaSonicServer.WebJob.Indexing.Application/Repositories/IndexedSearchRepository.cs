@@ -14,43 +14,6 @@ public class IndexedSearchRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
 
-    public async Task RemoveMissingTracksAsync()
-    {
-        string query = @"delete from sonicserver_indexed_search s
-                         where s.type = 'track'
-	                         and not exists (select 1 from metadata m 
-                                             where m.metadataid = s.id 
-                                             limit 1)";
-
-        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-        await conn.ExecuteAsync(query);
-    }
-
-    public async Task RemoveMissingAlbumsAsync()
-    {
-	    string query = @"delete from sonicserver_indexed_search s
-                         where s.type = 'album'
-	                         and not exists (select 1 from albums al
-	                                         where al.AlbumId = s.id 
-	                                         limit 1)";
-
-	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
-    }
-
-    public async Task RemoveMissingArtistsAsync()
-    {
-	    string query = @"delete from sonicserver_indexed_search s
-                         where s.type = 'artist'
-	                         and not exists (select 1 from artists a
-	                                         where a.ArtistId = s.id 
-	                                         limit 1)";
-
-	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
-    }
-    
-
     public async Task AddMissingTracks_TitleAsync()
     {
 	    string query = @"insert into sonicserver_indexed_search (SearchId, type, Id, SearchTerm)
