@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Interfaces;
+using MiniMediaSonicServer.Application.Models;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
 
@@ -21,6 +22,8 @@ public class GetCoverArtController : SonicControllerBase
     private const string RedisPrefixKey = "image:";
     private readonly IRedisCacheService _redisCacheService;
     private const string NotFoundCoverData = "NotFound";
+    private static readonly byte[] webpMagicHeader = ASCIIEncoding.ASCII.GetBytes("RIFF");
+    private static readonly byte[] webpMagicHeader2 = ASCIIEncoding.ASCII.GetBytes("WEBP");
     
     public GetCoverArtController(
         CoverService coverService,
@@ -48,10 +51,11 @@ public class GetCoverArtController : SonicControllerBase
             }
             else if (cachedCover?.Length > 0)
             {
-                return Results.Bytes(cachedCover, "image/jpeg");
+                return Results.Bytes(cachedCover, 
+                    IsCachedCoverWebP(cachedCover) ? "image/webp" : "image/jpeg");
             }
             
-            byte[]? coverArt = null;
+            CoverArtModel? coverArt = null;
             bool searchedArtist = false;
             bool searchedAlbum = false;
             bool searchedTrack = false;
@@ -97,8 +101,8 @@ public class GetCoverArtController : SonicControllerBase
             
             if (coverArt != null)
             {
-                await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, coverArt);
-                return Results.Bytes(coverArt, "image/jpeg");
+                await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, coverArt.CoverData);
+                return Results.Bytes(coverArt.CoverData, coverArt.ContentType);
             }
 
             await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
@@ -106,5 +110,25 @@ public class GetCoverArtController : SonicControllerBase
         }
         
         return Results.Bytes(_unknownCover, "image/png");
+    }
+
+    private bool IsCachedCoverWebP(byte[] coverData)
+    {
+        for(int i = 0; i < webpMagicHeader.Length; i++)
+        {
+            if (webpMagicHeader[i] != coverData[i])
+            {
+                return false;
+            }
+        }
+        for(int i = 0; i < webpMagicHeader2.Length; i++)
+        {
+            if (webpMagicHeader2[i] != coverData[i + webpMagicHeader.Length + 4])
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

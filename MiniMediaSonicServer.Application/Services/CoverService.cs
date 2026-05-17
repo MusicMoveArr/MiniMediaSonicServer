@@ -1,6 +1,6 @@
+using MiniMediaSonicServer.Application.Models;
 using MiniMediaSonicServer.Application.Repositories;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -18,12 +18,17 @@ public class CoverService
         AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
     };
 
+    private readonly string[] jpegWebpExtentions = [".jpg", ".webp"];
+    private const string ResizedContentType = "image/jpeg";
+    private const string WebpContentType = "image/webp";
+    private const string webpExtension = ".webp";
+
     public CoverService(TrackCoverRepository trackCoverRepository)
     {
         _trackCoverRepository = trackCoverRepository;
     }
 
-    public async Task<byte[]?> GetAlbumCoverByTrackIdAsync(Guid trackId)
+    public async Task<CoverArtModel?> GetAlbumCoverByTrackIdAsync(Guid trackId)
     {
         string? trackPath = await _trackCoverRepository.GetTrackPathByTrackIdAsync(trackId);
         
@@ -37,16 +42,28 @@ public class CoverService
         if (trackFileInfo.Directory?.Exists == true)
         {
             var coverFileInfo = trackFileInfo.Directory
-                .GetFiles("*.jpg", _enumerationOptions)
-                .Select(dir => dir)
+                .GetFiles("*.*", _enumerationOptions)
+                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext)))
+                .Select(f => new
+                {
+                    File = f,
+                    Order = f.Name.EndsWith(".webp") ? 0 : 1
+                })
+                .OrderBy(f => f.Order)
+                .Select(f => f.File)
                 .FirstOrDefault();
 
             if (coverFileInfo != null)
             {
+                if (coverFileInfo.Name.EndsWith(webpExtension))
+                {
+                    return new CoverArtModel(File.ReadAllBytes(coverFileInfo.FullName), WebpContentType);
+                }
+                
                 byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
                 if (coverData != null)
                 {
-                    return coverData;
+                    return new CoverArtModel(coverData, ResizedContentType);
                 }
             }
         }
@@ -56,14 +73,15 @@ public class CoverService
             ATL.Track track = new ATL.Track(trackPath);
             if (track.EmbeddedPictures.Any())
             {
-                return GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
+                byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
+                return new CoverArtModel(coverData, ResizedContentType);
             }
         }
 
         return null;
     }
 
-    public async Task<byte[]?> GetAlbumCoverByAlbumIdAsync(Guid albumId)
+    public async Task<CoverArtModel?> GetAlbumCoverByAlbumIdAsync(Guid albumId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByAlbumIdAsync(albumId);
         
@@ -71,16 +89,28 @@ public class CoverService
             .Select(path => new FileInfo(path).Directory)
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
-            .Select(dir => dir)
+            .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
+                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext))))
+            .Select(f => new
+            {
+                File = f,
+                Order = f.Name.EndsWith(".webp") ? 0 : 1
+            })
+            .OrderBy(f => f.Order)
+            .Select(f => f.File)
             .FirstOrDefault();
-
+        
         if (coverFileInfo != null)
         {
+            if (coverFileInfo.Name.EndsWith(webpExtension))
+            {
+                return new CoverArtModel(File.ReadAllBytes(coverFileInfo.FullName), WebpContentType);
+            }
+            
             byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
             if (coverData != null)
             {
-                return coverData;
+                return new CoverArtModel(coverData, ResizedContentType);
             }
         }
         
@@ -92,7 +122,7 @@ public class CoverService
                 byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
                 if (coverData != null)
                 {
-                    return coverData;
+                    return new CoverArtModel(coverData, ResizedContentType);
                 }
             }
         }
@@ -100,24 +130,36 @@ public class CoverService
         return null;
     }
 
-    public async Task<byte[]?> GetArtistCoverByArtistIdAsync(Guid artistId)
+    public async Task<CoverArtModel?> GetArtistCoverByArtistIdAsync(Guid artistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByArtistIdAsync(artistId);
         
         var coverFileInfo = trackPaths
-            .Select(path => new FileInfo(path).Directory.Parent)
+            .Select(path => new FileInfo(path).Directory)
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
-            .Select(dir => dir)
+            .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
+                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext))))
+            .Select(f => new
+            {
+                File = f,
+                Order = f.Name.EndsWith(".webp") ? 0 : 1
+            })
+            .OrderBy(f => f.Order)
+            .Select(f => f.File)
             .FirstOrDefault();
 
         if (coverFileInfo != null)
         {
+            if (coverFileInfo.Name.EndsWith(webpExtension))
+            {
+                return new CoverArtModel(File.ReadAllBytes(coverFileInfo.FullName), WebpContentType);
+            }
+            
             byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.FullName);
             if (coverData != null)
             {
-                return coverData;
+                return new CoverArtModel(coverData, ResizedContentType);
             }
         }
         
@@ -129,14 +171,14 @@ public class CoverService
                 byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
                 if (coverData != null)
                 {
-                    return coverData;
+                    return new CoverArtModel(coverData, ResizedContentType);
                 }
             }
         }
         return null;
     }
 
-    public async Task<byte[]?> GetPlaylistCoverByIdAsync(Guid playlistId)
+    public async Task<CoverArtModel?> GetPlaylistCoverByIdAsync(Guid playlistId)
     {
         List<string> trackPaths = await _trackCoverRepository.GetTrackPathByPlaylistIdAsync(playlistId);
         
@@ -157,7 +199,8 @@ public class CoverService
 
         if (coverFileInfo.Count < 4)
         {
-            return GetBytesOfResizedImage(coverFileInfo.First().FullName);
+            byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.First().FullName);
+            return new CoverArtModel(coverData, ResizedContentType);
         }
 
         List<Image> covers = coverFileInfo
@@ -171,7 +214,8 @@ public class CoverService
             {
                 cover.Dispose();
             }
-            return GetBytesOfResizedImage(coverFileInfo.First().FullName);
+            byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.First().FullName);
+            return new CoverArtModel(coverData, ResizedContentType);
         }
 
         int singleImageWidth = this.DefaultCoverSize.Width / 2;
@@ -203,7 +247,8 @@ public class CoverService
             {
                 cover.Dispose();
             }
-            return stream.ToArray();
+            
+            return new CoverArtModel(stream.ToArray(), ResizedContentType);
         }
     }
 
