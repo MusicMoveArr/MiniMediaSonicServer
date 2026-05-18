@@ -96,7 +96,15 @@ public class SearchRepository
 							(case when album_rated.Starred = true 
 							    then album_rated.StarredAt 
 							    else null 
-							 end) as Starred
+							 end) as Starred,
+							EXISTS (
+							        SELECT 1
+							        FROM albums ab
+							        JOIN albums ab2 ON ab2.albumid = al.AlbumId
+							        WHERE lower(ab.title) = lower(ab2.title)
+							        GROUP BY lower(ab.title)
+							        HAVING count(*) > 1
+							    ) as HasDuplicates
 						 FROM sonicserver_indexed_search search
 						 join albums al on al.AlbumId = search.Id
 						 JOIN artists a on a.ArtistId = al.ArtistId
@@ -134,7 +142,7 @@ public class SearchRepository
 
 	    try
 	    {
-		    results = (await conn.QueryAsync<AlbumID3>(query, 
+		    results = (await conn.QueryAsync<AlbumID3>(query,
 			    param: new
 			    {
 				    searchquery,
@@ -152,8 +160,17 @@ public class SearchRepository
 	    {
 		    await transaction.CommitAsync();
 	    }
+
+	    var finalResults = results
+		    .Where(r => !r.HasDuplicates)
+		    .ToList();
 	    
-	    return results;
+	    finalResults.AddRange(results
+		    .Where(r => r.HasDuplicates)
+		    .GroupBy(r => r.Name.ToLower())
+		    .Select(r => r.First()));
+	    
+	    return finalResults;
     }
     
     public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset, Guid userId, int accuracy = 50)

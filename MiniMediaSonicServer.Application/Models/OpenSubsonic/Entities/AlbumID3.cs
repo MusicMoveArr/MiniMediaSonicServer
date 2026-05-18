@@ -96,5 +96,8 @@ public class AlbumID3
     [XmlElement("song")]
     [JsonPropertyName("song")]
     public List<TrackID3> Song { get; set; } = new List<TrackID3>();
-
+    
+    [XmlIgnore]
+    [JsonIgnore]
+    public bool HasDuplicates { get; set; }
 }

@@ -126,7 +126,21 @@ public class AlbumRepository
     
     public async Task<AlbumID3?> GetAlbumId3WithTracksAsync(Guid albumId, Guid userId)
     {
-	    string query = @"SELECT 
+	    string query = @"WITH album_collection AS (
+							SELECT unnest(array_agg(ab.albumid)) as albumid
+							FROM albums ab
+							JOIN albums ab2 ON ab2.albumid = @id
+							WHERE lower(ab.title) = lower(ab2.title)
+							GROUP BY lower(ab.title)
+							HAVING count(*) > 1
+
+							union
+
+							SELECT ab.albumid as albumid
+							FROM albums ab
+							WHERE ab.albumid = @id
+						 )
+						 SELECT 
  							al.AlbumId as Id,
  							al.Title as Name,
  							'' as version,
@@ -201,8 +215,9 @@ public class AlbumRepository
  							    
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
-						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
+						 FROM album_collection col
+						 JOIN albums al ON al.albumid = col.albumid
+					     join artists a on a.artistid = al.artistid
 						 JOIN metadata m on m.albumid = al.albumid
  						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
  						 left join sonicserver_album_rated album_rated on album_rated.AlbumId = al.AlbumId and album_rated.UserId = @userId
@@ -246,9 +261,7 @@ public class AlbumRepository
 						         where UserId = @userId and Scrobble = true
 						         group by TrackId
 						     ) hist on hist.TrackId = m.MetadataId
-						     where m.albumid = al.albumid) as al_sum on true
- 							    
-						 where al.albumid = @id";
+						     where m.albumid = al.albumid) as al_sum on true";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
@@ -284,16 +297,35 @@ public class AlbumRepository
 		    });
 	    
 	    var groupedResult = results
-		    .GroupBy(album => album.Id)
+		    .GroupBy(album => album.Name.ToLower())
 		    .Select(group =>
 		    {
-			    var album = group.First();
+			    var album = group.First(a => a.Id == albumId);
+			    album.Duration = group.Sum(a => album.Duration);
+			    album.PlayCount = group.Sum(a => album.PlayCount);
+			    album.SongCount = group.Sum(a => album.SongCount);
+			    album.Artists = group
+				    .SelectMany(a => album.Artists)
+				    .DistinctBy(a => a.Id)
+				    .ToList();
+
+			    if (group.Select(a => a.Id).Distinct().Count() > 1)
+			    {
+				    album.IsCompilation = true;
+			    }
+			    
 			    album.Song = group
 				    .SelectMany(album => album.Song)
 				    .DistinctBy(track => track.TrackId)
 				    .OrderBy(track => track.TrackNumber)
 				    .ThenBy(track => track.DiscNumber)
 				    .ToList();
+
+			    foreach (var song in album.Song)
+			    {
+				    song.AlbumId = album.Id;
+			    }
+			    
 			    return album;
 		    })
 		    .ToList();
