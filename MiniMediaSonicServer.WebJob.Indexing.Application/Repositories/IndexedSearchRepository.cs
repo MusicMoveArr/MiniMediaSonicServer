@@ -290,4 +290,57 @@ public class IndexedSearchRepository
 	    await conn.ExecuteAsync(query);
 	    await conn.ExecuteAsync(resetIdentityQuery);
     }
+    
+    public async Task UpdateRecordTitleAscIdAlbumsAsync()
+    {
+	    //update record_title_asc_id only if needed when the table is out of sync with title ordering asc
+	    string outOfSyncQuery = @"WITH expected AS (
+							SELECT
+								albumid,
+								record_title_asc_id,
+								ROW_NUMBER() OVER (ORDER BY title ASC)          AS rank_by_title,
+								ROW_NUMBER() OVER (ORDER BY record_title_asc_id ASC) AS rank_by_id
+							FROM albums
+							WHERE record_title_asc_id IS NOT NULL
+						)
+						SELECT COUNT(*) AS out_of_sync
+						FROM expected
+						WHERE rank_by_title != rank_by_id";
+
+	    string resetTitleRecordAscSeqId = @"SELECT setval('albums_record_title_asc_id_seq', 1, false)";
+	    string resetTitleRecordAscId = @"UPDATE albums
+										 SET record_title_asc_id = sub.new_id
+										 FROM (
+										     SELECT record_title_asc_id, row_number() OVER (ORDER BY record_title_asc_id) + 1000000000 AS new_id
+										     FROM albums
+										 ) sub
+										 WHERE albums.record_title_asc_id = sub.record_title_asc_id";
+	    
+	    string setNewTitleRecordAscId = @"WITH ordered AS (
+										      SELECT
+										          albumid,
+										          nextval('albums_record_title_asc_id_seq') AS new_id
+										      FROM albums
+										      ORDER BY title ASC
+										  )
+										  UPDATE albums
+										  SET record_title_asc_id = ordered.new_id
+										  FROM ordered
+										  WHERE albums.albumid = ordered.albumid";
+	    
+	    string resetIdentityQuery = @"SELECT setval(
+									      'albums_record_title_asc_id_seq',
+									      (SELECT max(record_title_asc_id) FROM albums)
+									  );";
+	    
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncQuery);
+	    if (outOfSync > 0)
+	    {
+		    await conn.ExecuteAsync(resetTitleRecordAscSeqId);
+		    await conn.ExecuteAsync(resetTitleRecordAscId);
+		    await conn.ExecuteAsync(setNewTitleRecordAscId);
+		    await conn.ExecuteAsync(resetIdentityQuery);
+	    }
+    }
 }

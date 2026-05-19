@@ -30,5 +30,8 @@ public class ReIndexSearchService
         await _indexedSearchRepository.UpdateGappedRecordIdAlbumsAsync();
         await _indexedSearchRepository.UpdateGappedRecordIdArtistsAsync();
         await _indexedSearchRepository.UpdateGappedRecordIdMetadataAsync();
+        
+        //fix record_title_asc_id ordering
+        await _indexedSearchRepository.UpdateRecordTitleAscIdAlbumsAsync();
     }
 }

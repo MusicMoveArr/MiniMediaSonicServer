@@ -52,9 +52,10 @@ public class AlbumRepository
 						                    where m.albumid = al.albumid
 						                      and m.computed_genre ILIKE '%' || @genre || '%')
 						                WHEN @type IN ('recent', 'frequent') THEN playhistory.AlbumId IS NOT NULL
-						                WHEN @type IN ('newest', 'random', 'alphabeticalByName') THEN 1=1
+						                WHEN @type IN ('newest', 'random') THEN 1=1
 						                WHEN @type = 'starred' THEN album_rated.Starred
 						                WHEN @type = 'byYear' THEN al.year between @toYear and @fromYear
+						                WHEN @type = 'alphabeticalByName' THEN al.record_title_asc_id >= @offset AND al.record_title_asc_id <= @offset + @limit
 						                ELSE al.record_id >= @offset AND al.record_id <= @offset + @limit
 						            END)
 						     ORDER BY
@@ -62,11 +63,10 @@ public class AlbumRepository
 						         CASE WHEN @type = 'random' THEN random() END DESC,
 						         CASE WHEN @type = 'byYear' THEN al.year END DESC,
 						         CASE WHEN @type = 'newest' THEN al.record_id END DESC,
-						         CASE WHEN @type = 'alphabeticalByName' THEN al.Title END ASC,
+						         CASE WHEN @type = 'alphabeticalByName' THEN al.record_title_asc_id END ASC,
 						         CASE WHEN @type = 'recent' THEN playhistory.UpdatedAt END DESC,
 						         CASE WHEN @type = 'starred' THEN album_rated.StarredAt END DESC
 
-							 offset (case WHEN @type = 'alphabeticalByName' then @offset else 0 end)
 						     LIMIT @limit
 						 )
 						 SELECT

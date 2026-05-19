@@ -154,6 +154,9 @@
       <None Update="DbScripts\20260516 add quartz persistence.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="DbScripts\20260519 update albums table.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
