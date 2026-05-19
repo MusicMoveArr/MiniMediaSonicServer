@@ -79,7 +79,7 @@ public static class AlbumReleaseTypeUtil
 
     private static bool IsSingle(AlbumID3 album)
     {
-        if (album.SongCount == 1)
+        if (album.SongCount == 1 || album.Song.Count == 1)
         {
             return true;
         }
@@ -101,6 +101,6 @@ public static class AlbumReleaseTypeUtil
             .Skip(1)
             .Sum(song => Fuzz.PartialRatio(trackTitle, song.Title));
 
-        return percentageSum / (album.Song.Count - 1) > 90;
+        return Math.Max(percentageSum, 1) / Math.Max(album.Song.Count - 1, 1) > 90;
     }
 }
