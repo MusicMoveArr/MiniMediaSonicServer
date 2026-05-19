@@ -1,0 +1,1 @@
+CREATE INDEX if not exists idx_albums_albumid_metadataid ON metadata (albumid, metadataid);
