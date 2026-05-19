@@ -127,18 +127,44 @@ public class AlbumRepository
     public async Task<AlbumID3?> GetAlbumId3WithTracksAsync(Guid albumId, Guid userId)
     {
 	    string query = @"WITH album_collection AS (
-							SELECT unnest(array_agg(ab.albumid)) as albumid
+							SELECT unnest(array_agg(ab.albumid)) AS albumid
 							FROM albums ab
 							JOIN albums ab2 ON ab2.albumid = @id
+							JOIN metadata m ON m.albumid = ab2.albumid
 							WHERE lower(ab.title) = lower(ab2.title)
+								and lower(ab.title) NOT IN ('best of', 'the best of', 'live', 'greatest hits', '[unknown]')
 							GROUP BY lower(ab.title)
 							HAVING count(*) > 1
+							  AND count(m.metadataid) < 200
 
 							union
 
-							SELECT ab.albumid as albumid
-							FROM albums ab
-							WHERE ab.albumid = @id
+							SELECT @id as albumid
+						 ),
+						 al_sum_cte AS (
+						     SELECT
+						         m.albumid,
+						         min(m.file_creationtime) AS file_creationtime,
+						         nullif(max(m.tag_year), 0) AS Year,
+						         sum(EXTRACT(EPOCH FROM
+						             (CASE WHEN length(m.Tag_Length) = 5 
+						                   THEN '00:' || m.Tag_Length
+						                   ELSE m.Tag_Length END)::interval))::int AS Duration,
+						         max(hist.UpdatedAt) AS LastPlayDate,
+						         sum(hist.PlayCount) AS AlbumPlaycount,
+						         count(distinct m.MetadataId) AS SongCount
+						     FROM metadata m
+						     LEFT JOIN (
+						         SELECT TrackId,
+						                max(UpdatedAt)  AS UpdatedAt,
+						                count(*)        AS PlayCount
+						         FROM sonicserver_user_playhistory
+						         WHERE UserId = @userId
+						           AND Scrobble = true
+						         GROUP BY TrackId
+						     ) hist ON hist.TrackId = m.MetadataId
+						     WHERE m.albumid IN (SELECT albumid FROM album_collection)
+						     GROUP BY m.albumid
 						 )
 						 SELECT 
  							al.AlbumId as Id,
@@ -244,24 +270,7 @@ public class AlbumRepository
  							where hist.UserId = @userId and hist.TrackId = m.MetadataId
  							    ) playhistory on true
  							    
-						 JOIN lateral (
-						     select 
-								    min(m.file_creationtime) as file_creationtime,
-								    nullif(max(m.tag_year), 0) as Year, 
-								    sum(EXTRACT(EPOCH FROM
-									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
-			    							ELSE m.Tag_Length END)::interval))::int as Duration,
-						     		max(hist.UpdatedAt) as LastPlayDate,
-									sum(hist.PlayCount) as AlbumPlaycount,
-								    count(distinct(m.MetadataId)) as SongCount
-							 from metadata m 
-						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
-						         from sonicserver_user_playhistory
-						         where UserId = @userId and Scrobble = true
-						         group by TrackId
-						     ) hist on hist.TrackId = m.MetadataId
-						     where m.albumid = al.albumid) as al_sum on true";
+						 JOIN al_sum_cte al_sum ON al_sum.albumid = al.albumid";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
