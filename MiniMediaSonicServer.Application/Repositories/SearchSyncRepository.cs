@@ -147,7 +147,7 @@ public class SearchSyncRepository
 							    ELSE m.Tag_Length END)::interval) AS Duration,
  							    
 							m.file_creationtime as Created,
-							t.tags->>'bitrate' AS BitRate,
+							m.computed_bitrate AS BitRate,
 							16 as BitDepth,
 							44100 as SamplingRate,
 							2 as ChannelCount,
@@ -158,11 +158,11 @@ public class SearchSyncRepository
  							    else null 
  							 end) as Starred,
 
-							regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
-							regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
-							regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
-							regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,
-							regexp_substr(t.tags->>'replaygain_album_peak', '-?[0-9]+(\.[0-9]+)?') as AlbumPeak,
+							m.computed_bitrate as BPM,
+							m.computed_replaygain_track_gain as TrackGain,
+							m.computed_replaygain_album_gain as AlbumGain,
+							m.computed_replaygain_track_peak as TrackPeak,
+							m.computed_replaygain_album_peak as AlbumPeak,
  							    
 							joined_artist.ArtistId as Id,
 							joined_artist.Name
@@ -170,15 +170,9 @@ public class SearchSyncRepository
 						 JOIN albums al ON al.AlbumId = m.AlbumId
 						 JOIN artists a on a.ArtistId = al.ArtistId
 						 left join sonicserver_track_rated track_rated on track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
- 							    
- 						 
-						 LEFT JOIN LATERAL (
-							 SELECT jsonb_object_agg(lower(key), value) AS tags
-							 FROM jsonb_each_text(m.tag_alljsontags)
-							 ) t ON true
-						 
+
 						 left join lateral (
-							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
+							select DISTINCT unnest(string_to_array(coalesce(m.tag_alljsontags->>'artists', m.tag_alljsontags->>'ARTISTS'), ';')) AS artist
 						 ) all_artists ON true
  							    
  						left join lateral (
