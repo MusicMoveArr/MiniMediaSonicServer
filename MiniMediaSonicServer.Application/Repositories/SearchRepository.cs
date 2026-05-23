@@ -176,7 +176,21 @@ public class SearchRepository
     public async Task<List<TrackID3>> SearchTracksAsync(string searchquery, int count, int offset, Guid userId, int accuracy = 50)
     {
 	    string query = @$"SET LOCAL pg_trgm.similarity_threshold = 0.{accuracy};
-						 SELECT 
+						with tracks as (
+							SELECT search.Id, search.SearchTerm
+							FROM sonicserver_indexed_search search
+							where search.SearchTerm % lower(@searchquery) and search.type = 'track'
+							offset @offset
+							limit @count
+						),
+						 playhist as (
+							 select	max(hist.UpdatedAt) as LastPlayDate,
+									sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount
+							 from sonicserver_user_playhistory hist
+							 join tracks track on track.Id = hist.TrackId
+							 where hist.UserId = @userId
+						)
+						SELECT 
 							 m.MetadataId as TrackId,
 							 al.AlbumId as Parent,
 							 al.AlbumId as AlbumId,
@@ -203,15 +217,15 @@ public class SearchRepository
 							 m.Path as Path,
 							 'music' AS Type,
 							 'song' AS MediaType,
-							 playhistory.LastPlayDate as Played,
- 							 playhistory.PlayCount as PlayCount,
+							 playhist.LastPlayDate as Played,
+							 playhist.PlayCount as PlayCount,
 
 							 EXTRACT(EPOCH FROM
 							 (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
 								ELSE m.Tag_Length END)::interval) AS Duration,
 
 							 m.file_creationtime as Created,
-							 t.tags->>'bitrate' AS BitRate,
+							 m.computed_bitrate AS BitRate,
 							 16 as BitDepth,
 							 44100 as SamplingRate,
 							 2 as ChannelCount,
@@ -222,48 +236,34 @@ public class SearchRepository
 								 else null 
 							 end) as Starred,
 
-							 regexp_substr(t.tags->>'bpm', '[0-9]+([0-9]+)?') as BPM,
-							 regexp_substr(t.tags->>'replaygain_track_gain', '-?[0-9]+(\.[0-9]+)?') as TrackGain,
-							 regexp_substr(t.tags->>'replaygain_album_gain', '-?[0-9]+(\.[0-9]+)?') as AlbumGain,
-							 regexp_substr(t.tags->>'replaygain_track_peak', '-?[0-9]+(\.[0-9]+)?') as TrackPeak,
-							 regexp_substr(t.tags->>'replaygain_album_peak', '-?[0-9]+(\.[0-9]+)?') as AlbumPeak,
+							m.computed_bitrate as BPM,
+							m.computed_replaygain_track_gain as TrackGain,
+							m.computed_replaygain_album_gain as AlbumGain,
+							m.computed_replaygain_track_peak as TrackPeak,
+							m.computed_replaygain_album_peak as AlbumPeak,
 
 							 joined_artist.ArtistId as Id,
 							 joined_artist.Name
-						 FROM sonicserver_indexed_search search
-						 join metadata m on m.MetadataId = search.Id
+							 
+						 FROM tracks track
+						 join metadata m on m.MetadataId = track.Id
 						 JOIN albums al ON al.AlbumId = m.AlbumId
 						 JOIN artists a on a.ArtistId = al.ArtistId
 						 left join sonicserver_track_rated track_rated on 
-						 track_rated.TrackId = m.MetadataId 
-						 and track_rated.UserId = @userId
-
-						 LEFT JOIN LATERAL (
-							 SELECT jsonb_object_agg(lower(key), value) AS tags
-							 FROM jsonb_each_text(m.tag_alljsontags)
-							 ) t ON true
+							 track_rated.TrackId = m.MetadataId 
+							 and track_rated.UserId = @userId
 
 						 left join lateral (
-							select DISTINCT unnest(string_to_array(t.tags->>'artists', ';')) AS artist
+							select DISTINCT unnest(string_to_array(coalesce(m.tag_alljsontags->>'artists', m.tag_alljsontags->>'ARTISTS'), ';')) AS artist
 						 ) all_artists ON true
-
 						 left join lateral (
 							 select artistid, name 
 							 from artists join_artist 
 							 where lower(join_artist.name) = lower(all_artists.artist)
 							 limit 1) joined_artist on true
 
-						 left join lateral (
-							 select	max(hist.UpdatedAt) as LastPlayDate,
-    								sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount
-							 from sonicserver_user_playhistory hist
-							 where hist.UserId = @userId and hist.TrackId = m.MetadataId
-							 ) playhistory on true
-
-						 where search.SearchTerm % lower(@searchquery)
-						 order by similarity(search.SearchTerm, lower(@searchquery)) desc 
-						 offset @offset
-						 limit @count";
+						left join playhist on true
+						order by similarity(track.SearchTerm, lower(@searchquery)) desc ";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
