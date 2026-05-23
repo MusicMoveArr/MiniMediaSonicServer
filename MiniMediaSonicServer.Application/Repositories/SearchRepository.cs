@@ -43,7 +43,7 @@ public class SearchRepository
 							 where ab.artistid = a.artistid
 						 ) as album_count on true
  
-						 where search.SearchTerm % lower(@searchquery)
+						 where search.SearchTerm % lower(@searchquery) and search.type = 'artist'
 						 order by similarity(search.SearchTerm, lower(@searchquery)) desc
 						 offset @offset
 						 limit @count";
@@ -80,13 +80,54 @@ public class SearchRepository
     public async Task<List<AlbumID3>> SearchAlbumsAsync(string searchquery, int count, int offset, Guid userId)
     {
 	    string query = @"SET LOCAL pg_trgm.similarity_threshold = 0.5;
+						 with album_collection as (
+							SELECT search.Id, search.SearchTerm
+							FROM sonicserver_indexed_search search
+							where search.SearchTerm % lower(@searchquery) and search.type = 'album'
+							offset @offset
+							limit @count
+						 ),
+						 al_sum_cte AS (
+						     SELECT
+						         m.albumid,
+						         min(m.file_creationtime) AS file_creationtime,
+						         nullif(max(m.tag_year), 0) AS Year,
+						         sum(EXTRACT(EPOCH FROM
+						             (CASE WHEN length(m.Tag_Length) = 5 
+						                   THEN '00:' || m.Tag_Length
+						                   ELSE m.Tag_Length END)::interval))::int AS Duration,
+						         max(hist.UpdatedAt) AS LastPlayDate,
+						         sum(hist.PlayCount) AS AlbumPlaycount,
+						         count(distinct m.MetadataId) AS SongCount
+						     FROM album_collection col
+						     JOIN metadata m ON m.albumid = col.Id
+						     LEFT JOIN (
+						         SELECT TrackId,
+						                max(UpdatedAt)  AS UpdatedAt,
+						                count(*)        AS PlayCount
+						         FROM sonicserver_user_playhistory
+						         WHERE UserId = @userId
+						           AND Scrobble = true
+						         GROUP BY TrackId
+						     ) hist ON hist.TrackId = m.MetadataId
+						     GROUP BY m.albumid
+						 ),
+						 al_dups as (
+							SELECT lower(ab.title) as title, true as HasDuplicates
+							FROM album_collection col
+						    join albums ab on ab.albumid = col.id
+						    JOIN albums ab2 ON ab2.albumid != col.id
+						    WHERE lower(ab.title) = lower(ab2.title)
+						    GROUP BY lower(ab.title)
+						    HAVING count(*) > 1
+						 )
 						 SELECT
- 							al.AlbumId as Id,
- 							al.Title as Name,
- 							'' as version,
- 							a.Name as Artist,
- 							al_sum.Year as year,
- 							'album_' || al.AlbumId as CoverArt,
+							al.AlbumId as Id,
+							al.Title as Name,
+							'' as version,
+							a.Name as Artist,
+							al_sum.Year as year,
+							'album_' || al.AlbumId as CoverArt,
 							a.artistid AS ArtistId,
 							al_sum.file_creationtime as Created,
 							al_sum.Duration,
@@ -97,43 +138,17 @@ public class SearchRepository
 							    then album_rated.StarredAt 
 							    else null 
 							 end) as Starred,
-							EXISTS (
-							        SELECT 1
-							        FROM albums ab
-							        JOIN albums ab2 ON ab2.albumid = al.AlbumId
-							        WHERE lower(ab.title) = lower(ab2.title)
-							        GROUP BY lower(ab.title)
-							        HAVING count(*) > 1
-							    ) as HasDuplicates
-						 FROM sonicserver_indexed_search search
-						 join albums al on al.AlbumId = search.Id
+							dups.HasDuplicates as HasDuplicates
+						 FROM album_collection col
+						 join albums al on al.AlbumId = col.Id
 						 JOIN artists a on a.ArtistId = al.ArtistId
 						 left join sonicserver_album_rated album_rated on 
- 							album_rated.AlbumId = al.AlbumId 
- 							and album_rated.UserId = @userId
- 							
-						 JOIN lateral (
-						     select 
-								    min(m.file_creationtime) as file_creationtime,
-								    nullif(max(m.tag_year), 0) as Year, 
-								    sum(EXTRACT(EPOCH FROM
-									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
-			    							ELSE m.Tag_Length END)::interval))::int as Duration,
-									sum(hist.PlayCount) as AlbumPlaycount,
-								    count(distinct(m.MetadataId)) as SongCount
-							 from metadata m 
-						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
-						         from sonicserver_user_playhistory
-						         where UserId = @userId
-						         group by TrackId
-						     ) hist on hist.TrackId = m.MetadataId
-						     where m.albumid = al.albumid) as al_sum on true
-						     
-						 where search.SearchTerm % lower(@searchquery)
-						 order by similarity(search.SearchTerm, lower(@searchquery)) desc
-						 offset @offset
-						 limit @count";
+							album_rated.AlbumId = al.AlbumId 
+							and album_rated.UserId = @userId
+							
+						 JOIN al_sum_cte al_sum ON al_sum.albumid = al.albumid
+						 left join al_dups dups on dups.title = lower(al.title)
+						 order by similarity(col.SearchTerm, lower(@searchquery)) desc";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
