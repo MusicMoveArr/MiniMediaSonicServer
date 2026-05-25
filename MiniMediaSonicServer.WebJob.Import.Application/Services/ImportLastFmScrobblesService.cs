@@ -56,6 +56,7 @@ public class ImportLastFmScrobblesService
         }
         
         LastfmClient client = new LastfmClient(lastfmApiKey, lastfmSharedSecret);
+        
         for (int page = 1;; page++)
         {
             var scrobbles = await client.User.GetRecentScrobbles(
@@ -103,10 +104,10 @@ public class ImportLastFmScrobblesService
                     .SearchTracksAsync(searchQuery, 
                         1, 
                         0, 
-                        userId,
-                        99))
+                        userId))
                 .FirstOrDefault();
-            if (track != null && trackId != Guid.Empty)
+
+            if (track != null && track.TrackId != Guid.Empty)
             {
                 trackId = track.TrackId;
                 await _redisCacheService.SetStringAsync(string.Empty, searchQueryRedisKey, trackId.ToString());
