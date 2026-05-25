@@ -195,6 +195,7 @@ public class SearchRepository
 							SELECT search.Id, search.SearchTerm
 							FROM sonicserver_indexed_search search
 							where search.SearchTerm % lower(@searchquery) and search.type = 'track'
+							order by similarity(search.SearchTerm, lower(@searchquery)) desc
 							offset @offset
 							limit @count
 						),
@@ -277,8 +278,7 @@ public class SearchRepository
 							 where lower(join_artist.name) = lower(all_artists.artist)
 							 limit 1) joined_artist on true
 
-						left join playhist on true
-						order by similarity(track.SearchTerm, lower(@searchquery)) desc ";
+						left join playhist on true ";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
