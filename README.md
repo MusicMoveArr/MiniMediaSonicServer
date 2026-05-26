@@ -150,8 +150,8 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | GetAlbumList2              | Working |  |
 | GetAlbumList               | Working |  |
 | GetArtist                  | Working |  |
-| GetArtistInfo2             | Not yet |  |
-| GetArtistInfo              | Not yet |  |
+| GetArtistInfo2             | Working |  |
+| GetArtistInfo              | Working |  |
 | GetArtists                 | Working |  |
 | GetAvatar                  | Not yet |  |
 | GetBookmarks               | Working |  |
