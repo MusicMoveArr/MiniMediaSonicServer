@@ -20,19 +20,19 @@ public class GetArtistInfo2Controller : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetArtistInfo2Request request)
     {
-        //var artist = await _artistService.GetArtistByIdAsync(request.Id);
+        var artist = await _artistService.GetLastFmArtistInfoAsync(request.Id, User.UserId, request.Count);
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse
         {
             ArtistInfo2 = new ArtistInfo2
             {
-                Biography = string.Empty,
-                LargeImageUrl = string.Empty,
-                LastFmUrl = string.Empty,
-                MediumImageUrl = string.Empty,
-                MusicBrainzId =  string.Empty,
-                SimilarArtist = new List<ArtistID3>(),
-                SmallImageUrl = string.Empty,
+                Biography = artist?.BioContent,
+                LargeImageUrl = artist?.ImageUri,
+                LastFmUrl = artist?.Uri,
+                MediumImageUrl = artist?.ImageUri,
+                MusicBrainzId =  artist?.MusicBrainzId?.ToString(),
+                SimilarArtist = artist?.SimilarArtists?.ToList() ?? [],
+                SmallImageUrl = artist?.ImageUri
             }
         });
     }

@@ -16,7 +16,7 @@ public class ArtistRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
+    public async Task<ArtistID3> GetArtistWithAlbumsByIdAsync(Guid artistId, Guid userId)
     {
         string query = @"SELECT 
     						a.ArtistId as Id,
@@ -83,9 +83,6 @@ public class ArtistRepository
 						     ) hist on hist.TrackId = m.MetadataId
 						     where m.albumid = al.albumid
 						     ) as al_sum on true
-						                
-						                
-						                
 						 where a.ArtistId = @artistId";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -122,6 +119,43 @@ public class ArtistRepository
 	        .ToList();
 
         return groupedResult.FirstOrDefault();
+    }
+    
+    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
+    {
+        string query = @"SELECT 
+    						a.ArtistId as Id,
+    						a.Name as Name,
+    						'artist_' || a.ArtistId as CoverArt,
+    						'' as ArtistImageUrl,
+    						album_count.albums as AlbumCount,
+ 							artist_rated.Rating as UserRating,
+ 							(case when artist_rated.Starred = true 
+ 							    then artist_rated.StarredAt 
+ 							    else null 
+ 							 end) as Starred    						
+						 FROM artists a
+						 JOIN albums al ON al.artistid = a.artistid
+ 						 left join sonicserver_artist_rated artist_rated on 
+ 						     artist_rated.ArtistId = a.ArtistId 
+ 						         and artist_rated.UserId = @userId
+						 JOIN lateral (
+						     select count(ab.albumid) as albums 
+						     from albums ab 
+						     where ab.artistid = a.artistid 
+						     limit 1) as album_count on true
+						                             
+						 where a.ArtistId = @artistId
+						 limit 1";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        return await conn.QueryFirstOrDefaultAsync<ArtistID3>(query, 
+	        param: new
+	        {
+		        artistId,
+		        userId
+	        });
     }
     
     public async Task<List<ArtistID3>> GetAllArtistsAsync(Guid userId)
@@ -195,5 +229,107 @@ public class ArtistRepository
 			    userId
 		    }))
 		    .ToList();
+    }
+    public async Task<LastFmArtist> GetLastFmArtistInfoAsync(string artistName, int maxSimilarArtists)
+    {
+        string query = @"SELECT 
+    						la.ArtistId,
+    						la.LastFmId,
+    						la.Name,
+    						la.OnTour,
+    						la.StatsListeners,
+    						la.MusicBrainzId,
+    						la.BioContent,
+    						la.BioSummary,
+    						la.BioYearFormed,
+    						la.BioPublished,
+    						la.Uri,
+    						la.LastSyncTime,
+    						la_image.Uri as ImageUri,
+    						a.ArtistId
+						 FROM lastfm_artist la
+						 LEFT JOIN lastfm_artist_image la_image ON la_image.ArtistId = la.ArtistId
+						 LEFT JOIN lastfm_artist_similar las ON las.ArtistId = la.ArtistId
+						 LEFT JOIN lastfm_artist sim_la ON sim_la.ArtistId = las.SimilarArtistId
+						 LEFT JOIN artists a ON lower(a.Name) = lower(sim_la.Name) --need to improve this later with table cross-referencing
+						 where lower(la.Name) = lower(@artistName)
+						 limit @maxSimilarArtists";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        var results = (await conn.QueryAsync<LastFmArtist, Guid?, LastFmArtist>(query, 
+	        map: (artist, similarArtistId) =>
+	        {
+		        if (similarArtistId.HasValue && similarArtistId != Guid.Empty)
+		        {
+			        artist.SimilarArtistIds.Add(similarArtistId.Value);
+		        }
+		        return artist;
+	        },
+	        splitOn: "ArtistId, ArtistId",
+	        param: new
+	        {
+		        artistName,
+		        maxSimilarArtists
+	        })).ToList();
+
+        return results
+	        .GroupBy(artist => artist.Name)
+	        .Select(group =>
+	        {
+		        var artist = group.First();
+		        artist.SimilarArtistIds = group.SelectMany(artist => artist.SimilarArtistIds).ToList();
+		        return artist;
+	        })
+	        .FirstOrDefault();
+    }
+    
+    public async Task<string?> GetArtistNameByArtistIdAsync(Guid artistId)
+    {
+	    string query = @"SELECT a.Name
+						 FROM artists a
+						 where a.ArtistId = @artistId
+						 limit 1";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<string>(query, 
+		    param: new
+		    {
+			    artistId
+		    });
+    }
+    public async Task<string?> GetArtistNameByAlbumIdAsync(Guid albumId)
+    {
+	    string query = @"SELECT a.Name
+						 FROM albums ab
+						 join artists a on a.ArtistId = ab.ArtistId
+						 where ab.AlbumId = @albumId
+						 limit 1";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<string>(query, 
+		    param: new
+		    {
+			    albumId
+		    });
+    }
+    public async Task<string?> GetArtistNameByTrackIdAsync(Guid trackId)
+    {
+	    string query = @"SELECT a.Name
+					     FROM metadata m
+						 join albums ab on ab.AlbumId = m.AlbumId
+						 join artists a on a.ArtistId = ab.ArtistId
+						 where m.MetadataId = @trackId
+						 limit 1";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return await conn.QueryFirstOrDefaultAsync<string>(query, 
+		    param: new
+		    {
+			    trackId
+		    });
     }
 }

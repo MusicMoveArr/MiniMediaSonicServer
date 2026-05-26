@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Logging.Abstractions;
+using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
@@ -17,9 +19,37 @@ public class ArtistService
         _artistRepository = artistRepository;
     }
 
+    public async Task<LastFmArtist?> GetLastFmArtistInfoAsync(Guid id, Guid userId, int maxSimilarArtists)
+    {
+        string? artistName = await _artistRepository.GetArtistNameByArtistIdAsync(id) ??
+                             await _artistRepository.GetArtistNameByAlbumIdAsync(id) ??
+                             await _artistRepository.GetArtistNameByTrackIdAsync(id);
+
+        if (string.IsNullOrWhiteSpace(artistName))
+        {
+            return null;
+        }
+        
+        var artist = await _artistRepository.GetLastFmArtistInfoAsync(artistName, maxSimilarArtists);
+
+        if (artist?.SimilarArtistIds?.Any() == true)
+        {
+            foreach (Guid simArtistId in artist.SimilarArtistIds.AsParallel())
+            {
+                ArtistID3 simArtist = await _artistRepository.GetArtistByIdAsync(simArtistId, userId);
+                if (simArtist != null)
+                {
+                    artist.SimilarArtists.Add(simArtist);
+                }
+            }
+        }
+        
+        return artist;
+    }
+
     public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
-        var artist = await _artistRepository.GetArtistByIdAsync(artistId, userId);
+        var artist = await _artistRepository.GetArtistWithAlbumsByIdAsync(artistId, userId);
         AlbumReleaseTypeUtil.SetAlbumReleaseTypes(artist.Albums);
         return artist;
     }
