@@ -8,6 +8,7 @@ namespace MiniMediaSonicServer.WebJob.Indexing.Application.Repositories;
 public class IndexedSearchRepository
 {
     private readonly DatabaseConfiguration _databaseConfiguration;
+    private readonly int MaxQueryTimeout = (int)TimeSpan.FromMinutes(30).TotalSeconds;
     
     public IndexedSearchRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
     {
@@ -30,7 +31,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task AddMissingTracks_ArtistTitleAsync()
@@ -49,7 +50,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task AddMissingTracks_ArtistAlbumTitleAsync()
@@ -68,7 +69,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-        await conn.ExecuteAsync(query);
+        await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task AddMissingAlbums_ArtistAlbumAsync()
@@ -86,7 +87,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task AddMissingAlbums_AlbumAsync()
@@ -104,7 +105,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task AddMissingArtistsAsync()
@@ -121,7 +122,7 @@ public class IndexedSearchRepository
 						 	limit 1)";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task CleanupNonExistingSearchIdsAsync()
@@ -141,9 +142,9 @@ public class IndexedSearchRepository
 									  and not exists(select 1 from albums ab
 									  		         where ab.albumid = sis.id)";
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(cleanupMetadataQuery);
-	    await conn.ExecuteAsync(cleanupArtistsQuery);
-	    await conn.ExecuteAsync(cleanupAlbumsQuery);
+	    await conn.ExecuteAsync(cleanupMetadataQuery, commandTimeout: MaxQueryTimeout);
+	    await conn.ExecuteAsync(cleanupArtistsQuery, commandTimeout: MaxQueryTimeout);
+	    await conn.ExecuteAsync(cleanupAlbumsQuery, commandTimeout: MaxQueryTimeout);
     }
 
     public async Task UpdateAlbumsYearAsync()
@@ -157,7 +158,7 @@ public class IndexedSearchRepository
 						 where al.year = 0";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
     }
     public async Task UpdateGappedRecordIdMetadataAsync()
     {
@@ -167,6 +168,47 @@ public class IndexedSearchRepository
 	    //when there are gaps and say you have 200 albums it might show statistically only 49
 	    //because record_id was deleted/cleaned up
 	    //then second query to reset the record_id sequence ordering for new records
+
+	    string outOfSyncCountQuery = @"WITH gaps AS (
+									  SELECT
+									    record_id AS gap_id,
+									    ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+									  FROM (
+									    SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+									    FROM metadata
+									    EXCEPT
+									    SELECT record_id FROM metadata
+									  ) missing
+									),
+									highs AS (
+									  SELECT
+									    record_id AS high_id,
+									    ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
+									  FROM metadata
+									  ORDER BY record_id DESC
+									  LIMIT (SELECT COUNT(*) FROM gaps)
+									)
+									SELECT count(*)
+									FROM gaps g
+									JOIN highs h ON g.rn = h.rn";
+	    
+	    
+	    string resetRecordSeqId = @"SELECT setval('metadata_record_id_seq', 1, false)";
+	    string resetRecordId = @"UPDATE metadata
+								 SET record_id = sub.new_id
+								 FROM (
+								     SELECT record_id, row_number() OVER (ORDER BY record_id) + 1000000000 AS new_id
+								     FROM metadata
+								 ) sub
+								 WHERE metadata.record_id = sub.record_id";
+	    
+	    string setNewRecordId = @"UPDATE metadata
+								  SET record_id = sub.new_id
+								  FROM (
+								      SELECT record_id, row_number() OVER (ORDER BY record_id) AS new_id
+								      FROM metadata
+								  ) sub
+								  WHERE metadata.record_id = sub.record_id";
 	    
 	    string query = @"WITH gaps AS (
 						   SELECT
@@ -199,7 +241,21 @@ public class IndexedSearchRepository
 									  );";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    
+	    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncCountQuery);
+	    if (outOfSync > 100000)
+	    {
+		    //just too many records are out of sync, updating this
+		    //amount takes too long to update everything, lazy update works faster
+		    
+		    await conn.ExecuteAsync(resetRecordSeqId);
+		    await conn.ExecuteAsync(resetRecordId, commandTimeout: MaxQueryTimeout);
+		    await conn.ExecuteAsync(setNewRecordId, commandTimeout: MaxQueryTimeout);
+	    }
+	    else
+	    {
+		    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+	    }
 	    await conn.ExecuteAsync(resetIdentityQuery);
     }
     
@@ -243,8 +299,8 @@ public class IndexedSearchRepository
 									  );";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
-	    await conn.ExecuteAsync(resetIdentityQuery);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+	    await conn.ExecuteAsync(resetIdentityQuery, commandTimeout: MaxQueryTimeout);
     }
     
     public async Task UpdateGappedRecordIdAlbumsAsync()
@@ -287,7 +343,7 @@ public class IndexedSearchRepository
 									  );";
 	    
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    await conn.ExecuteAsync(query);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
 	    await conn.ExecuteAsync(resetIdentityQuery);
     }
     
@@ -337,10 +393,10 @@ public class IndexedSearchRepository
 	    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncQuery);
 	    if (outOfSync > 0)
 	    {
-		    await conn.ExecuteAsync(resetTitleRecordAscSeqId);
-		    await conn.ExecuteAsync(resetTitleRecordAscId);
-		    await conn.ExecuteAsync(setNewTitleRecordAscId);
-		    await conn.ExecuteAsync(resetIdentityQuery);
+		    await conn.ExecuteAsync(resetTitleRecordAscSeqId, commandTimeout: MaxQueryTimeout);
+		    await conn.ExecuteAsync(resetTitleRecordAscId, commandTimeout: MaxQueryTimeout);
+		    await conn.ExecuteAsync(setNewTitleRecordAscId, commandTimeout: MaxQueryTimeout);
+		    await conn.ExecuteAsync(resetIdentityQuery, commandTimeout: MaxQueryTimeout);
 	    }
     }
 }
