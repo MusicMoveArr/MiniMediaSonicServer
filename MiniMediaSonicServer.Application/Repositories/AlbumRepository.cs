@@ -299,9 +299,9 @@ public class AlbumRepository
 			    id = albumId,
 			    userId
 		    });
-	    
+
 	    var groupedResult = results
-		    .GroupBy(album => album.Name.ToLower())
+		    .GroupBy(album => new { })
 		    .Select(group =>
 		    {
 			    var album = group.First(a => a.Id == albumId);
