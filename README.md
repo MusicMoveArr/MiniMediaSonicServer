@@ -171,8 +171,8 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | GetOpenSubsonicExtensions  | Working |  |
 | GetPlaylist                | Working |  |
 | GetPlaylists               | Working |  |
-| GetPlayQueueByIndex        | Not yet |  |
-| GetPlayQueue               | Not yet |  |
+| GetPlayQueueByIndex        | Working |  |
+| GetPlayQueue               | Working |  |
 | GetPodcastEpisode          | Not yet |  |
 | GetPodcasts                | Not yet |  |
 | GetRandomSongs             | Working |  |
@@ -195,7 +195,7 @@ A lot of Not yet/Partially but on iPhone the Arpeggi/Narjo/SubStreamer apps are 
 | JukeboxControl             | Not yet |  |
 | Ping                       | Working |  |
 | RefreshPodcasts            | Not yet |  |
-| SavePlayQueueByIndex       | Not yet |  |
+| SavePlayQueueByIndex       | Working |  |
 | SavePlayQueue              | Working |  |
 | Scrobble                   | Working | History via database and scrobbling ListenBrainz, Maloja work |
 | Search2                    | Not yet |  |
