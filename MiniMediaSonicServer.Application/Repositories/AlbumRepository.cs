@@ -67,6 +67,7 @@ public class AlbumRepository
 						         CASE WHEN @type = 'recent' THEN playhistory.UpdatedAt END DESC,
 						         CASE WHEN @type = 'starred' THEN album_rated.StarredAt END DESC
 
+							 OFFSET (case when not @type IN ('alphabeticalByName') then @offset else 0 end)
 						     LIMIT @limit
 						 )
 						 SELECT
