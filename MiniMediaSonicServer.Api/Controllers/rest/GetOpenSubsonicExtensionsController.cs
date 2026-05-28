@@ -23,6 +23,11 @@ public class GetOpenSubsonicExtensionsController : SonicControllerBase
                 {
                     Name = "formPost",
                     Versions = [1]
+                },
+                new Extension
+                {
+                    Name = "indexBasedQueue",
+                    Versions = [1]
                 }
             }
         });

@@ -151,4 +151,12 @@ public class SubsonicResponse
     [XmlElement("shares")]
     [JsonPropertyName("shares")]
     public SharesResponse? Shares { get; set; }
+
+    [XmlElement("playQueue")]
+    [JsonPropertyName("playQueue")]
+    public PlayQueue? PlayQueue { get; set; }
+
+    [XmlElement("playQueueByIndex")]
+    [JsonPropertyName("playQueueByIndex")]
+    public PlayQueueByIndex? PlayQueueByIndex { get; set; }
 }

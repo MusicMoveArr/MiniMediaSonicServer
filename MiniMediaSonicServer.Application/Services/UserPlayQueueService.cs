@@ -8,12 +8,16 @@ public class UserPlayQueueService
 {
     private readonly UserPlayQueueRepository _userPlayQueueRepository;
     private readonly UserService _userService;
+    private readonly TrackRepository _trackRepository;
 
-    public UserPlayQueueService(UserPlayQueueRepository userPlayQueueRepository,
-        UserService userService)
+    public UserPlayQueueService(
+        UserPlayQueueRepository userPlayQueueRepository,
+        UserService userService,
+        TrackRepository trackRepository)
     {
         _userPlayQueueRepository = userPlayQueueRepository;
         _userService = userService;
+        _trackRepository = trackRepository;
     }
 
     public async Task SaveUserPlayQueueAsync(SavePlayQueueRequest request, Guid userId, string clientName)
@@ -26,6 +30,70 @@ public class UserPlayQueueService
             clientName, 
             datetime);
     }
+    
+    
+    public async Task<UserPlayQueueModel> GetUserPlayQueueAsync(Guid userId)
+    {
+        var queue = await _userPlayQueueRepository.GetUserPlayQueueAsync(userId);
+        if (queue?.Tracks?.Any() == true)
+        {
+            var tracks = await _trackRepository.GetTracksAsync(queue.Tracks.Select(t => t.TrackId).ToList(), userId);
+            foreach (var track in queue.Tracks)
+            {
+                track.Track = tracks.FirstOrDefault(t => t.TrackId == track.TrackId);
+            }
+        }
+
+        return queue;
+    }
+
+
+    public async Task<bool> SaveUserPlayQueueByIndexAsync(SavePlayQueueByIndexRequest request, Guid userId, string clientName)
+    {
+        if (request.Id?.Any() == false)
+        {
+            await ClearPlayQueue(userId);
+            return true;
+        }
+
+        if (!request.CurrentIndex.HasValue)
+        {
+            request.CurrentIndex = 0;
+        }
+        
+        var trackIds = request.Id
+            .Select(id => Guid.TryParse(id, out Guid guid) ? guid : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .ToList();
+
+        if (request.CurrentIndex < 0 || request.CurrentIndex > trackIds.Count)
+        {
+            return false;
+        }
+            
+        SavePlayQueueRequest requestNonIndexed = new SavePlayQueueRequest
+        {
+            Id = request.Id,
+            Current = trackIds[request.CurrentIndex.Value],
+            Position = request.Position ?? 0,
+        };
+            
+        await SaveUserPlayQueueAsync(requestNonIndexed, userId, clientName);
+        await SaveUserPlayQueueTracksAsync(requestNonIndexed, userId);
+        return true;
+    }
+
+    public async Task ClearPlayQueue(Guid userId)
+    {
+        DateTime datetime = await _userService.GetUserOrServerDateTimeAsync(userId);
+        await _userPlayQueueRepository.UpsertUserPlayQueueAsync(
+            userId, 
+            null, 
+            0,
+            string.Empty, 
+            datetime);
+        await _userPlayQueueRepository.DeletePlayQueueTracksAsync(userId, 0);
+    }
 
     public async Task SaveUserPlayQueueTracksAsync(SavePlayQueueRequest request, Guid userId)
     {
@@ -34,7 +102,7 @@ public class UserPlayQueueService
             request.Current.HasValue &&
             request.Position == 0)
         {
-            await _userPlayQueueRepository.DeletePlayQueueTracksAsync(userId, 0);
+            await ClearPlayQueue(userId);
             return;
         }
         

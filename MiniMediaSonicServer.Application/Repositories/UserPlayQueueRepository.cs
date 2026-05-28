@@ -29,7 +29,7 @@ public class UserPlayQueueRepository
         Guid userId, 
         Guid? currentTrackId, 
         long trackPosition, 
-        string clientName,
+        string? clientName,
         DateTime userDateTime)
     {
         string query = @"INSERT INTO sonicserver_user_playqueue (UserId, CurrentTrackId, TrackPosition, UpdatedByAppName, CreatedAt, UpdatedAt)
@@ -49,7 +49,7 @@ public class UserPlayQueueRepository
                     userId,
                     currentTrackId,
                     trackPosition,
-                    clientName,
+                    clientName = clientName ?? string.Empty,
                     userDateTime
                 });
     }
@@ -78,6 +78,52 @@ public class UserPlayQueueRepository
                 index,
                 userDateTime
             });
+    }
+    
+    public async Task<UserPlayQueueModel?> GetUserPlayQueueAsync(Guid userId)
+    {
+        string query = @"SELECT queue.UserId,
+                                u.Username,
+                                queue.CurrentTrackId,
+                                queue.TrackPosition,
+                                queue.UpdatedByAppName,
+                                queue.CreatedAt,
+                                queue.UpdatedAt,
+                                track.TrackId,
+                                track.UserId,
+                                track.Index,
+                                track.CreatedAt,
+                                track.UpdatedAt
+                                
+                         FROM sonicserver_user_playqueue queue
+                         join sonicserver_user_playqueue_track track on track.UserId = queue.UserId
+                         join sonicserver_user u on u.UserId = queue.UserId and u.IsDeleted = false
+                         where queue.UserId = @userId
+                         order by track.Index asc";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        return (await conn.QueryAsync<UserPlayQueueModel, UserPlayQueueTrackModel, UserPlayQueueModel>(query,
+                (queue, track) =>
+                {
+                    queue.Tracks.Add(track);
+                    return queue;
+                },
+                splitOn: "TrackId",
+                param: new
+                {
+                    userId
+                }))
+            .GroupBy(group => group.UserId)
+            .Select(group =>
+            {
+                var queue = group.First();
+                queue.Tracks = group
+                    .SelectMany(track => track.Tracks)
+                    .ToList();
+                return queue;
+            })
+            .FirstOrDefault();
     }
     
     public async Task<List<UserPlayQueueTrackModel>> GetUserPlayQueueTracksAsync(Guid userId)

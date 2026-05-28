@@ -1,3 +1,5 @@
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
+
 namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class UserPlayQueueTrackModel
@@ -7,4 +9,5 @@ public class UserPlayQueueTrackModel
     public int Index { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public TrackID3? Track { get; set; }
 }
