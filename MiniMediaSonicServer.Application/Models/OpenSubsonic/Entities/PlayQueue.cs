@@ -5,7 +5,7 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 
 public class PlayQueue
 {
-    [XmlAttribute("current")]
+    [XmlElement("current")]
     [JsonPropertyName("current")]
     public Guid? CurrentTrackId { get; set; }
 

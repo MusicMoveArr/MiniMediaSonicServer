@@ -5,7 +5,7 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 
 public class PlayQueueByIndex
 {
-    [XmlAttribute("currentIndex")]
+    [XmlElement("currentIndex")]
     [JsonPropertyName("currentIndex")]
     public int? CurrentIndex { get; set; }
 
