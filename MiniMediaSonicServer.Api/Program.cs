@@ -7,7 +7,6 @@ using MiniMediaSonicServer.Api.Certificates;
 using MiniMediaSonicServer.Api.Filters;
 using MiniMediaSonicServer.Api.Validators;
 using MiniMediaSonicServer.Application.Configurations;
-using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.Application.Services;
@@ -18,6 +17,7 @@ using MiniMediaSonicServer.WebJob.Playlists.Application.Extensions;
 using Quartz;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
+using MiniMediaSonicServer.WebJob.Scrobbler.Application.Extensions;
 
 namespace MiniMediaSonicServer.Api;
 
@@ -95,6 +95,7 @@ public class Program
                 q.AddPlaylistJobs(builder);
                 q.AddIndexingJobs(builder);
                 q.AddImportJobs(builder);
+                q.AddScrobblerJobs(builder);
                 q.UsePersistentStore(options =>
                 {
                     options.UsePostgres(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"]);
@@ -156,13 +157,6 @@ public class Program
         builder.Services.AddScoped<UserPlayQueueService>();
         builder.Services.AddScoped<TranscodeService>();
         builder.Services.AddScoped<MusicCacheService>();
-
-        //handlers
-        builder.Services.AddScoped<ListenBrainzScrobbleHandler>();
-        builder.Services.AddScoped<MalojaScrobbleHandler>();
-        builder.Services.AddScoped<LibreFmScrobbleHandler>();
-
-
         builder.Services.AddScoped<SubsonicAuthFilter>();
         builder.Services.AddScoped<ApiLoggingFilter>();
 
@@ -174,6 +168,8 @@ public class Program
         builder.Services.AddImportDependencies();
         //AutoLikeJobs
         builder.Services.AddAutoLikeDependencies();
+        //AutoLikeJobs
+        builder.Services.AddScrobblerDependencies();
 
 
         var app = builder.Build();

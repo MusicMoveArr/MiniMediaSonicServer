@@ -15,6 +15,23 @@ public class UserRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
+    public async Task<UserModel?> GetUserByIdAsync(Guid userId)
+    {
+        string query = @"SELECT *
+                         FROM sonicserver_user su
+                         where su.UserId = @userId
+                               and IsDeleted = false
+                         limit 1";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+        
+        return await conn.QueryFirstOrDefaultAsync<UserModel>(query,
+            param: new
+            {
+                userId
+            });
+    }
+    
     public async Task<UserModel?> GetUserByUsernameAsync(string username)
     {
         string query = @"SELECT *

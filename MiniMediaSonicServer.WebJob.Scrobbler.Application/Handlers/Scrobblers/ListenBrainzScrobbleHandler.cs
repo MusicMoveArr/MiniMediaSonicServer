@@ -1,15 +1,14 @@
-using System.Text.Json;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.ListenBrainz;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using RestSharp;
 
-namespace MiniMediaSonicServer.Application.Handlers.Scrobblers;
+namespace MiniMediaSonicServer.WebJob.Scrobbler.Application.Handlers.Scrobblers;
 
 public class ListenBrainzScrobbleHandler : IScrobble
 {
-    public async Task ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
+    public async Task<bool> ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
     {
         SubmitModel submitModel = new SubmitModel
         {
@@ -44,5 +43,7 @@ public class ListenBrainzScrobbleHandler : IScrobble
         {
             Console.WriteLine($"Error scrobbling to ListenBrainz, ResponseStatus: '{result.ResponseStatus}', Error: '{result.ErrorException?.Message}', Content: '{result.Content}', Error Message: '{result.ErrorMessage}'");
         }
+
+        return result.IsSuccessful;
     }
 }

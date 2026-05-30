@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Models.Handlers.LibreFm;
 using MiniMediaSonicServer.Application.Repositories;
+using MiniMediaSonicServer.WebJob.Scrobbler.Application.Handlers.Scrobblers;
 
 namespace MiniMediaSonicServer.Api.Controllers.mini;
 

@@ -5,25 +5,29 @@ using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Repositories;
 
-namespace MiniMediaSonicServer.Application.Handlers.Scrobblers;
+namespace MiniMediaSonicServer.WebJob.Scrobbler.Application.Handlers.Scrobblers;
 
 public class LibreFmScrobbleHandler : IScrobble
 {
     private const string LibreFmApiUrl = "https://libre.fm/2.0/";
-    private readonly UserPropertyRepository _userPropertyRepository;
     public const string LibreFmApiKeySettingName = "LibreFm_ApiKey";
     public const string LibreFmApiSecretSettingName = "LibreFm_ApiSecret";
     public const string LibreFmTokenSettingName = "LibreFm_Token";
     public const string LibreFmSessionKeySettingName = "LibreFm_SessionKey";
+    
+    private readonly UserPropertyRepository _userPropertyRepository;
+    private readonly UserPlayHistoryRepository _userPlayHistoryRepository;
+    private const int BulkScrobble = 50;
 
-    public LibreFmScrobbleHandler(UserPropertyRepository userPropertyRepository)
+    public LibreFmScrobbleHandler(UserPropertyRepository userPropertyRepository,
+        UserPlayHistoryRepository userPlayHistoryRepository)
     {
         _userPropertyRepository = userPropertyRepository;
+        _userPlayHistoryRepository = userPlayHistoryRepository;
     }
-    
-    public async Task ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
+
+    public async Task<bool> ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
     {
-        var unixTimeListenedAt = new DateTimeOffset(scrobbleAt).ToUnixTimeSeconds();
         string? apiKey = await _userPropertyRepository.GetUserPropertyAsync(user.UserId, LibreFmApiKeySettingName);
         string? apiSecret = await _userPropertyRepository.GetUserPropertyAsync(user.UserId, LibreFmApiSecretSettingName);
         string? token = await _userPropertyRepository.GetUserPropertyAsync(user.UserId, LibreFmTokenSettingName);
@@ -32,7 +36,7 @@ public class LibreFmScrobbleHandler : IScrobble
             string.IsNullOrWhiteSpace(apiSecret) ||
             string.IsNullOrWhiteSpace(token))
         {
-            return;
+            return false;
         }
 
         string? sessionKey = await _userPropertyRepository.GetUserPropertyAsync(user.UserId, LibreFmSessionKeySettingName);
@@ -42,6 +46,8 @@ public class LibreFmScrobbleHandler : IScrobble
             sessionKey = await GetSessionAsync(token, apiKey, apiSecret);
             await _userPropertyRepository.SetUserPropertyAsync(user.UserId, LibreFmSessionKeySettingName, sessionKey);
         }
+
+        var unixTimeListenedAt = new DateTimeOffset(scrobbleAt).ToUnixTimeSeconds();
         
         var parameters = new SortedDictionary<string, string>
         {
@@ -62,7 +68,8 @@ public class LibreFmScrobbleHandler : IScrobble
         parameters["format"]  = "json";
         
         using var client = new HttpClient();
-        await client.PostAsync(LibreFmApiUrl, new FormUrlEncodedContent(parameters));
+        var response = await client.PostAsync(LibreFmApiUrl, new FormUrlEncodedContent(parameters));
+        return response.IsSuccessStatusCode;
     }
     
     public async Task<string?> GetTokenAsync(string apiKey, string apiSecret)

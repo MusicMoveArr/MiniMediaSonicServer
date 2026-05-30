@@ -8,5 +8,6 @@ public class ScrobbleTrackEntity
     public List<string> Albumartists { get; set; }
     public int Duration { get; set; }
     public int Length { get; set; }
+    public long Time { get; set; }
     public string Key { get; set; }
 }

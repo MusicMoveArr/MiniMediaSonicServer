@@ -130,4 +130,61 @@ public class UserPlayHistoryRepository
 		    }))
 		    .ToList();
     }
+    
+    public async Task<List<UserPlayHistoryModel>> GetUserPlayHistoryAsync(Guid userId, DateTime createdFrom)
+    {
+	    string query = @"SELECT * FROM sonicserver_user_playhistory
+					     WHERE UserId = @userId
+					     AND CreatedAt >= @createdFrom
+					     order by UpdatedAt desc";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<UserPlayHistoryModel>(query,
+		    param: new
+		    {
+			    userId,
+			    createdFrom
+		    })).ToList();
+    }
+    
+    public async Task<List<UserPlayHistoryModel>> GetUserPlayHistoryNotSendAsync(Guid userId, string serviceName, int limit)
+    {
+	    string query = @"SELECT * 
+						 FROM sonicserver_user_playhistory hist
+					     LEFT JOIN sonicserver_user_playhistory_send send on send.HistoryId = hist.HistoryId and send.ServiceName = @serviceName
+					     where 
+					         hist.UserId = @userId 
+					       	 and hist.Scrobble = true
+					       	 and send.HistoryId is null
+					     order by hist.UpdatedAt asc
+					     limit @limit";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    return (await conn.QueryAsync<UserPlayHistoryModel>(query,
+		    param: new
+		    {
+			    userId,
+			    limit,
+			    serviceName
+		    })).ToList();
+    }
+    
+    public async Task InsertPlayHistorySendAsync(Guid historyId, string serviceName)
+    {
+	    string query = @"insert into sonicserver_user_playhistory_send (HistoryId, ServiceName, SendAt)
+					     VALUES(@historyId, @serviceName, current_timestamp)
+						 ON CONFLICT (HistoryId, ServiceName)
+						 DO NOTHING";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    await conn.ExecuteAsync(query,
+		    param: new
+		    {
+			    historyId,
+			    serviceName
+		    });
+    }
 }

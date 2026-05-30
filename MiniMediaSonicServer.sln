@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.WebJob
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.WebJob.AutoLike.Application", "MiniMediaSonicServer.WebJob.AutoLike.Application\MiniMediaSonicServer.WebJob.AutoLike.Application.csproj", "{012A1C15-61F1-4018-94C1-31A049BA2C4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMediaSonicServer.WebJob.Scrobbler.Application", "MiniMediaSonicServer.WebJob.Scrobbler.Application\MiniMediaSonicServer.WebJob.Scrobbler.Application.csproj", "{AD31B2E6-1B8F-4E30-A6BB-E675917128BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{012A1C15-61F1-4018-94C1-31A049BA2C4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{012A1C15-61F1-4018-94C1-31A049BA2C4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{012A1C15-61F1-4018-94C1-31A049BA2C4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD31B2E6-1B8F-4E30-A6BB-E675917128BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD31B2E6-1B8F-4E30-A6BB-E675917128BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD31B2E6-1B8F-4E30-A6BB-E675917128BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD31B2E6-1B8F-4E30-A6BB-E675917128BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

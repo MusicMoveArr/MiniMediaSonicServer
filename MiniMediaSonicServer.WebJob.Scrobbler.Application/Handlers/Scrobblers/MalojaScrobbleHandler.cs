@@ -4,11 +4,11 @@ using MiniMediaSonicServer.Application.Models.Maloja;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using RestSharp;
 
-namespace MiniMediaSonicServer.Application.Handlers.Scrobblers;
+namespace MiniMediaSonicServer.WebJob.Scrobbler.Application.Handlers.Scrobblers;
 
 public class MalojaScrobbleHandler : IScrobble
 {
-    public async Task ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
+    public async Task<bool> ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt)
     {
         int fourMinutes = (int)TimeSpan.FromMinutes(4).TotalSeconds;
         int scrobbleFor = fourMinutes > track.Duration ? fourMinutes :  (int)(track.Duration * 0.8F);
@@ -24,6 +24,7 @@ public class MalojaScrobbleHandler : IScrobble
             Album = track.Album,
             Duration = scrobbleFor,
             Length = track.Duration,
+            Time = new DateTimeOffset(scrobbleAt).ToUnixTimeSeconds(),
             Key = user.MalojaApiKey
         };
         
@@ -34,7 +35,12 @@ public class MalojaScrobbleHandler : IScrobble
         var result = await client.ExecuteAsync(request);
         if (!result.IsSuccessful)
         {
+            if (result?.Content?.Contains("duplicate_timestamp") == true)
+            {
+                return true;
+            }
             Console.WriteLine($"Error scrobbling to Maloja, ResponseStatus: '{result.ResponseStatus}', Error: '{result.ErrorException?.Message}', Content: '{result.Content}', Error Message: '{result.ErrorMessage}'");
         }
+        return result.IsSuccessful;
     }
 }

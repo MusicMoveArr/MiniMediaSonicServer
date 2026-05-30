@@ -5,5 +5,5 @@ namespace MiniMediaSonicServer.Application.Interfaces;
 
 public interface IScrobble
 {
-    Task ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt);
+    Task<bool> ScrobbleAsync(TrackID3 track, UserModel user, DateTime scrobbleAt);
 }

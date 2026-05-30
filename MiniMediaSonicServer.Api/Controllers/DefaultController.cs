@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
+using MiniMediaSonicServer.Application.Services;
 
 namespace MiniMediaSonicServer.Api.Controllers.rest;
 

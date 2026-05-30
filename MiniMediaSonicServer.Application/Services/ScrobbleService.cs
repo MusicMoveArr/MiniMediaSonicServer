@@ -1,4 +1,3 @@
-using MiniMediaSonicServer.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Repositories;
@@ -7,24 +6,20 @@ namespace MiniMediaSonicServer.Application.Services;
 
 public class ScrobbleService
 {
+    public const string ServiceNameLastFm = "LastFm";
+    public const string ServiceNameMaloja = "Maloja";
+    public const string ServiceNameListenBrainz = "ListenBrainz";
+    public const string ServiceNameLibreFm = "LibreFm";
+    
     private readonly TrackRepository _trackRepository;
     private readonly UserPlayHistoryRepository _userPlayHistoryRepository;
-    private readonly ListenBrainzScrobbleHandler _listenBrainzScrobbleHandler;
-    private readonly MalojaScrobbleHandler _malojaScrobbleHandler;
-    private readonly LibreFmScrobbleHandler _libreFmScrobbleHandler;
 
     public ScrobbleService(
         TrackRepository trackRepository,
-        ListenBrainzScrobbleHandler listenBrainzScrobbleHandler,
-        UserPlayHistoryRepository userPlayHistoryRepository,
-        MalojaScrobbleHandler malojaScrobbleHandler,
-        LibreFmScrobbleHandler libreFmScrobbleHandler)
+        UserPlayHistoryRepository userPlayHistoryRepository)
     {
         _trackRepository = trackRepository;
-        _listenBrainzScrobbleHandler = listenBrainzScrobbleHandler;
         _userPlayHistoryRepository = userPlayHistoryRepository;
-        _malojaScrobbleHandler = malojaScrobbleHandler;
-        _libreFmScrobbleHandler = libreFmScrobbleHandler;
     }
 
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
@@ -47,18 +42,6 @@ public class ScrobbleService
         {
             await _userPlayHistoryRepository.UpdateUserPlayHistoryAsync(userPlayHistory.HistoryId, true, scrobbleAt, DateTime.Now);
         }
-
-        if (!string.IsNullOrWhiteSpace(user.ListenBrainzUserToken))
-        {
-            await _listenBrainzScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
-        }
-        
-        if (!string.IsNullOrWhiteSpace(user.MalojaUrl) && !string.IsNullOrWhiteSpace(user.MalojaApiKey))
-        {
-            await _malojaScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
-        }
-        
-        await _libreFmScrobbleHandler.ScrobbleAsync(track, user, scrobbleAt);
     }
 
     public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)
