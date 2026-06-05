@@ -37,7 +37,8 @@ public class NavidromeSmartPlaylistRepository
 						     SELECT
 						         m.MetadataId,
 						         COUNT(*) AS TrackPlaycount,
-						         MAX(playhistory.UpdatedAt) AS UpdatedAt
+						         MAX(playhistory.UpdatedAt) AS UpdatedAt,
+								 MAX(playhistory.CreatedAt) AS CreatedAt
 						     FROM sonicserver_user_playhistory playhistory
 						     JOIN metadata m
 						         ON m.MetadataId = playhistory.TrackId
