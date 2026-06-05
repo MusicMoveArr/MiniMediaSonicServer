@@ -133,6 +133,7 @@ public class AlbumRepository
 							JOIN albums ab2 ON ab2.albumid = @id
 							JOIN metadata m ON m.albumid = ab2.albumid
 							WHERE lower(ab.title) = lower(ab2.title)
+								and ab.title ~ '[0-9]'
 								and lower(ab.title) NOT IN ('best of', 'the best of', 'live', 'greatest hits', '[unknown]')
 							GROUP BY lower(ab.title)
 							HAVING count(*) > 1
