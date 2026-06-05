@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using AwesomeAssertions;
 
-namespace MiniMediaSonicServer.Tests.Helpers;
+namespace BaseTests.Helpers;
 
 public class BenchmarkTest
 {

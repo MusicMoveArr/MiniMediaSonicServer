@@ -1,4 +1,4 @@
-namespace MiniMediaSonicServer.Tests.Configurations;
+namespace BaseTests.Configurations;
 
 public class AuthenticationConfiguration
 {

@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using MiniMediaSonicServer.Tests.Configurations;
+using BaseTests.Configurations;
 using RestSharp;
+using Xunit;
 
-namespace MiniMediaSonicServer.Tests;
+namespace BaseTests;
 
 [Trait("Category", "Integration")]
 public abstract class IntegrationTest : IClassFixture<ApiWebApplicationFactory>

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using MiniMediaSonicServer.Api;
 
-namespace MiniMediaSonicServer.Tests;
+namespace BaseTests;
 
 public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 {

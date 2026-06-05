@@ -1,6 +1,7 @@
 ﻿using AwesomeAssertions;
+using BaseTests;
+using BaseTests.Helpers;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
-using MiniMediaSonicServer.Tests.Helpers;
 using RestSharp;
 
 namespace MiniMediaSonicServer.Tests.Tests.Controllers.rest;

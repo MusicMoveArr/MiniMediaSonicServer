@@ -2,7 +2,7 @@ using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using RestSharp;
 
-namespace MiniMediaSonicServer.Tests.Helpers;
+namespace BaseTests.Helpers;
 
 public class RandomDataHelper
 {
