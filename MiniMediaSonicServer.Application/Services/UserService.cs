@@ -79,11 +79,25 @@ public class UserService
 
     public bool ValidatePassword(string password, string hashedPassword)
     {
-        return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+            return false;
+        }
     }
     public bool ValidateToken(string hashedPassword, string token, string salt)
     {
         string password = DecryptPassword(hashedPassword, Convert.FromHexString(_encryptionKeysConfiguration.UserPasswordKey));
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return false;
+        }
+        
         string serverToken = Md5Hex(password + salt);
 
         return CryptographicOperations.FixedTimeEquals(
@@ -153,7 +167,12 @@ public class UserService
     
     private string DecryptPassword(string encrypted, byte[] key)
     {
-        byte[] combined = Convert.FromBase64String(encrypted);
+        Span<byte> combined = new Span<byte>(new byte[256]);
+        
+        if (!Convert.TryFromBase64String(encrypted, combined, out int combinedLength))
+        {
+            return string.Empty;
+        }
 
         using var aes = Aes.Create();
         aes.Key = key;
@@ -161,10 +180,11 @@ public class UserService
         aes.Padding = PaddingMode.PKCS7;
 
         byte[] iv = new byte[aes.BlockSize / 8];
-        byte[] cipherText = new byte[combined.Length - iv.Length];
+        byte[] cipherText = new byte[combinedLength - iv.Length];
 
-        Buffer.BlockCopy(combined, 0, iv, 0, iv.Length);
-        Buffer.BlockCopy(combined, iv.Length, cipherText, 0, cipherText.Length);
+        byte[] combinedBytes = combined.ToArray();
+        Buffer.BlockCopy(combinedBytes, 0, iv, 0, iv.Length);
+        Buffer.BlockCopy(combinedBytes, iv.Length, cipherText, 0, cipherText.Length);
 
         aes.IV = iv;
 

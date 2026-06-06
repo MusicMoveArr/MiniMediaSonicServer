@@ -15,6 +15,26 @@ public class UserServiceTests : IntegrationTest
         
     }
 
+    [Fact]
+    public async Task GetUserByUsername_Ok()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+        var user = await userService.GetUserByUsernameAsync(_authConfig.Username);
+        user.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task ValidateToken_Ok()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+        var user = await userService.GetUserByUsernameAsync(_authConfig.Username);
+        user.Should().NotBeNull();
+        var authed = userService.ValidateToken(user.TokenBasedAuth, _authConfig.Token, _authConfig.Salt);
+        authed.Should().BeTrue();
+    }
+
     [Theory, Repeat(1000)]
     public async Task FuzzUserLogin(string args)
     {
