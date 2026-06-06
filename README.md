@@ -102,6 +102,7 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "PlaylistImportCron": "0 0 0 * * ?",
     "NavidromeSmartPlaylistRefreshCron": "0 0 0 * * ?",
     "PlaylistFixTracksCron": "0 0 0 * * ?",
+    "PlayHistoryFixTracksCron": "0 0 0 * * ?",
     "ReIndexSearchCron": "0 0 0 * * ?",
     "ImportLastFmScrobblesCron": "0 0 0 * * ?",
     "AutoLikeCron": "0 0 0 * * ?",
