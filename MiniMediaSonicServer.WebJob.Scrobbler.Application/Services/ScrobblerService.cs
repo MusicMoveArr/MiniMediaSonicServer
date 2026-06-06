@@ -67,8 +67,13 @@ public class ScrobblerService
         var notSendScrobbles = await _userPlayHistoryRepository
             .GetUserPlayHistoryNotSendAsync(user.UserId, ScrobbleService.ServiceNameLibreFm, 1000);
         var tracks = await _trackRepository
-            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).ToList(), user.UserId);
+            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).Distinct().ToList(), user.UserId);
 
+        if (!tracks.Any())
+        {
+            return;
+        }
+        
         int failCount = 0;
         foreach (var scrobble in notSendScrobbles)
         {
@@ -103,8 +108,13 @@ public class ScrobblerService
         var notSendScrobbles = await _userPlayHistoryRepository
             .GetUserPlayHistoryNotSendAsync(user.UserId, ScrobbleService.ServiceNameMaloja, 1000);
         var tracks = await _trackRepository
-            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).ToList(), user.UserId);
+            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).Distinct().ToList(), user.UserId);
 
+        if (!tracks.Any())
+        {
+            return;
+        }
+        
         int failCount = 0;
         foreach (var scrobble in notSendScrobbles)
         {
@@ -139,8 +149,13 @@ public class ScrobblerService
         var notSendScrobbles = await _userPlayHistoryRepository
             .GetUserPlayHistoryNotSendAsync(user.UserId, ScrobbleService.ServiceNameListenBrainz, 1000);
         var tracks = await _trackRepository
-            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).ToList(), user.UserId);
+            .GetTracksAsync(notSendScrobbles.Select(t => t.TrackId).Distinct().ToList(), user.UserId);
 
+        if (!tracks.Any())
+        {
+            return;
+        }
+        
         int failCount = 0;
         foreach (var scrobble in notSendScrobbles)
         {
