@@ -14,11 +14,17 @@ public class GetAlbumList2ControllerTests : IntegrationTest
         
     }
     
-    [Fact]
-    public async Task Benchmark_GetAlbum_Newest()
+    [Theory]
+    [InlineData("newest")]
+    [InlineData("recent")]
+    [InlineData("frequent")]
+    [InlineData("random")]
+    [InlineData("starred")]
+    [InlineData("alphabeticalByName")]
+    public async Task Benchmark_GetAlbum(string type)
     {
         var request = GetRequest("/rest/getAlbumList2");
-        request.AddParameter("type", "newest");
+        request.AddParameter("type", type);
         
         await BenchmarkTest.BenchmarkTestAsync(150, 100, async () =>
         {

@@ -29,4 +29,24 @@ public class GetAlbumControllerTests : IntegrationTest
             response.Response.Status.Should().Be("ok");
         });
     }
+    
+    [Fact]
+    public async Task Benchmark_GetAlbums()
+    {
+        var albums = await RandomDataHelper.GetRandomAlbumsAsync(this, 101);
+        var albumIds = albums.Select(a => a.Id).ToList();
+        int offset = 0;
+        
+        await BenchmarkTest.BenchmarkTestAsync(70, 100, async () =>
+        {
+            Guid albumId = albumIds[offset++];
+            
+            var request = GetRequest("/rest/getAlbum");
+            request.AddParameter("id", albumId);
+        
+            var response = await Client.GetAsync<SubsonicEnvelope>(request);
+            response.Response.Album.Id.Should().Be(albumId);
+            response.Response.Status.Should().Be("ok");
+        });
+    }
 }
