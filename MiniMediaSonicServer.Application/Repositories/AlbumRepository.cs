@@ -147,7 +147,7 @@ public class AlbumRepository
 						    SELECT DISTINCT ON (m.AlbumId, m.Title)
 						        m.*
 						    FROM metadata m
-						    LEFT JOIN sonicserver_track_rated track_rated ON tr.TrackId = m.MetadataId and track_rated.UserId = @userId
+						    LEFT JOIN sonicserver_track_rated track_rated ON track_rated.TrackId = m.MetadataId and track_rated.UserId = @userId
 						    WHERE m.albumid IN (SELECT albumid FROM album_collection)
 						    ORDER BY m.AlbumId, m.Title, track_rated.ratedat DESC NULLS LAST
 						),
