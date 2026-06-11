@@ -80,7 +80,7 @@ public class AlbumRepository
 						     al_sum.file_creationtime_min AS Created,
 						     al_sum.Duration,
 						     al_sum.SongCount,
-						     NULLIF(ca.year, 0),
+						     NULLIF(ca.year, 0) as Year,
 						     COALESCE(ca.AlbumPlaycount, 0) AS PlayCount,
 						     ca.UserRating,
 						     CASE WHEN ca.Starred = true
