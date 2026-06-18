@@ -86,8 +86,8 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
   },
   "Redis": {
     "ConnectionString": "",
-    "Expiry": "72:00:00",
-    "SlidingExpiration": "72:00:00"
+    "Expiry": "3.00:00:00",
+    "SlidingExpiration": "3.00:00:00"
   },
   "MusicCache": {
     "Path": "/cache",
@@ -103,6 +103,7 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "NavidromeSmartPlaylistRefreshCron": "0 0 0 * * ?",
     "PlaylistFixTracksCron": "0 0 0 * * ?",
     "PlayHistoryFixTracksCron": "0 0 0 * * ?",
+    "RatingsFixTracksCron": "0 0 0 * * ?",
     "ReIndexSearchCron": "0 0 0 * * ?",
     "ImportLastFmScrobblesCron": "0 0 0 * * ?",
     "AutoLikeCron": "0 0 0 * * ?",
