@@ -13,7 +13,9 @@ public static class DependencyExtension
         services.AddScoped<ReIndexSearchService>()
             .AddScoped<IndexedSearchRepository>()
             .AddScoped<FixMissingPlayHistoryTracksRepository>()
-            .AddScoped<FixMissingPlayHistoryTracksService>();
+            .AddScoped<FixMissingRatedTracksRepository>()
+            .AddScoped<FixMissingPlayHistoryTracksService>()
+            .AddScoped<FixMissingRatedTracksService>();
 
     public static IServiceCollectionQuartzConfigurator AddIndexingJobs(
         this IServiceCollectionQuartzConfigurator config,
@@ -33,6 +35,13 @@ public static class DependencyExtension
             .ForJob(jobKeyPlayHistory)
             .WithIdentity("FixMissingPlayHistoryTracksJob-trigger")
             .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlayHistoryFixTracksCron"]));
+        
+        var jobKeyRatedTracks = new JobKey("FixMissingRatedTracksJob");
+        config.AddJob<FixMissingRatedTracksJob>(opts => opts.WithIdentity(jobKeyRatedTracks));
+        config.AddTrigger(opts => opts
+            .ForJob(jobKeyRatedTracks)
+            .WithIdentity("FixMissingRatedTracksJob-trigger")
+            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["RatingsFixTracksCron"]));
         return config;
     }
 }
