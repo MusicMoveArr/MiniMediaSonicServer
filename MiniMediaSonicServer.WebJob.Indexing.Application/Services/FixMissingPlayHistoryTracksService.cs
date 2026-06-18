@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Helpers;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Repositories;
 
@@ -22,16 +23,19 @@ public class FixMissingPlayHistoryTracksService
 
         foreach (var historyTrack in historyTracks)
         {
+            string searchQuery = $"{historyTrack.Artist} {historyTrack.Album} {historyTrack.Title}";
             var track = (await _searchRepository
                     .SearchTracksAsync(
-                    $"{historyTrack.Artist} {historyTrack.Album} {historyTrack.Title}", 
-                    1, 
-                    0, 
-                    Guid.Empty,
-                    99))
-                    .FirstOrDefault();
+                        searchQuery, 
+                        1, 
+                        0, 
+                        Guid.Empty,
+                        99))
+                        .FirstOrDefault();
+
+            bool numberingMatch = FuzzyHelper.ExactNumberMatch(searchQuery, $"{track?.Artist} {track?.Album} {track?.Title}");
             
-            if (track != null)
+            if (track != null && numberingMatch)
             {
                 await _fixMissingPlayHistoryTracksRepository.ReplaceMissingPlayHistoryAsync(
                     historyTrack.HistoryId,

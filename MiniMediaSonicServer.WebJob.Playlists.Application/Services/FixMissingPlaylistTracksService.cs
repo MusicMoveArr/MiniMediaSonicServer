@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Helpers;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
 
@@ -22,16 +23,19 @@ public class FixMissingPlaylistTracksService
 
         foreach (var playlistTrack in playlistTracks)
         {
+            string searchQuery = $"{playlistTrack.Artist} {playlistTrack.Album} {playlistTrack.Title}";
             var track = (await _searchRepository
                     .SearchTracksAsync(
-                    $"{playlistTrack.Artist} {playlistTrack.Album} {playlistTrack.Title}", 
-                    1, 
-                    0, 
-                    Guid.Empty,
-                    99))
-                    .FirstOrDefault();
+                        searchQuery, 
+                        1, 
+                        0, 
+                        Guid.Empty,
+                        99))
+                        .FirstOrDefault();
+            
+            bool numberingMatch = FuzzyHelper.ExactNumberMatch(searchQuery, $"{track?.Artist} {track?.Album} {track?.Title}");
 
-            if (track != null)
+            if (track != null && numberingMatch)
             {
                 await _fixMissingPlaylistTracksRepository.ReplaceMissingPlaylistTrackAsync(
                     playlistTrack.TrackId, 

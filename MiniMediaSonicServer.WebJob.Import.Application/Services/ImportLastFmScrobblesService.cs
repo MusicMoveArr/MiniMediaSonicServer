@@ -1,5 +1,6 @@
 using IF.Lastfm.Core.Api;
 using IF.Lastfm.Core.Objects;
+using MiniMediaSonicServer.Application.Helpers;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Repositories;
 
@@ -108,7 +109,14 @@ public class ImportLastFmScrobblesService
                         99))
                 .FirstOrDefault();
 
-            if (track != null && track.TrackId != Guid.Empty)
+            if (track == null)
+            {
+                Console.WriteLine($"[ImportLastFmScrobbles] Unknown track, {lastfmTrack.ArtistName} - {lastfmTrack.AlbumName} - {lastfmTrack.Name}");
+            }
+            
+            bool numberingMatch = FuzzyHelper.ExactNumberMatch(searchQuery, $"{track?.Artist} {track?.Album} {track?.Title}");
+            
+            if (track != null && track.TrackId != Guid.Empty && numberingMatch)
             {
                 trackId = track.TrackId;
                 await _redisCacheService.SetStringAsync(string.Empty, searchQueryRedisKey, trackId.ToString());
