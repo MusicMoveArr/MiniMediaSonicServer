@@ -273,10 +273,6 @@ public class IndexedSearchRepository
 		    await transaction.RollbackAsync();
 		    Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
 	    }
-	    finally
-	    {
-		    await transaction.CommitAsync();
-	    }
     }
     
     public async Task UpdateGappedRecordIdArtistsAsync()
