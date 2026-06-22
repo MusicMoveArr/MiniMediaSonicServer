@@ -174,7 +174,7 @@ public class IndexedSearchRepository
 									    record_id AS gap_id,
 									    ROW_NUMBER() OVER (ORDER BY record_id) AS rn
 									  FROM (
-									    SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+									    SELECT generate_series(1, MAX(record_id)) AS record_id
 									    FROM metadata
 									    EXCEPT
 									    SELECT record_id FROM metadata
@@ -203,19 +203,14 @@ public class IndexedSearchRepository
 								 WHERE metadata.record_id = sub.record_id";
 	    
 	    string setNewRecordId = @"UPDATE metadata
-								  SET record_id = sub.new_id
-								  FROM (
-								      SELECT record_id, row_number() OVER (ORDER BY record_id) AS new_id
-								      FROM metadata
-								  ) sub
-								  WHERE metadata.record_id = sub.record_id";
+								  SET record_id = nextval('metadata_record_id_seq')";
 	    
 	    string query = @"WITH gaps AS (
 						   SELECT
 						     record_id AS gap_id,
 						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
 						   FROM (
-						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     SELECT generate_series(1, MAX(record_id)) AS record_id
 						     FROM metadata
 						     EXCEPT
 						     SELECT record_id FROM metadata
@@ -241,22 +236,47 @@ public class IndexedSearchRepository
 									  );";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
-	    
-	    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncCountQuery);
-	    if (outOfSync > 100000)
+	    await conn.OpenAsync();
+	    var transaction = await conn.BeginTransactionAsync();
+
+	    try
 	    {
-		    //just too many records are out of sync, updating this
-		    //amount takes too long to update everything, lazy update works faster
+		    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncCountQuery,
+			    transaction: transaction);
+		    if (outOfSync >= 100000)
+		    {
+			    //just too many records are out of sync, updating this
+			    //amount takes too long to update everything, lazy update works faster
 		    
-		    await conn.ExecuteAsync(resetRecordSeqId);
-		    await conn.ExecuteAsync(resetRecordId, commandTimeout: MaxQueryTimeout);
-		    await conn.ExecuteAsync(setNewRecordId, commandTimeout: MaxQueryTimeout);
+			    await conn.ExecuteAsync(resetRecordSeqId,
+				    transaction: transaction);
+		    
+			    await conn.ExecuteAsync(resetRecordId, 
+				    commandTimeout: MaxQueryTimeout,
+				    transaction: transaction);
+		    
+			    await conn.ExecuteAsync(setNewRecordId, 
+				    commandTimeout: MaxQueryTimeout,
+				    transaction: transaction);
+		    }
+		    else
+		    {
+			    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout,
+				    transaction: transaction);
+		    }
+		    await conn.ExecuteAsync(resetIdentityQuery,
+			    transaction: transaction);
+		    await transaction.CommitAsync();
 	    }
-	    else
+	    catch (Exception e)
 	    {
-		    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+		    await transaction.RollbackAsync();
+		    Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
 	    }
-	    await conn.ExecuteAsync(resetIdentityQuery);
+	    finally
+	    {
+		    await transaction.CommitAsync();
+	    }
     }
     
     public async Task UpdateGappedRecordIdArtistsAsync()
@@ -273,7 +293,7 @@ public class IndexedSearchRepository
 						     record_id AS gap_id,
 						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
 						   FROM (
-						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     SELECT generate_series(1, MAX(record_id)) AS record_id
 						     FROM artists
 						     EXCEPT
 						     SELECT record_id FROM artists
@@ -317,7 +337,7 @@ public class IndexedSearchRepository
 						     record_id AS gap_id,
 						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
 						   FROM (
-						     SELECT generate_series(MIN(record_id), MAX(record_id)) AS record_id
+						     SELECT generate_series(1, MAX(record_id)) AS record_id
 						     FROM albums
 						     EXCEPT
 						     SELECT record_id FROM albums
