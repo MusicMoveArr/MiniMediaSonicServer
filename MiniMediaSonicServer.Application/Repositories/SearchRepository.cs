@@ -215,6 +215,7 @@ public class SearchRepository
 							 m.Title as Title,
 							 al.Title as Album,
 							 a.Name as Artist,
+ 							 m.Tag_Disc as DiscNumber,
 							 m.Tag_Track as TrackNumber,
 							 NULLIF(m.tag_year, 0) as Year,
 							 m.Computed_Genre as Genre,

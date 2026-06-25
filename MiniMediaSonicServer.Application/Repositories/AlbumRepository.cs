@@ -205,6 +205,7 @@ public class AlbumRepository
  							al.Title as Album,
  							a.Name as Artist,
  							m.Tag_Track as TrackNumber,
+ 							m.Tag_Disc as DiscNumber,
  							NULLIF(m.tag_year, 0) as Year,
  							m.Computed_Genre as Genre,
  							m.File_Size as Size,
@@ -330,8 +331,8 @@ public class AlbumRepository
 			    album.Song = group
 				    .SelectMany(album => album.Song)
 				    .DistinctBy(track => track.TrackId)
-				    .OrderBy(track => track.TrackNumber)
-				    .ThenBy(track => track.DiscNumber)
+				    .OrderBy(track => track.DiscNumber)
+				    .ThenBy(track => track.TrackNumber)
 				    .ToList();
 
 			    foreach (var song in album.Song)

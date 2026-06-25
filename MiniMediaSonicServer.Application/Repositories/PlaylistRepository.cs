@@ -71,6 +71,7 @@ public class PlaylistRepository
  							m.Title as Title,
  							al.Title as Album,
  							a.Name as Artist,
+ 							m.Tag_Disc as DiscNumber,
  							playlist_track.TrackOrder as TrackNumber,
  							NULLIF(m.tag_year, 0) as Year,
  							m.Computed_Genre as Genre,
