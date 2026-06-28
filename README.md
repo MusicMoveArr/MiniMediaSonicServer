@@ -15,6 +15,7 @@ This roadmap will be ongoing as the project keeps going
 - [x] Get similar tracks from Tidal
 - [x] Redis caching
 - [x] Support for Navidrome's Smart Playlist (nsp) format
+- [x] Sonic Analysis
 
 ## Tested Working Android/iPhone Apps
 1. Android: Symfonium https://www.symfonium.app
@@ -105,6 +106,7 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "PlayHistoryFixTracksCron": "0 0 0 * * ?",
     "RatingsFixTracksCron": "0 0 0 * * ?",
     "ReIndexSearchCron": "0 0 0 * * ?",
+    "ReIndexSonicTrackCron": "0 0 0 * * ?",
     "ImportLastFmScrobblesCron": "0 0 0 * * ?",
     "AutoLikeCron": "0 0 0 * * ?",
     "ScrobblerCron": "0 0/15 * * * ?"
