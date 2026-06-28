@@ -149,7 +149,26 @@ public class TrackRepository
 
         return results;
     }
-    
+
+    public async Task<List<TrackID3>> GetSimilarSonicTracksAsync(Guid trackId, int count, Guid userId)
+    {
+	    string query = @"select RelatedTrackId
+						 from sonicserver_indexed_track_sonic
+					     where TrackId = @trackId
+					     order by distance asc
+					     limit @count";
+	    
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+	    var trackIds = (await conn.QueryAsync<Guid>(query, 
+		    param: new
+		    {
+			    trackId,
+			    count
+		    })).ToList();
+
+	    return await GetTracksAsync(trackIds, userId);
+    }
     
     public async Task<List<GenreCountModel>> GetAllGenresAsync()
     {

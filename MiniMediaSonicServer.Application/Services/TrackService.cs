@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -20,6 +21,16 @@ public class TrackService
     public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count, Guid userId)
     {
         var id3Type = await _searchRepository.GetId3TypeAsync(trackId);
+
+        if (id3Type == ID3Type.Track)
+        {
+            var sonicTracks = await _trackRepository.GetSimilarSonicTracksAsync(trackId, count, userId);
+            if (sonicTracks.Any())
+            {
+                return sonicTracks;
+            }
+        }
+        
         return await _trackRepository.GetSimilarTracksAsync(trackId, count, id3Type, userId);
     }
 
