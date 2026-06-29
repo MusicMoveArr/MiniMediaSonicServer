@@ -173,6 +173,9 @@
       <None Update="DbScripts\20260628 indexed track sonic.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="DbScripts\20260629 removed indexed track sonic.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

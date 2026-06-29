@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Enums;
+using MiniMediaSonicServer.Application.Helpers;
 using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using Npgsql;
@@ -152,21 +153,46 @@ public class TrackRepository
 
     public async Task<List<TrackID3>> GetSimilarSonicTracksAsync(Guid trackId, int count, Guid userId)
     {
-	    string query = @"select RelatedTrackId
-						 from sonicserver_indexed_track_sonic
-					     where TrackId = @trackId
-					     order by distance asc
-					     limit @count";
+	    string query = @"select a.RelatedTrackId as TrackId, m.Title, s.Title as SourceTitle, a.Distance from (
+						 	select s.metadataid as SourceTrackId, t.metadataid as RelatedTrackId, t.mood_vector <+> s.mood_vector AS Distance
+						 	FROM metadata_mood t, metadata_mood s
+						 	WHERE s.metadataid = @trackId
+						 	  AND t.metadataid <> s.metadataid
+						 	  and t.mood_vector <+> s.mood_vector <= 1.0
+						 	ORDER BY distance ASC
+						 	LIMIT @count
+						 ) a
+						 join metadata s on s.metadataid = a.SourceTrackId 
+						 join metadata m on m.metadataid = a.RelatedTrackId";
 	    
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
-	    var trackIds = (await conn.QueryAsync<Guid>(query, 
+	    var dbTracks = (await conn.QueryAsync<SonicTrackModel>(query, 
 		    param: new
 		    {
 			    trackId,
 			    count
 		    })).ToList();
+	    
+	    var deduplicatedTracks = new List<SonicTrackModel>();
 
+	    foreach (var track in dbTracks.Where(t => t.Distance < 1.0f))
+	    {
+		    bool exists = FuzzyHelper.FuzzRatioToLower(track.SourceTitle, track.Title) > 95 ||
+		                  FuzzyHelper.PartialRatioToLower(track.SourceTitle, track.Title) > 95 ||
+			    deduplicatedTracks.Any(t => FuzzyHelper.FuzzRatioToLower(t.Title, track.Title) > 95);
+		    
+		    if (exists)
+		    {
+			    continue;
+		    }
+		    deduplicatedTracks.Add(track);
+	    }
+
+	    var trackIds = deduplicatedTracks
+		    .Select(t => t.TrackId)
+		    .ToList();
+	    
 	    return await GetTracksAsync(trackIds, userId);
     }
     

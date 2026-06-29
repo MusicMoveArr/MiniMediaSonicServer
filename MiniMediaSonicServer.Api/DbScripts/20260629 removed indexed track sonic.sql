@@ -1,0 +1,1 @@
+DROP TABLE if exists public.sonicserver_indexed_track_sonic;

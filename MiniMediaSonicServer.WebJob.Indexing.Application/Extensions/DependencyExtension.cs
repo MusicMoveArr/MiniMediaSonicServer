@@ -12,8 +12,6 @@ public static class DependencyExtension
     public static IServiceCollection AddIndexingDependencies(this IServiceCollection services) =>
         services.AddScoped<ReIndexSearchService>()
             .AddScoped<IndexedSearchRepository>()
-            .AddScoped<ReIndexTrackSonic>()
-            .AddScoped<IndexedTrackSonicRepository>()
             .AddScoped<FixMissingPlayHistoryTracksRepository>()
             .AddScoped<FixMissingRatedTracksRepository>()
             .AddScoped<FixMissingPlayHistoryTracksService>()
@@ -44,13 +42,6 @@ public static class DependencyExtension
             .ForJob(jobKeyRatedTracks)
             .WithIdentity("FixMissingRatedTracksJob-trigger")
             .WithCronSchedule(builder.Configuration.GetSection("Jobs")["RatingsFixTracksCron"]));
-        
-        var jobKeyReIndexSonicTracks = new JobKey("ReIndexTrackSonicJob");
-        config.AddJob<ReIndexTrackSonicJob>(opts => opts.WithIdentity(jobKeyReIndexSonicTracks));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKeyReIndexSonicTracks)
-            .WithIdentity("ReIndexTrackSonicJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["ReIndexSonicTrackCron"]));
         return config;
     }
 }
