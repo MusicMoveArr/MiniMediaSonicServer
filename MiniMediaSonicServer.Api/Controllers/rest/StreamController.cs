@@ -40,8 +40,11 @@ public class StreamController : SonicControllerBase
         if (!string.IsNullOrWhiteSpace(request.Format) && !path.EndsWith(request.Format))
         {
             Stream stream = await _transcodeService.TranscodeAsync(path, request.Format, request.MaxBitRate);
-            var transcodedContentType = ContentTypeFromSuffix(request.Format);
-            return Results.File(stream, transcodedContentType, enableRangeProcessing: true);
+            if (stream != null)
+            {
+                var transcodedContentType = ContentTypeFromSuffix(request.Format);
+                return Results.File(stream, transcodedContentType, enableRangeProcessing: true);
+            }
         }
         
         var contentType = ContentTypeFromSuffix(Path.GetExtension(path).TrimStart('.'));
