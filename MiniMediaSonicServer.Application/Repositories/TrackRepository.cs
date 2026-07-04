@@ -153,17 +153,32 @@ public class TrackRepository
 
     public async Task<List<TrackID3>> GetSimilarSonicTracksAsync(Guid trackId, int count, Guid userId)
     {
-	    string query = @"select a.RelatedTrackId as TrackId, m.Title, s.Title as SourceTitle, a.Distance from (
-						 	select s.metadataid as SourceTrackId, t.metadataid as RelatedTrackId, t.mood_vector <+> s.mood_vector AS Distance
-						 	FROM metadata_mood t, metadata_mood s
-						 	WHERE s.metadataid = @trackId
-						 	  AND t.metadataid <> s.metadataid
-						 	  and t.mood_vector <+> s.mood_vector <= 1.0
-						 	ORDER BY distance ASC
-						 	LIMIT @count
-						 ) a
-						 join metadata s on s.metadataid = a.SourceTrackId 
-						 join metadata m on m.metadataid = a.RelatedTrackId";
+	    //+1 in the count because we match our own track by 100%, distance 0
+	    //the output is not exactly the count we gave because of deduplication
+	    string query = @"WITH src AS (
+						   SELECT metadataid, mood_vector
+						   FROM metadata_mood
+						   WHERE metadataid = @trackId
+						 ),
+						 nearest AS (
+						   SELECT t.metadataid,
+						          t.mood_vector <+> src.mood_vector AS distance
+						   FROM metadata_mood t, src
+						   ORDER BY t.mood_vector <+> src.mood_vector
+						   LIMIT @count+1
+						 )
+						 SELECT n.metadataid AS TrackId,
+						        m.Title,
+						        s.Title AS SourceTitle,
+						        n.distance
+						 FROM nearest n
+						 JOIN metadata_mood src ON src.metadataid = @trackId
+						 JOIN metadata s ON s.metadataid = src.metadataid
+						 JOIN metadata m ON m.metadataid = n.metadataid
+						 WHERE n.metadataid <> src.metadataid
+						   AND n.distance <= 1.0
+						 ORDER BY n.distance ASC
+						 LIMIT @count";
 	    
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 
