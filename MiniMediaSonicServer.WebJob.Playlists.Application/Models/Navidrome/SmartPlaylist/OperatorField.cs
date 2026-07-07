@@ -53,6 +53,7 @@ public class OperatorField
     public string? Genre { get; set; }
     public bool? ArtistLoved { get; set; }
     public bool? AlbumLoved { get; set; }
+    public string? Artist { get; set; }
     
     
     private Dictionary<string, object?> _activeFields;
@@ -64,9 +65,6 @@ public class OperatorField
             {
                 return _activeFields;
             }
-
-            var hmm = this.GetType()
-                .GetProperties();
 
             _activeFields = this.GetType()
                 .GetProperties()

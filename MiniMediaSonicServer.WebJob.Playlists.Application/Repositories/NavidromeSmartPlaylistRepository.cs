@@ -1,7 +1,6 @@
 using Dapper;
 using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
-using MiniMediaSonicServer.Application.Models.Database;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Models.Database;
 using Npgsql;
 
@@ -45,7 +44,7 @@ public class NavidromeSmartPlaylistRepository
 						     WHERE playhistory.UserId = @userId
 						     GROUP BY m.MetadataId
 						 )
-						 SELECT m.MetadataId, m.Title, a.Name as Artist
+						 SELECT m.MetadataId, m.Title, a.Name as Artist, mood.mood_vector
 						 from (
 	 						select *
 	 						from metadata
@@ -57,6 +56,7 @@ public class NavidromeSmartPlaylistRepository
 						 left join sonicserver_track_rated rated on rated.UserId = @userId and rated.TrackId = m.MetadataId
 						 left join sonicserver_artist_rated artist_rated on artist_rated.UserId = @userId and artist_rated.ArtistId = a.ArtistId
 						 left join sonicserver_album_rated album_rated on album_rated.UserId = @userId and album_rated.AlbumId = al.AlbumId
+						 left join metadata_mood mood on mood.MetadataId = m.MetadataId
  						 LEFT JOIN LATERAL (
 						    SELECT jsonb_object_agg(lower(key), value) AS tags
 						    FROM jsonb_each_text(m.tag_alljsontags)
@@ -68,7 +68,11 @@ public class NavidromeSmartPlaylistRepository
 						 {ordering}
 						 limit @limit";
 
-        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(_databaseConfiguration.ConnectionString);
+        dataSourceBuilder.UseVector();
+        var dataSource = dataSourceBuilder.Build();
+
+        await using var conn = dataSource.CreateConnection();
         await conn.OpenAsync();
 
         return (await conn

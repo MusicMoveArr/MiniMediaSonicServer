@@ -1,4 +1,7 @@
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text;
+using MiniMediaSonicServer.Application.Helpers;
 using MiniMediaSonicServer.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Models.Database;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Models.Navidrome.SmartPlaylist;
@@ -91,20 +94,42 @@ public class NavidromeSmartPlaylistService
                 sortBy,
                 nsp.Order, 
                 nsp.Limit + DeDuplicationOverFetch);
-
-            await _playlistRepository.DeleteAllTracksFromPlaylistAsync(userPlaylistId.Value);
-
-            tracks = tracks
-                .GroupBy(t => 
-                    new {
-                        Artist = t.Artist.ToLower(),
-                        Title = t.Title.ToLower()
-                    })
-                .Select(t => t.FirstOrDefault())
-                .Where(t => t != null)
-                .Take(nsp.Limit)
-                .ToList()!;
             
+            tracks = DeduplicateTracks(tracks);
+            
+            if (tracks.Any() && nsp.SonicSort != null)
+            {
+                tracks = tracks
+                    .Where(t => t.Mood_Vector?.Memory.Length > 0)
+                    .ToList();
+                
+                var vectorTracks = tracks.Select(x => 
+                (
+                    Item: x,
+                    Vector: x.Mood_Vector.Memory.ToArray()
+                )).ToList();
+                
+                VectorIndex<NavidromeSmartPlaylistTrackModel> vectors =
+                    new VectorIndex<NavidromeSmartPlaylistTrackModel>(vectorTracks);
+
+                var curVector = tracks.First().Mood_Vector.Memory.ToArray();
+                if (nsp.SonicSort.AnchorCount > 0 && nsp.SonicSort.AnchorInterval > 0)
+                {
+                    tracks = vectors
+                        .KNearestAnchor(curVector, tracks.Count, nsp.SonicSort.AnchorCount, nsp.SonicSort.AnchorInterval)
+                        .Select(t => t.Item)
+                        .ToList();
+                }
+                else
+                {
+                    tracks = vectors
+                        .KNearest(curVector, tracks.Count)
+                        .Select(t => t.Item)
+                        .ToList();
+                }
+            }
+            
+            await _playlistRepository.DeleteAllTracksFromPlaylistAsync(userPlaylistId.Value);
             foreach (var track in tracks)
             {
                 await _playlistRepository.AddTrackToPlaylistAsync(userPlaylistId.Value, track.MetadataId);
@@ -266,5 +291,23 @@ public class NavidromeSmartPlaylistService
             default:
                 return string.Empty;
         }
+    }
+
+    private List<NavidromeSmartPlaylistTrackModel> DeduplicateTracks(List<NavidromeSmartPlaylistTrackModel> tracks)
+    {
+        var tempTracks = new List<NavidromeSmartPlaylistTrackModel>();
+
+        foreach (var track in tracks)
+        {
+            bool contains = tempTracks.Any(t =>
+                FuzzyHelper.FuzzRatioToLower(t.Title, track.Title) > 90 &&
+                FuzzyHelper.ExactNumberMatch(t.Title, track.Title));
+            if (!contains)
+            {
+                tempTracks.Add(track);
+            }
+        }
+        
+        return tempTracks;
     }
 }

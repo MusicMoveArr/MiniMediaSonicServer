@@ -7,5 +7,6 @@ public class SmartPlaylistModel
     public string Sort { get; set; }
     public string Order { get; set; }
     public int Limit { get; set; }
+    public SonicSort? SonicSort { get; set; }
     public List<Operator> All { get; set; }
 }
