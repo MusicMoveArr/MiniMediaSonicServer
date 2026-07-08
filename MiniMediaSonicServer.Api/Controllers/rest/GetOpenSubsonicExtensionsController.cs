@@ -28,6 +28,11 @@ public class GetOpenSubsonicExtensionsController : SonicControllerBase
                 {
                     Name = "indexBasedQueue",
                     Versions = [1]
+                },
+                new Extension
+                {
+                    Name = "sonicSimilarity",
+                    Versions = [1]
                 }
             }
         });
