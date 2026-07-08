@@ -32,11 +32,13 @@ public class ShareRepository
 		    })).ToList();
     }
     
-    public async Task<ShareModel?> GetShareAsync(string shareName)
+    public async Task<ShareModel?> GetShareAsync(string shareNameOrId)
     {
+	    Guid.TryParse(shareNameOrId, out Guid shareId);
+	    
 	    string query = @"select *
 						 from sonicserver_user_share
-						 where shareName = @shareName
+						 where shareName = @shareNameOrId or ShareId = @shareId
 						 and IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -44,7 +46,8 @@ public class ShareRepository
 	    return await conn.QueryFirstOrDefaultAsync<ShareModel>(query, 
 		    param: new
 		    {
-			    shareName
+			    shareNameOrId,
+			    shareId
 		    });
     }
     
