@@ -159,4 +159,8 @@ public class SubsonicResponse
     [XmlElement("playQueueByIndex")]
     [JsonPropertyName("playQueueByIndex")]
     public PlayQueueByIndex? PlayQueueByIndex { get; set; }
+
+    [XmlElement("sonicMatch")]
+    [JsonPropertyName("sonicMatch")]
+    public List<SonicMatch>? SonicMatch { get; set; }
 }

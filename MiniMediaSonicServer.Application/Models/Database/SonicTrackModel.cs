@@ -1,3 +1,5 @@
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
+
 namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class SonicTrackModel
@@ -6,4 +8,5 @@ public class SonicTrackModel
     public string Title { get; set; }
     public string SourceTitle { get; set; }
     public float Distance { get; set; }
+    public TrackID3? Track { get; set; }
 }

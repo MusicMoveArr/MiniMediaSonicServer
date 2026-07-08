@@ -17,6 +17,24 @@ public class TrackService
         _trackRepository = trackRepository;
         _searchRepository = searchRepository;
     }
+    public async Task<List<SonicMatch>> GetSonicSimilarTracksAsync(Guid trackId, int count, Guid userId)
+    {
+        var id3Type = await _searchRepository.GetId3TypeAsync(trackId);
+
+        if (id3Type == ID3Type.Track)
+        {
+            return (await _trackRepository
+                    .GetSimilarSonicTracksAsync(trackId, count, userId))
+                    .Select(t => new SonicMatch
+                    {
+                        Similarity = (1 - t.Distance) * 100F,
+                        Song = t.Track
+                    })
+                    .ToList();
+        }
+        
+        return [];
+    }
 
     public async Task<List<TrackID3>> GetAlbumList2ResponseAsync(Guid trackId, int count, Guid userId)
     {
@@ -27,7 +45,9 @@ public class TrackService
             var sonicTracks = await _trackRepository.GetSimilarSonicTracksAsync(trackId, count, userId);
             if (sonicTracks.Any())
             {
-                return sonicTracks;
+                return sonicTracks
+                    .Select(t => t.Track)
+                    .ToList();
             }
         }
         

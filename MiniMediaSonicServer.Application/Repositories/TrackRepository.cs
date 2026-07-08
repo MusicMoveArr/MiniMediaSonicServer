@@ -151,7 +151,7 @@ public class TrackRepository
         return results;
     }
 
-    public async Task<List<TrackID3>> GetSimilarSonicTracksAsync(Guid trackId, int count, Guid userId)
+    public async Task<List<SonicTrackModel>> GetSimilarSonicTracksAsync(Guid trackId, int count, Guid userId)
     {
 	    //+1 in the count because we match our own track by 100%, distance 0
 	    //the output is not exactly the count we gave because of deduplication
@@ -191,7 +191,7 @@ public class TrackRepository
 	    
 	    var deduplicatedTracks = new List<SonicTrackModel>();
 
-	    foreach (var track in dbTracks.Where(t => t.Distance < 1.0f))
+	    foreach (var track in dbTracks)
 	    {
 		    bool exists = FuzzyHelper.FuzzRatioToLower(track.SourceTitle, track.Title) > 95 ||
 		                  FuzzyHelper.PartialRatioToLower(track.SourceTitle, track.Title) > 95 ||
@@ -208,7 +208,16 @@ public class TrackRepository
 		    .Select(t => t.TrackId)
 		    .ToList();
 	    
-	    return await GetTracksAsync(trackIds, userId);
+	    var tracks = await GetTracksAsync(trackIds, userId);
+
+	    foreach (var track in deduplicatedTracks)
+	    {
+		    track.Track = tracks.FirstOrDefault(t => t.TrackId == track.TrackId);
+	    }
+	    
+	    return deduplicatedTracks
+		    .Where(t => t.Track != null)
+		    .ToList();
     }
     
     public async Task<List<GenreCountModel>> GetAllGenresAsync()
