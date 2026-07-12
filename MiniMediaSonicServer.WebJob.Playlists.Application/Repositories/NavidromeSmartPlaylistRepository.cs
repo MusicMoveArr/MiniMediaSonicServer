@@ -9,6 +9,7 @@ namespace MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
 public class NavidromeSmartPlaylistRepository
 {
     private readonly DatabaseConfiguration _databaseConfiguration;
+    private readonly int MaxQueryTimeout = (int)TimeSpan.FromMinutes(15).TotalSeconds;
     
     public NavidromeSmartPlaylistRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
     {
@@ -76,7 +77,7 @@ public class NavidromeSmartPlaylistRepository
         await conn.OpenAsync();
 
         return (await conn
-                .QueryAsync<NavidromeSmartPlaylistTrackModel>(query, param: parameters))
+                .QueryAsync<NavidromeSmartPlaylistTrackModel>(query, param: parameters, commandTimeout: MaxQueryTimeout))
                 .ToList();
     }
 }
