@@ -72,7 +72,20 @@ public class NavidromeSmartPlaylistService
         var userIds = await _userRepository.GetAllUserIdsAsync();
         foreach (var userId in userIds)
         {
-            PlaylistImportUserModel? userPlaylistImport = await _playlistImportRepository.GetPlaylistImportUserAsync(importId, userId);
+            try
+            {
+                await ProcessUserAsync(userId, importId, nsp, filter);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+            }
+        }
+    }
+
+    private async Task ProcessUserAsync(Guid userId, Guid importId, SmartPlaylistModel nsp, StringBuilder filter)
+    {
+        PlaylistImportUserModel? userPlaylistImport = await _playlistImportRepository.GetPlaylistImportUserAsync(importId, userId);
             Guid? userPlaylistId = userPlaylistImport?.PlaylistId;
             if (!userPlaylistId.HasValue)
             {
@@ -136,7 +149,6 @@ public class NavidromeSmartPlaylistService
             }
 
             await _playlistRepository.UpdatePlaylistUpdatedAtAsync(userPlaylistId.Value, DateTime.Now);
-        }
     }
 
     private void ProcessOperator(
