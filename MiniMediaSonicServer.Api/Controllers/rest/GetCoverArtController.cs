@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Interfaces;
 using MiniMediaSonicServer.Application.Models;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -24,13 +26,16 @@ public class GetCoverArtController : SonicControllerBase
     private const string NotFoundCoverData = "NotFound";
     private static readonly byte[] webpMagicHeader = ASCIIEncoding.ASCII.GetBytes("RIFF");
     private static readonly byte[] webpMagicHeader2 = ASCIIEncoding.ASCII.GetBytes("WEBP");
+    private readonly GlobalConfiguration _globalConfiguration;
     
     public GetCoverArtController(
         CoverService coverService,
-        IRedisCacheService redisCacheService)
+        IRedisCacheService redisCacheService,
+        IOptions<GlobalConfiguration> globalConfiguration)
     {
         _coverService = coverService;
         _redisCacheService = redisCacheService;
+        _globalConfiguration = globalConfiguration.Value;
     }
     
     [HttpGet, HttpPost]
@@ -48,6 +53,12 @@ public class GetCoverArtController : SonicControllerBase
             if (cachedCover?.Length == NotFoundCoverData.Length)
             {
                 return Results.Bytes(_unknownCover, "image/png");
+            }
+            else if (cachedCover?.Length > 0 && 
+                     !_globalConfiguration.EnableWebpCovers && 
+                     IsCachedCoverWebP(cachedCover))
+            {
+                await _redisCacheService.KeyDeleteAsync(RedisPrefixKey, genericId.ToString());
             }
             else if (cachedCover?.Length > 0)
             {

@@ -50,4 +50,9 @@ public class RedisCacheService : IRedisCacheService
     {
         return await _db.KeyExistsAsync(new RedisKey($"{prefixKey}{key}"));
     }
+
+    public async Task<bool> KeyDeleteAsync(string prefixKey, string key)
+    {
+        return await _db.KeyDeleteAsync(new RedisKey($"{prefixKey}{key}"));
+    }
 }

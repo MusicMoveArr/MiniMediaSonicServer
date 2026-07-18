@@ -9,4 +9,5 @@ public interface IRedisCacheService
     Task<string?> GetStringAsync(string prefixKey, string key);
     
     Task<bool> KeyExistsAsync(string prefixKey, string key);
+    Task<bool> KeyDeleteAsync(string prefixKey, string key);
 }
