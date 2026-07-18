@@ -90,6 +90,9 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "Expiry": "3.00:00:00",
     "SlidingExpiration": "3.00:00:00"
   },
+  "GlobalConfiguration": {
+    "EnableWebpCovers": false
+  },
   "MusicCache": {
     "Path": "/cache",
     "DirectoryFormat": "{CleanArtistUpper:substr(0,1)}/{CleanArtistUpper:substr(1,1)}/{CleanArtist}/{Album}",
@@ -106,7 +109,6 @@ Change the "aaaaaaa" with a random 64character string, for example on linux you 
     "PlayHistoryFixTracksCron": "0 0 0 * * ?",
     "RatingsFixTracksCron": "0 0 0 * * ?",
     "ReIndexSearchCron": "0 0 0 * * ?",
-    "ReIndexSonicTrackCron": "0 0 0 * * ?",
     "ImportLastFmScrobblesCron": "0 0 0 * * ?",
     "AutoLikeCron": "0 0 0 * * ?",
     "ScrobblerCron": "0 0/15 * * * ?"
