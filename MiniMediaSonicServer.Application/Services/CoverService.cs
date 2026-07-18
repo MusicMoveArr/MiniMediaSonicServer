@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Models;
 using MiniMediaSonicServer.Application.Repositories;
@@ -27,10 +28,10 @@ public class CoverService
     private readonly GlobalConfiguration _globalConfiguration;
 
     public CoverService(TrackCoverRepository trackCoverRepository, 
-        GlobalConfiguration globalConfiguration)
+       IOptions<GlobalConfiguration> globalConfiguration)
     {
         _trackCoverRepository = trackCoverRepository;
-        _globalConfiguration = globalConfiguration;
+        _globalConfiguration = globalConfiguration.Value;
     }
 
     public async Task<CoverArtModel?> GetAlbumCoverByTrackIdAsync(Guid trackId)
