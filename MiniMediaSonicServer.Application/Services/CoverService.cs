@@ -1,3 +1,4 @@
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.Application.Models;
 using MiniMediaSonicServer.Application.Repositories;
 using SixLabors.ImageSharp;
@@ -18,14 +19,18 @@ public class CoverService
         AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
     };
 
+    private readonly string[] jpegExtention = [".jpg"];
     private readonly string[] jpegWebpExtentions = [".jpg", ".webp"];
     private const string ResizedContentType = "image/jpeg";
     private const string WebpContentType = "image/webp";
     private const string webpExtension = ".webp";
+    private readonly GlobalConfiguration _globalConfiguration;
 
-    public CoverService(TrackCoverRepository trackCoverRepository)
+    public CoverService(TrackCoverRepository trackCoverRepository, 
+        GlobalConfiguration globalConfiguration)
     {
         _trackCoverRepository = trackCoverRepository;
+        _globalConfiguration = globalConfiguration;
     }
 
     public async Task<CoverArtModel?> GetAlbumCoverByTrackIdAsync(Guid trackId)
@@ -43,7 +48,8 @@ public class CoverService
         {
             var coverFileInfo = trackFileInfo.Directory
                 .GetFiles("*.*", _enumerationOptions)
-                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext)))
+                .Where(f => (_globalConfiguration.EnableWebpCovers ? jpegWebpExtentions : jpegExtention)
+                                        .Any(ext => f.Name.EndsWith(ext)))
                 .Select(f => new
                 {
                     File = f,
@@ -90,7 +96,8 @@ public class CoverService
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
             .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
-                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext))))
+                .Where(f => (_globalConfiguration.EnableWebpCovers ? jpegWebpExtentions : jpegExtention)
+                    .Any(ext => f.Name.EndsWith(ext))))
             .Select(f => new
             {
                 File = f,
@@ -139,7 +146,8 @@ public class CoverService
             .DistinctBy(dir => dir.Name)
             .Where(dir => dir.Exists)
             .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
-                .Where(f => jpegWebpExtentions.Any(ext => f.Name.EndsWith(ext))))
+                .Where(f => (_globalConfiguration.EnableWebpCovers ? jpegWebpExtentions : jpegExtention)
+                    .Any(ext => f.Name.EndsWith(ext))))
             .Select(f => new
             {
                 File = f,

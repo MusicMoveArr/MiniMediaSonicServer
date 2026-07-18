@@ -111,7 +111,8 @@ public class Program
             .Configure<EncryptionKeysConfiguration>(builder.Configuration.GetSection("EncryptionKeys"))
             .Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"))
             .Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"))
-            .Configure<MusicCacheConfiguration>(builder.Configuration.GetSection("MusicCache"));
+            .Configure<MusicCacheConfiguration>(builder.Configuration.GetSection("MusicCache"))
+            .Configure<GlobalConfiguration>(builder.Configuration.GetSection("GlobalConfiguration"));
 
         string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
         if (!string.IsNullOrWhiteSpace(redisConnectionString))
