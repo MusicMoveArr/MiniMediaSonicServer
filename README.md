@@ -24,6 +24,11 @@ This roadmap will be ongoing as the project keeps going
 4. iPhone/Android: Substreamer https://substreamer.org
 5. iPhone: Armperfy
 
+## Compatibility
+1. Tested with Intel Nuc 4cores 32GB ram MVME/SSD's/HDD's
+2. Tested with AMD Mini Pc 12 cores 32GB ram MVME/SSD's/HDD's
+3. Tested with Raspberry Pi4 in Docker Swarm 4-nodes (each pi only uses ~10% memory)
+
 ## Tested working projects
 1. Feishin https://github.com/jeffvli/feishin
 
