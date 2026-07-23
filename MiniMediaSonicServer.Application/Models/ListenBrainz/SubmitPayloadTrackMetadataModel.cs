@@ -6,7 +6,7 @@ public class SubmitPayloadTrackMetadataModel
 {
     [JsonPropertyName("additional_info")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public required SubmitPayloadTrackMetadataAdditionalInfoModel AdditionalInfo { get; init; }
+    public SubmitPayloadTrackMetadataAdditionalInfoModel? AdditionalInfo { get; set; }
     
     [JsonPropertyName("artist_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

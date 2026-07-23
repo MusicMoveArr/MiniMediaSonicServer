@@ -211,5 +211,5 @@ public class TrackID3
     
     [JsonIgnore]
     [XmlIgnore]
-    public required string Isrc_Single { get; set; }
+    public string Isrc_Single { get; set; }
 }

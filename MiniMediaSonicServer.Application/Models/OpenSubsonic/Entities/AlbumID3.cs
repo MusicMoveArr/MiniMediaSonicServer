@@ -91,13 +91,13 @@ public class AlbumID3
     
     [XmlElement("artists")]
     [JsonPropertyName("artists")]
-    public required List<NameIdEntity> Artists { get; set; }
+    public List<NameIdEntity>? Artists { get; set; }
 
     [XmlElement("song")]
     [JsonPropertyName("song")]
-    public required List<TrackID3> Song { get; set; } = [];
+    public List<TrackID3>? Song { get; set; } = [];
     
     [XmlIgnore]
     [JsonIgnore]
-    public required bool HasDuplicates { get; init; }
+    public bool HasDuplicates { get; set; }
 }
