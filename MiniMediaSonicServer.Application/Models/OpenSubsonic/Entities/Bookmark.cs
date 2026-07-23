@@ -11,21 +11,21 @@ public class Bookmark
     
     [XmlAttribute("position")]
     [JsonPropertyName("position")]
-    public long Position { get; set; }
+    public required long Position { get; set; }
     
     [XmlAttribute("username")]
     [JsonPropertyName("username")]
-    public string Username { get; set; }
+    public required string Username { get; set; }
     
     [XmlAttribute("comment")]
     [JsonPropertyName("comment")]
-    public string Comment { get; set; }
+    public required string Comment { get; set; }
     
     [XmlAttribute("created")]
     [JsonPropertyName("created")]
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
     
     [XmlAttribute("changed")]
     [JsonPropertyName("changed")]
-    public DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
 }

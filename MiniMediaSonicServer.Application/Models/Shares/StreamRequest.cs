@@ -7,7 +7,7 @@ namespace MiniMediaSonicServer.Application.Models.Shares;
 public class StreamShareRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
-    public string ShareName { get; set; }
+    public required string ShareName { get; set; }
     public int MaxBitRate { get; set; }
-    public string Format { get; set; }
+    public string? Format { get; set; }
 }

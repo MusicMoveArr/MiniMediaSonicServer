@@ -4,10 +4,10 @@ namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class UserPlayQueueTrackModel
 {
-    public Guid UserId { get; set; }
-    public Guid TrackId { get; set; }
-    public int Index { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public required Guid UserId { get; init; }
+    public required Guid TrackId { get; init; }
+    public required int Index { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required DateTime UpdatedAt { get; init; }
     public TrackID3? Track { get; set; }
 }

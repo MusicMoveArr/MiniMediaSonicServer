@@ -9,5 +9,5 @@ public class UserListResponse
 {
     [XmlElement("user")]
     [JsonPropertyName("user")]
-    public List<User> User { get; set; }
+    public required List<User> User { get; set; }
 }

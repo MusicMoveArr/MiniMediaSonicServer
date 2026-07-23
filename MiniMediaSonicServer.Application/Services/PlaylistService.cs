@@ -27,7 +27,7 @@ public class PlaylistService
         return await _playlistRepository.GetAllPlaylistsAsync(userId);
     }
 
-    public async Task<PlaylistModel> CreatePlaylistAsync(Guid userId, string name)
+    public async Task<PlaylistModel?> CreatePlaylistAsync(Guid userId, string name)
     {
         Guid playlistId = await _playlistRepository.CreatePlaylistAsync(userId, name);
         return await _playlistRepository.GetPlaylistByIdAsync(playlistId, userId);

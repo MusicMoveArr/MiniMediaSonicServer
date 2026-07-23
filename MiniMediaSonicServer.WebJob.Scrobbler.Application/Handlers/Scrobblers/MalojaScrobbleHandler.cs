@@ -39,7 +39,7 @@ public class MalojaScrobbleHandler : IScrobble
             {
                 return true;
             }
-            Console.WriteLine($"Error scrobbling to Maloja, ResponseStatus: '{result.ResponseStatus}', Error: '{result.ErrorException?.Message}', Content: '{result.Content}', Error Message: '{result.ErrorMessage}'");
+            Console.WriteLine($"Error scrobbling to Maloja, ResponseStatus: '{result?.ResponseStatus}', Error: '{result?.ErrorException?.Message}', Content: '{result?.Content}', Error Message: '{result?.ErrorMessage}'");
         }
         return result.IsSuccessful;
     }

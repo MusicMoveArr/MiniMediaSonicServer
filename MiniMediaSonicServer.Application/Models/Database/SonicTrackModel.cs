@@ -4,9 +4,9 @@ namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class SonicTrackModel
 {
-    public Guid TrackId { get; set; }
-    public string Title { get; set; }
-    public string SourceTitle { get; set; }
-    public float Distance { get; set; }
-    public TrackID3? Track { get; set; }
+    public required Guid TrackId { get; init; }
+    public required string Title { get; init; }
+    public required string SourceTitle { get; init; }
+    public required float Distance { get; init; }
+    public required TrackID3 Track { get; set; }
 }

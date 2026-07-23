@@ -8,5 +8,5 @@ public class AlbumResponse
 {
     [XmlElement("album")]
     [JsonPropertyName("album")]
-    public AlbumID3 Album { get; set; } = new();
+    public required AlbumID3 Album { get; init; }
 }

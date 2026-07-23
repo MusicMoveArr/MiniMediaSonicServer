@@ -6,17 +6,17 @@ public class SubmitPayloadTrackMetadataModel
 {
     [JsonPropertyName("additional_info")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public SubmitPayloadTrackMetadataAdditionalInfoModel AdditionalInfo { get; set; }
+    public required SubmitPayloadTrackMetadataAdditionalInfoModel AdditionalInfo { get; init; }
     
     [JsonPropertyName("artist_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string ArtistName { get; set; }
+    public required string ArtistName { get; init; }
     
     [JsonPropertyName("track_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string TrackName { get; set; }
+    public required string TrackName { get; init; }
     
     [JsonPropertyName("release_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string ReleaseName { get; set; }
+    public required string ReleaseName { get; init; }
 }

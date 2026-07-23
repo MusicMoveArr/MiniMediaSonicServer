@@ -92,15 +92,15 @@ public class AutoRateDuplicateTracksService
 
                     var masterRating = lastUpdatedRatings.FirstOrDefault();
 
-                    if (masterRating?.LastUpdatedAt.HasValue == false)
+                    if (masterRating == null || masterRating?.LastUpdatedAt.HasValue == false)
                     {
                         continue;
                     }
                     var duplicateTracks = lastUpdatedRatings.Skip(1).ToList();
                     
-                    foreach (var rating in duplicateTracks.Where(t => t.Rating != masterRating.Rating))
+                    foreach (var rating in duplicateTracks.Where(t => t.Rating != masterRating!.Rating))
                     {
-                        await _ratingRepository.RateTrackAsync(userId, rating.TrackId, masterRating.Rating);
+                        await _ratingRepository.RateTrackAsync(userId, rating.TrackId, masterRating!.Rating);
                     }
                     
                     alreadyProcessedTrack.Add(ratedTrack.MetadataId);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -23,6 +24,11 @@ public class GetAlbumController : SonicControllerBase
     public async Task<IResult> Get([FromQuery] GetAlbumRequest request)
     {
         var album = await _albumService.GetAlbumByIdResponseAsync(request.Id, User.UserId);
+
+        if (album == null)
+        {
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Album not found");
+        }
         
         if (_musicCacheService.IsCachedFilePathExposed)
         {

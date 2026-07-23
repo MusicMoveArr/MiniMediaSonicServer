@@ -7,9 +7,9 @@ public class RateDuplicateTrackModel
     public Guid MetadataId { get; set; }
     public int Rating { get; set; }
     public DateTime? RatedAt { get; set; }
-    public string AcoustIdFingerprint { get; set; }
-    public string ArtistName { get; set; }
-    public string TrackTitle { get; set; }
+    public string? AcoustIdFingerprint { get; set; }
+    public required string ArtistName { get; set; }
+    public required string TrackTitle { get; set; }
     
     private int[]? _acoustIdFingerprintData;
     public int[] AcoustIdFingerprintData
@@ -23,12 +23,12 @@ public class RateDuplicateTrackModel
             
             if (string.IsNullOrWhiteSpace(AcoustIdFingerprint))
             {
-                return new int[0];
+                return [];
             }
 
             FingerPrintService fingerPrintService = new FingerPrintService();
             _acoustIdFingerprintData = fingerPrintService.DecodeAcoustIdFingerprint(AcoustIdFingerprint);
-            return _acoustIdFingerprintData;
+            return _acoustIdFingerprintData ?? [];
         }
     }
 }

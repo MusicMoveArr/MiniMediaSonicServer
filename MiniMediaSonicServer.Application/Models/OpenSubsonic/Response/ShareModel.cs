@@ -8,37 +8,37 @@ public class ShareResponse
 {
     [XmlElement("id")]
     [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
     
     [XmlElement("url")]
     [JsonPropertyName("url")]
-    public string Url { get; set; }
+    public required string Url { get; init; }
     
     [XmlElement("description")]
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public required string Description { get; init; }
     
     [XmlElement("username")]
     [JsonPropertyName("username")]
-    public string Username { get; set; }
+    public required string Username { get; init; }
     
     [XmlElement("created")]
     [JsonPropertyName("created")]
-    public DateTime Created { get; set; }
+    public required DateTime Created { get; init; }
     
     [XmlElement("expires")]
     [JsonPropertyName("expires")]
-    public DateTime? Expires { get; set; }
+    public required DateTime? Expires { get; init; }
     
     [XmlElement("lastVisited")]
     [JsonPropertyName("lastVisited")]
-    public DateTime? LastVisited { get; set; }
+    public required DateTime? LastVisited { get; init; }
     
     [XmlElement("visitCount")]
     [JsonPropertyName("visitCount")]
-    public int VisitCount { get; set; }
+    public required int VisitCount { get; init; }
     
     [XmlElement("entry")]
     [JsonPropertyName("entry")]
-    public List<TrackID3> Tracks { get; set; } = new();
+    public required List<TrackID3> Tracks { get; init; } = [];
 }

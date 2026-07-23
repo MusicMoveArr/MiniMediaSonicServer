@@ -1,4 +1,5 @@
 using MiniMediaSonicServer.Application.Models.Database;
+using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Repositories;
 
@@ -32,7 +33,7 @@ public class UserPlayQueueService
     }
     
     
-    public async Task<UserPlayQueueModel> GetUserPlayQueueAsync(Guid userId)
+    public async Task<UserPlayQueueModel?> GetUserPlayQueueAsync(Guid userId)
     {
         var queue = await _userPlayQueueRepository.GetUserPlayQueueAsync(userId);
         if (queue?.Tracks?.Any() == true)
@@ -40,7 +41,11 @@ public class UserPlayQueueService
             var tracks = await _trackRepository.GetTracksAsync(queue.Tracks.Select(t => t.TrackId).ToList(), userId);
             foreach (var track in queue.Tracks)
             {
-                track.Track = tracks.FirstOrDefault(t => t.TrackId == track.TrackId);
+                var tempTrack = tracks.FirstOrDefault(t => t.TrackId == track.TrackId);
+                if (tempTrack != null)
+                {
+                    track.Track = tempTrack;
+                }
             }
         }
 
@@ -61,7 +66,7 @@ public class UserPlayQueueService
             request.CurrentIndex = 0;
         }
         
-        var trackIds = request.Id
+        var trackIds = request.Id!
             .Select(id => Guid.TryParse(id, out Guid guid) ? guid : Guid.Empty)
             .Where(id => id != Guid.Empty)
             .ToList();

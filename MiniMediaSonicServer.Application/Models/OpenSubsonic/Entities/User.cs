@@ -7,11 +7,11 @@ public class User
 {
     [JsonPropertyName("username")]
     [XmlElement("username")]
-    public string Username { get; set; }
+    public required string Username { get; init; }
     
     [JsonPropertyName("email")]
     [XmlElement("email")]
-    public string Email { get; set; }
+    public required string Email { get; init; }
 
     [JsonPropertyName("scrobblingEnabled")]
     [XmlElement("scrobblingEnabled")]
@@ -19,19 +19,19 @@ public class User
 
     [JsonPropertyName("adminRole")]
     [XmlElement("adminRole")]
-    public bool AdminRole { get; set; }
+    public required bool AdminRole { get; init; }
 
     [JsonPropertyName("settingsRole")]
     [XmlElement("settingsRole")]
-    public bool SettingsRole { get; set; }
+    public required bool SettingsRole { get; init; }
 
     [JsonPropertyName("downloadRole")]
     [XmlElement("downloadRole")]
-    public bool DownloadRole { get; set; }
+    public required bool DownloadRole { get; init; }
 
     [JsonPropertyName("uploadRole")]
     [XmlElement("uploadRole")]
-    public bool UploadRole { get; set; }
+    public required bool UploadRole { get; init; }
 
     [JsonPropertyName("playlistRole")]
     [XmlElement("playlistRole")]
@@ -39,37 +39,37 @@ public class User
 
     [JsonPropertyName("coverArtRole")]
     [XmlElement("coverArtRole")]
-    public bool CoverArtRole { get; set; }
+    public required bool CoverArtRole { get; init; }
 
     [JsonPropertyName("commentRole")]
     [XmlElement("commentRole")]
-    public bool CommentRole { get; set; }
+    public required bool CommentRole { get; init; }
 
     [JsonPropertyName("podcastRole")]
     [XmlElement("podcastRole")]
-    public bool PodcastRole { get; set; }
+    public required bool PodcastRole { get; init; }
 
     [JsonPropertyName("streamRole")]
     [XmlElement("streamRole")]
-    public bool StreamRole { get; set; }
+    public required bool StreamRole { get; init; }
 
     [JsonPropertyName("jukeboxRole")]
     [XmlElement("jukeboxRole")]
-    public bool JukeboxRole { get; set; }
+    public required bool JukeboxRole { get; init; }
 
     [JsonPropertyName("shareRole")]
     [XmlElement("shareRole")]
-    public bool ShareRole { get; set; }
+    public required bool ShareRole { get; init; }
 
     [JsonPropertyName("videoConversionRole")]
     [XmlElement("videoConversionRole")]
-    public bool VideoConversionRole { get; set; }
+    public required bool VideoConversionRole { get; init; }
 
     [JsonPropertyName("folder")]
     [XmlElement("folder")]
-    public List<int> Folder { get; set; } = new() { 1 };
+    public List<int> Folder { get; init; } = [ 1 ];
 
     [JsonPropertyName("maxBitRate")]
     [XmlElement("maxBitRate")]
-    public int MaxBitRate { get; set; }
+    public required int MaxBitRate { get; init; }
 }

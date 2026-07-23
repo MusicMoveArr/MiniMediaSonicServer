@@ -7,209 +7,209 @@ public class TrackID3
 {
     [XmlAttribute("id")]
     [JsonPropertyName("id")]
-    public Guid TrackId { get; set; }
+    public required Guid TrackId { get; set; }
     
     [XmlAttribute("parent")]
     [JsonPropertyName("parent")]
-    public Guid Parent { get; set; }
+    public required Guid Parent { get; set; }
 
     [XmlAttribute("isDir")]
     [JsonPropertyName("isDir")]
-    public bool IsDir { get; set; } = false;
+    public required bool IsDir { get; set; } = false;
 
     [XmlAttribute("title")]
     [JsonPropertyName("title")]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [XmlAttribute("album")]
     [JsonPropertyName("album")]
-    public string Album { get; set; }
+    public required string Album { get; set; }
 
     [XmlAttribute("artist")]
     [JsonPropertyName("artist")]
-    public string Artist { get; set; }
+    public required string Artist { get; set; }
 
     [XmlAttribute("track")]
     [JsonPropertyName("track")]
-    public int TrackNumber { get; set; }
+    public required int TrackNumber { get; set; }
 
     [XmlElement("year")]
     [JsonPropertyName("year")]
-    public int? Year { get; set; }
+    public required int? Year { get; set; }
 
     [XmlAttribute("genre")]
     [JsonPropertyName("genre")]
-    public string Genre { get; set; }
+    public required string Genre { get; set; }
 
     [XmlAttribute("coverArt")]
     [JsonPropertyName("coverArt")]
-    public string CoverArt { get; set; }
+    public required string CoverArt { get; set; }
 
     [XmlAttribute("size")]
     [JsonPropertyName("size")]
-    public long Size { get; set; }
+    public required long Size { get; set; }
 
     [XmlAttribute("contentType")]
     [JsonPropertyName("contentType")]
-    public string ContentType { get; set; }
+    public required string ContentType { get; set; }
 
     [XmlAttribute("suffix")]
     [JsonPropertyName("suffix")]
-    public string Suffix { get; set; }
+    public required string Suffix { get; set; }
 
     [XmlAttribute("transcodedContentType")]
     [JsonPropertyName("transcodedContentType")]
-    public string TranscodedContentType { get; set; }
+    public required string TranscodedContentType { get; set; }
 
     [XmlAttribute("transcodedSuffix")]
     [JsonPropertyName("transcodedSuffix")]
-    public string TranscodedSuffix { get; set; }
+    public required string TranscodedSuffix { get; set; }
 
     [XmlAttribute("duration")]
     [JsonPropertyName("duration")]
-    public int Duration { get; set; }
+    public required int Duration { get; set; }
 
     [XmlAttribute("bitRate")]
     [JsonPropertyName("bitRate")]
-    public int BitRate { get; set; }
+    public required int BitRate { get; set; }
 
     [XmlAttribute("bitDepth")]
     [JsonPropertyName("bitDepth")]
-    public int BitDepth { get; set; }
+    public required int BitDepth { get; set; }
 
     [XmlAttribute("samplingRate")]
     [JsonPropertyName("samplingRate")]
-    public int SamplingRate { get; set; }
+    public required int SamplingRate { get; set; }
 
     [XmlAttribute("channelCount")]
     [JsonPropertyName("channelCount")]
-    public int ChannelCount { get; set; }
+    public required int ChannelCount { get; set; }
 
     [XmlAttribute("path")]
     [JsonPropertyName("path")]
-    public string Path { get; set; }
+    public required string Path { get; set; }
 
     [XmlAttribute("isVideo")]
     [JsonPropertyName("isVideo")]
-    public bool IsVideo { get; set; }
+    public required bool IsVideo { get; set; }
 
     [XmlAttribute("userRating")]
     [JsonPropertyName("userRating")]
-    public int UserRating { get; set; }
+    public required int UserRating { get; set; }
 
     [XmlAttribute("averageRating")]
     [JsonPropertyName("averageRating")]
-    public int AverageRating { get; set; }
+    public required int AverageRating { get; set; }
 
     [XmlAttribute("playCount")]
     [JsonPropertyName("playCount")]
-    public long PlayCount { get; set; }
+    public required long PlayCount { get; set; }
 
     [XmlAttribute("discNumber")]
     [JsonPropertyName("discNumber")]
-    public int DiscNumber { get; set; }
+    public required int DiscNumber { get; set; }
 
     [XmlAttribute("created")]
     [JsonPropertyName("created")]
-    public DateTime Created { get; set; }
+    public required DateTime Created { get; set; }
 
     [XmlElement("starred")]
     [JsonPropertyName("starred")]
-    public DateTime? Starred { get; set; }
+    public required DateTime? Starred { get; set; }
 
     [XmlAttribute("albumId")]
     [JsonPropertyName("albumId")]
-    public Guid AlbumId { get; set; }
+    public required Guid AlbumId { get; set; }
 
     [XmlAttribute("artistId")]
     [JsonPropertyName("artistId")]
-    public Guid ArtistId { get; set; }
+    public required Guid ArtistId { get; set; }
 
     [XmlAttribute("type")]
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public required string Type { get; set; }
 
     [XmlAttribute("mediaType")]
     [JsonPropertyName("mediaType")]
-    public string MediaType { get; set; }
+    public required string MediaType { get; set; }
 
     [XmlAttribute("bookmarkPosition")]
     [JsonPropertyName("bookmarkPosition")]
-    public long BookmarkPosition { get; set; }
+    public required long BookmarkPosition { get; set; }
 
     [XmlAttribute("originalWidth")]
     [JsonPropertyName("originalWidth")]
-    public int OriginalWidth { get; set; }
+    public required int OriginalWidth { get; set; }
 
     [XmlAttribute("originalHeight")]
     [JsonPropertyName("originalHeight")]
-    public int OriginalHeight { get; set; }
+    public required int OriginalHeight { get; set; }
 
     [XmlElement("played")]
     [JsonPropertyName("played")]
-    public DateTime? Played { get; set; }
+    public required DateTime? Played { get; set; }
 
     [XmlAttribute("bpm")]
     [JsonPropertyName("bpm")]
-    public int Bpm { get; set; }
+    public required int Bpm { get; set; }
 
     [XmlAttribute("comment")]
     [JsonPropertyName("comment")]
-    public string Comment { get; set; }
+    public required string Comment { get; set; }
 
     [XmlAttribute("sortName")]
     [JsonPropertyName("sortName")]
-    public string SortName { get; set; }
+    public required string SortName { get; set; }
 
     [XmlElement("musicBrainzId")]
     [JsonPropertyName("musicBrainzId")]
-    public Guid? MusicBrainzId { get; set; }
+    public required Guid? MusicBrainzId { get; set; }
 
     [XmlElement("isrc")]
     [JsonPropertyName("isrc")]
-    public List<string> Isrc { get; set; } = new List<string>();
+    public required List<string> Isrc { get; set; } = new List<string>();
 
     [XmlElement("genres")]
     [JsonPropertyName("genres")]
-    public List<NameEntity> Genres { get; set; } = new List<NameEntity>();
+    public required List<NameEntity> Genres { get; set; } = new List<NameEntity>();
 
     [XmlElement("artists")]
     [JsonPropertyName("artists")]
-    public List<NameIdEntity> Artists { get; set; } = new List<NameIdEntity>();
+    public required List<NameIdEntity> Artists { get; set; } = new List<NameIdEntity>();
 
     [XmlAttribute("displayArtist")]
     [JsonPropertyName("displayArtist")]
-    public string DisplayArtist { get; set; }
+    public required string DisplayArtist { get; set; }
 
     [XmlElement("albumArtists")]
     [JsonPropertyName("albumArtists")]
-    public List<NameIdEntity> AlbumArtists { get; set; } = new List<NameIdEntity>();
+    public required List<NameIdEntity> AlbumArtists { get; set; } = new List<NameIdEntity>();
 
     [XmlAttribute("displayAlbumArtist")]
     [JsonPropertyName("displayAlbumArtist")]
-    public string DisplayAlbumArtist { get; set; }
+    public required string DisplayAlbumArtist { get; set; }
 
     [XmlAttribute("contributors")]
     [JsonPropertyName("contributors")]
-    public string Contributors { get; set; }
+    public required string Contributors { get; set; }
 
     [XmlAttribute("displayComposer")]
     [JsonPropertyName("displayComposer")]
-    public string DisplayComposer { get; set; }
+    public required string DisplayComposer { get; set; }
 
     [XmlElement("moods")]
     [JsonPropertyName("moods")]
-    public List<string> Moods { get; set; } = new List<string>();
+    public required List<string> Moods { get; set; } = new List<string>();
 
     [XmlElement("replayGain")]
     [JsonPropertyName("replayGain")]
-    public ReplayGain ReplayGain { get; set; }
+    public required ReplayGain ReplayGain { get; set; }
 
     [XmlAttribute("explicitStatus")]
     [JsonPropertyName("explicitStatus")]
-    public string ExplicitStatus { get; set; }
+    public required string ExplicitStatus { get; set; }
     
     [JsonIgnore]
     [XmlIgnore]
-    public string Isrc_Single { get; set; }
+    public required string Isrc_Single { get; set; }
 }

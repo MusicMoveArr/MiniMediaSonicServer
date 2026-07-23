@@ -22,11 +22,11 @@ public class AlbumService
         return albums;
     }
 
-    public async Task<AlbumID3> GetAlbumByIdResponseAsync(Guid albumId, Guid userId)
+    public async Task<AlbumID3?> GetAlbumByIdResponseAsync(Guid albumId, Guid userId)
     {
-        var albums = await _albumRepository.GetAlbumId3WithTracksAsync(albumId, userId);
-        AlbumReleaseTypeUtil.SetAlbumReleaseTypes(albums);
-        return albums;
+        var album = await _albumRepository.GetAlbumId3WithTracksAsync(albumId, userId);
+        AlbumReleaseTypeUtil.SetAlbumReleaseTypes(album);
+        return album;
     }
 
     public async Task<List<AlbumID3>> GetStarredAlbumsAsync(Guid userId)

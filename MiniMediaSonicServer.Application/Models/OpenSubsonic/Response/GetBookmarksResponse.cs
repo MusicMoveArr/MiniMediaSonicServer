@@ -8,5 +8,5 @@ public class GetBookmarksResponse
 {
     [XmlElement("bookmark")]
     [JsonPropertyName("bookmark")]
-    public List<Bookmark> Bookmarks { get; set; }
+    public required List<Bookmark> Bookmarks { get; init; }
 }

@@ -5,19 +5,19 @@ namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class LastFmArtist
 {
-    public Guid ArtistId { get; set; }
-    public string? LastFmId { get; set; }
-    public string Name { get; set; }
-    public bool OnTour { get; set; }
-    public int StatsListeners { get; set; }
-    public Guid? MusicBrainzId { get; set; }
-    public string? BioContent { get; set; }
-    public string? BioSummary { get; set; }
-    public int? BioYearFormed { get; set; }
-    public DateTime? BioPublished { get; set; }
-    public string Uri { get; set; }
-    public string ImageUri { get; set; }
-    public DateTime? LastSyncTime { get; set; }
-    public List<Guid> SimilarArtistIds { get; set; } = new List<Guid>();
-    public ConcurrentBag<ArtistID3> SimilarArtists { get; set; } = new ConcurrentBag<ArtistID3>();
+    public required Guid ArtistId { get; init; }
+    public required string? LastFmId { get; init; }
+    public required string Name { get; init; }
+    public required bool OnTour { get; init; }
+    public required int StatsListeners { get; init; }
+    public required Guid? MusicBrainzId { get; init; }
+    public required string? BioContent { get; init; }
+    public required string? BioSummary { get; init; }
+    public required int? BioYearFormed { get; init; }
+    public required DateTime? BioPublished { get; init; }
+    public required string Uri { get; init; }
+    public required string ImageUri { get; init; }
+    public required DateTime? LastSyncTime { get; init; }
+    public required List<Guid> SimilarArtistIds { get; set; } = [];
+    public required ConcurrentBag<ArtistID3> SimilarArtists { get; init; } = [];
 }

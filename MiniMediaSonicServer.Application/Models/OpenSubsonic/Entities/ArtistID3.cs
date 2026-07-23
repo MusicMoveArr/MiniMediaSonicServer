@@ -13,15 +13,15 @@ public class ArtistID3
     
     [XmlAttribute("name")]
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
     
     [XmlAttribute("coverArt")]
     [JsonPropertyName("coverArt")]
-    public string CoverArt { get; set; }
+    public required string CoverArt { get; set; }
     
     [XmlAttribute("artistImageUrl")]
     [JsonPropertyName("artistImageUrl")]
-    public string ArtistImageUrl { get; set; }
+    public required string ArtistImageUrl { get; set; }
     
     [XmlAttribute("albumCount")]
     [JsonPropertyName("albumCount")]

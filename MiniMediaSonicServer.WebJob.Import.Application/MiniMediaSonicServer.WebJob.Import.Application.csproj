@@ -8,8 +8,9 @@
 
     <ItemGroup>
       <PackageReference Include="Inflatable.Lastfm" Version="1.2.0" />
-      <PackageReference Include="Quartz" Version="3.17.0" />
-      <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.17.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+      <PackageReference Include="Quartz" Version="3.18.2" />
+      <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.18.2" />
     </ItemGroup>
 
     <ItemGroup>

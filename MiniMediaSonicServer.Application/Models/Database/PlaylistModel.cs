@@ -4,17 +4,17 @@ namespace MiniMediaSonicServer.Application.Models.Database;
 
 public class PlaylistModel
 {
-    public Guid PlaylistId { get; set; }
-    public Guid UserId { get; set; }
-    public string Name { get; set; }
-    public bool Public { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public string CoverArt { get; set; }
-    public bool ReadOnly { get; set; }
+    public required Guid PlaylistId { get; init; }
+    public required Guid UserId { get; init; }
+    public required string Name { get; init; }
+    public required bool Public { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required DateTime UpdatedAt { get; init; }
+    public required string CoverArt { get; init; }
+    public required bool ReadOnly { get; init; }
     
     //extra
-    public int SongCount { get; set; }
-    public int TotalDuration { get; set; }
-    public List<TrackID3> Tracks { get; set; } = new List<TrackID3>();
+    public required int SongCount { get; set; }
+    public required int TotalDuration { get; init; }
+    public required List<TrackID3> Tracks { get; set; } = [];
 }

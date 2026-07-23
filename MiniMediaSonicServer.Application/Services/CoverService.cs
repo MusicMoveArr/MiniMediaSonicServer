@@ -81,7 +81,10 @@ public class CoverService
             if (track.EmbeddedPictures.Any())
             {
                 byte[]? coverData = GetBytesOfResizedImage(track.EmbeddedPictures.First().PictureData, trackPath);
-                return new CoverArtModel(coverData, ResizedContentType);
+                if (coverData != null)
+                {
+                    return new CoverArtModel(coverData, ResizedContentType);
+                }
             }
         }
 
@@ -94,9 +97,10 @@ public class CoverService
         
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
-            .DistinctBy(dir => dir.Name)
-            .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
+            .Where(path => path != null)
+            .DistinctBy(dir => dir!.Name)
+            .Where(dir => dir!.Exists)
+            .SelectMany(dir => dir!.GetFiles("*.*", _enumerationOptions)
                 .Where(f => (_globalConfiguration.EnableWebpCovers ? jpegWebpExtentions : jpegExtention)
                     .Any(ext => f.Name.EndsWith(ext))))
             .Select(f => new
@@ -144,9 +148,10 @@ public class CoverService
         
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
-            .DistinctBy(dir => dir.Name)
-            .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.*", _enumerationOptions)
+            .Where(path => path != null)
+            .DistinctBy(dir => dir!.Name)
+            .Where(dir => dir!.Exists)
+            .SelectMany(dir => dir!.GetFiles("*.*", _enumerationOptions)
                 .Where(f => (_globalConfiguration.EnableWebpCovers ? jpegWebpExtentions : jpegExtention)
                     .Any(ext => f.Name.EndsWith(ext))))
             .Select(f => new
@@ -193,9 +198,10 @@ public class CoverService
         
         var coverFileInfo = trackPaths
             .Select(path => new FileInfo(path).Directory)
-            .DistinctBy(dir => dir.Name)
-            .Where(dir => dir.Exists)
-            .SelectMany(dir => dir.GetFiles("*.jpg", _enumerationOptions))
+            .Where(path => path != null)
+            .DistinctBy(dir => dir!.Name)
+            .Where(dir => dir!.Exists)
+            .SelectMany(dir => dir!.GetFiles("*.jpg", _enumerationOptions))
             .Select(dir => dir)
             .DistinctBy(dir => dir.FullName)
             .Take(4)
@@ -209,7 +215,10 @@ public class CoverService
         if (coverFileInfo.Count < 4)
         {
             byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.First().FullName);
-            return new CoverArtModel(coverData, ResizedContentType);
+            if (coverData != null)
+            {
+                return new CoverArtModel(coverData, ResizedContentType);
+            }
         }
 
         List<Image> covers = coverFileInfo
@@ -224,6 +233,12 @@ public class CoverService
                 cover.Dispose();
             }
             byte[]? coverData = GetBytesOfResizedImage(coverFileInfo.First().FullName);
+
+            if (coverData == null)
+            {
+                return null;
+            }
+            
             return new CoverArtModel(coverData, ResizedContentType);
         }
 

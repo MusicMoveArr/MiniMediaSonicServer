@@ -2,7 +2,7 @@ namespace BaseTests.Configurations;
 
 public class AuthenticationConfiguration
 {
-    public string Username { get; set; }
-    public string Salt { get; set; }
-    public string Token { get; set; }
+    public required string Username { get; init; }
+    public required string Salt { get; init; }
+    public required string Token { get; init; }
 }

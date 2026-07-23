@@ -2,5 +2,5 @@ namespace BaseTests.Models;
 
 public class BogusString
 {
-    public string Value { get; set; }
+    public required string Value { get; set; }
 }

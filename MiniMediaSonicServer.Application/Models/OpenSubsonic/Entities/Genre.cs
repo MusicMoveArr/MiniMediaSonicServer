@@ -7,13 +7,13 @@ public class Genre
 {
     [XmlText]
     [JsonPropertyName("value")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [XmlAttribute("songCount")]
     [JsonPropertyName("songCount")]
-    public int SongCount { get; set; }
+    public required int SongCount { get; set; }
 
     [XmlAttribute("albumCount")]
     [JsonPropertyName("albumCount")]
-    public int AlbumCount { get; set; }
+    public required int AlbumCount { get; set; }
 }

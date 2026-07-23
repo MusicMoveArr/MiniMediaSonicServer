@@ -16,7 +16,7 @@ public class ArtistRepository
         _databaseConfiguration = databaseConfiguration.Value;
     }
     
-    public async Task<ArtistID3> GetArtistWithAlbumsByIdAsync(Guid artistId, Guid userId)
+    public async Task<ArtistID3?> GetArtistWithAlbumsByIdAsync(Guid artistId, Guid userId)
     {
         string query = @"SELECT 
     						a.ArtistId as Id,
@@ -121,7 +121,7 @@ public class ArtistRepository
         return groupedResult.FirstOrDefault();
     }
     
-    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
+    public async Task<ArtistID3?> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
         string query = @"SELECT 
     						a.ArtistId as Id,
@@ -230,7 +230,7 @@ public class ArtistRepository
 		    }))
 		    .ToList();
     }
-    public async Task<LastFmArtist> GetLastFmArtistInfoAsync(string artistName, int maxSimilarArtists)
+    public async Task<LastFmArtist?> GetLastFmArtistInfoAsync(string artistName, int maxSimilarArtists)
     {
         string query = @"SELECT 
     						la.ArtistId,

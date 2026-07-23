@@ -5,7 +5,7 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 [HybridBind]
 public class Search3Request : SubsonicAuthModel
 {
-    public string Query { get; set; }
+    public required string Query { get; set; }
     public int ArtistCount { get; set; }
     public int ArtistOffset { get; set; }
     public int AlbumCount { get; set; }

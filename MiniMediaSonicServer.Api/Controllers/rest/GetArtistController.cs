@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Repositories;
@@ -20,9 +21,16 @@ public class GetArtistController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetArtistRequest request)
     {
+        var artist = await _artistService.GetArtistByIdAsync(request.Id, User.UserId);
+
+        if (artist == null)
+        {
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Artist not found");
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
-            Artist = await _artistService.GetArtistByIdAsync(request.Id, User.UserId)
+            Artist = artist
         });
     }
 }

@@ -44,7 +44,7 @@ public class MusicCacheService
         return GetCachedOrOriginalFilePath(sourceFilePath, track);
     }
     
-    public async Task<string?> GetCachedOrOriginalFilePathAsync(string sourceFilePath, Guid trackId)
+    public async Task<string> GetCachedOrOriginalFilePathAsync(string sourceFilePath, Guid trackId)
     {
         if (!IsCachingEnabled)
         {
@@ -141,7 +141,8 @@ public class MusicCacheService
     public void CleanupCache()
     {
         long cacheUsage = TotalCacheUsage();
-        if (cacheUsage < _musicCacheConfiguration.MaxCacheSize ||
+        if (string.IsNullOrWhiteSpace(_musicCacheConfiguration.Path) ||
+            cacheUsage < _musicCacheConfiguration.MaxCacheSize ||
             _musicCacheConfiguration.MaxCacheSize <= 0)
         {
             return;

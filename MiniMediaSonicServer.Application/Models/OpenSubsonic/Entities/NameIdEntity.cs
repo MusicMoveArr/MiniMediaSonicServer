@@ -13,11 +13,6 @@ public class NameIdEntity
     [JsonPropertyName("name")]
     public string Name { get; set; }
 
-    public NameIdEntity()
-    {
-        
-    }
-
     public NameIdEntity(Guid id, string name)
     {
         this.Id = id;

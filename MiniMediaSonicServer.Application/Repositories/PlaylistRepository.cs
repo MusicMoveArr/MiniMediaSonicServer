@@ -417,7 +417,7 @@ public class PlaylistRepository
 			    transaction: transaction);
 		    await transaction.CommitAsync();
 	    }
-	    catch (Exception e)
+	    catch
 	    {
 		    await transaction.RollbackAsync();
 	    }

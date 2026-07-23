@@ -29,8 +29,8 @@ public class GetAlbumList2ControllerTests : IntegrationTest
         await BenchmarkTest.BenchmarkTestAsync(150, 100, async () =>
         {
             var response = await Client.GetAsync<SubsonicEnvelope>(request);
-            response.Response.AlbumList2.Album.Count.Should().BeGreaterThan(1);
-            response.Response.Status.Should().Be("ok");
+            response?.Response?.AlbumList2?.Album.Count.Should().BeGreaterThan(1);
+            response?.Response?.Status.Should().Be("ok");
         });
     }
 }

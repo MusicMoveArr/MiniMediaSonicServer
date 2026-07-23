@@ -13,11 +13,6 @@ public class MusicFolder
     [JsonPropertyName("name")]
     public string Name { get; set; }
 
-    public MusicFolder()
-    {
-        
-    }
-
     public MusicFolder(int id, string name)
     {
         this.Id = id;

@@ -8,5 +8,5 @@ public class SubmitPayloadModel
     public long ListenedAt { get; set; }
     
     [JsonPropertyName("track_metadata")]
-    public SubmitPayloadTrackMetadataModel TrackMetadata { get; set; }
+    public required SubmitPayloadTrackMetadataModel TrackMetadata { get; set; }
 }

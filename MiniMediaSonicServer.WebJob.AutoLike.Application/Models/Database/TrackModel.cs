@@ -4,15 +4,15 @@ namespace MiniMediaSonicServer.WebJob.AutoLike.Application.Models.Database;
 
 public class TrackModel
 {
-    public string ArtistName { get; set; }
+    public required string ArtistName { get; set; }
     public Guid ArtistId { get; set; }
     
-    public string AlbumTitle { get; set; }
+    public required string AlbumTitle { get; set; }
     public Guid AlbumId { get; set; }
     
     public Guid MetadataId { get; set; }
-    public string TrackTitle { get; set; }
-    public string AcoustIdFingerprint { get; set; }
+    public required string TrackTitle { get; set; }
+    public string? AcoustIdFingerprint { get; set; }
     public int Rating { get; set; }
     public DateTime? RatedAt { get; set; }
     
@@ -28,12 +28,12 @@ public class TrackModel
             
             if (string.IsNullOrWhiteSpace(AcoustIdFingerprint))
             {
-                return new int[0];
+                return [0];
             }
 
             FingerPrintService fingerPrintService = new FingerPrintService();
             _acoustIdFingerprintData = fingerPrintService.DecodeAcoustIdFingerprint(AcoustIdFingerprint);
-            return _acoustIdFingerprintData;
+            return _acoustIdFingerprintData ?? [];
         }
     }
 }

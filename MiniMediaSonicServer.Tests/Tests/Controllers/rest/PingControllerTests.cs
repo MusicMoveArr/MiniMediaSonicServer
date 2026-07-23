@@ -18,7 +18,7 @@ public class PingControllerTests : IntegrationTest
     //[Repeat(1000)]
     public async Task GET_retrieves_ping_forecast()
     {
-        var response = await Client.GetAsync<SubsonicResponse>(GetRequest("/rest/ping"));
-        response.Status.Should().Be("ok");
+        var response = await Client.GetAsync<SubsonicResponse>(GetRequest("/rest/ping"), TestContext.Current.CancellationToken);
+        response?.Status.Should().Be("ok");
     }
 }

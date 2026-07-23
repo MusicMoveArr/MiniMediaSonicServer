@@ -24,7 +24,7 @@ public static class AlbumReleaseTypeUtil
     {
         if (album != null)
         {
-            album.releaseTypes = GetAlbumReleaseTypes(album);
+            album.ReleaseTypes = GetAlbumReleaseTypes(album);
         }
     }
     

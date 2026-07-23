@@ -83,6 +83,11 @@ public class ImportLastFmScrobblesService
         TimeZoneInfo userTimezone,
         Guid userId)
     {
+        if (!lastfmTrack.TimePlayed.HasValue)
+        {
+            return;
+        }
+        
         long epoch = lastfmTrack.TimePlayed.Value.ToUnixTimeSeconds();
         var scrobbleAt = lastfmTrack.TimePlayed.Value
             .DateTime.Add(userTimezone.BaseUtcOffset);
@@ -123,7 +128,7 @@ public class ImportLastFmScrobblesService
             }
         }
         
-        if (trackId != null && trackId != Guid.Empty)
+        if (trackId != Guid.Empty)
         {
             await _userPlayHistoryRepository.CreatePlayHistoryAsync(
                 userId, trackId, 

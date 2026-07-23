@@ -7,5 +7,5 @@ public class StreamRequest : SubsonicAuthModel
 {
     public Guid Id { get; set; }
     public int MaxBitRate { get; set; }
-    public string Format { get; set; }
+    public string? Format { get; set; }
 }

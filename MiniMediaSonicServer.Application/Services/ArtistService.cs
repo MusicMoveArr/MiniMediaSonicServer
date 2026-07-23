@@ -36,7 +36,7 @@ public class ArtistService
         {
             foreach (Guid simArtistId in artist.SimilarArtistIds.AsParallel())
             {
-                ArtistID3 simArtist = await _artistRepository.GetArtistByIdAsync(simArtistId, userId);
+                ArtistID3? simArtist = await _artistRepository.GetArtistByIdAsync(simArtistId, userId);
                 if (simArtist != null)
                 {
                     artist.SimilarArtists.Add(simArtist);
@@ -47,10 +47,13 @@ public class ArtistService
         return artist;
     }
 
-    public async Task<ArtistID3> GetArtistByIdAsync(Guid artistId, Guid userId)
+    public async Task<ArtistID3?> GetArtistByIdAsync(Guid artistId, Guid userId)
     {
         var artist = await _artistRepository.GetArtistWithAlbumsByIdAsync(artistId, userId);
-        AlbumReleaseTypeUtil.SetAlbumReleaseTypes(artist.Albums);
+        if (artist != null)
+        {
+            AlbumReleaseTypeUtil.SetAlbumReleaseTypes(artist.Albums);
+        }
         return artist;
     }
 

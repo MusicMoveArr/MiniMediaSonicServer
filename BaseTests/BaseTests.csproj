@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
+      <PackageReference Include="AwesomeAssertions" Version="9.5.0" />
       <PackageReference Include="Bogus" Version="35.6.5" />
       <PackageReference Include="RestSharp" Version="114.0.0" />
       <PackageReference Include="xunit.v3" Version="3.2.2" />

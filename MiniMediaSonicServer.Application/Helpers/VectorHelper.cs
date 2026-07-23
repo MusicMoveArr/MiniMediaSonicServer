@@ -2,9 +2,9 @@ namespace MiniMediaSonicServer.Application.Helpers;
 
 public class VectorEntry<T>
 {
-    public T Item;
-    public float[] Vector;
-    public float SquaredNorm;
+    public required T Item;
+    public required float[] Vector;
+    public required float SquaredNorm;
 }
 
 public class VectorIndex<T>

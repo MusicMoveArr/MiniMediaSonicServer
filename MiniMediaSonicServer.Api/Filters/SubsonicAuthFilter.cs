@@ -10,6 +10,8 @@ namespace MiniMediaSonicServer.Api.Filters;
 public sealed class SubsonicAuthFilter : IAsyncActionFilter
 {
     private readonly UserService _userService;
+    private const string GenericErrorResponseMessage = "Wrong username or password";
+    
     public SubsonicAuthFilter(UserService userService)
     {
         _userService = userService;
@@ -19,8 +21,15 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
     {
         var authModel = context.ActionArguments.Values.FirstOrDefault() as SubsonicAuthModel;
         var endpoint = context.HttpContext.GetEndpoint();
-        bool hasAllowAnonymous = endpoint.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
         var ctx = context.HttpContext;
+        
+        if (endpoint == null)
+        {
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, GenericErrorResponseMessage);
+            return;
+        }
+        
+        bool hasAllowAnonymous = endpoint.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
         
         if (hasAllowAnonymous)
         {
@@ -31,7 +40,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (string.IsNullOrWhiteSpace(authModel.AuthUsername))
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, GenericErrorResponseMessage);
             return;
         }
 
@@ -40,7 +49,7 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
         
         if (user == null)
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, GenericErrorResponseMessage);
             return;
         }
         
@@ -55,13 +64,13 @@ public sealed class SubsonicAuthFilter : IAsyncActionFilter
 
         if (!authenticated)
         {
-            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, "Wrong username or password");
+            context.Result = SubsonicResults.FailActionResult(ctx, SubsonicErrorCode.WrongUsernameOrPassword, GenericErrorResponseMessage);
             return;
         }
 
-        user.ClientName = authModel.AuthAppName;
+        user.ClientName = authModel.AuthAppName ?? string.Empty;
         ctx.Items["user"] = user;
-        ctx.Items["format"] = authModel.AuthOutputFormat;
+        ctx.Items["format"] = authModel?.AuthOutputFormat;
         await next();
     }
 }

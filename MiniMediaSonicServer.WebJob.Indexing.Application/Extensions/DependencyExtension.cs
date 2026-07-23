@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Indexing.Application.Services;
@@ -19,29 +20,37 @@ public static class DependencyExtension
 
     public static IServiceCollectionQuartzConfigurator AddIndexingJobs(
         this IServiceCollectionQuartzConfigurator config,
-        WebApplicationBuilder builder)
+        CronConfiguration cronConfig)
     {
-        var jobKey = new JobKey("ReIndexSearchJob");
-        config.AddJob<ReIndexSearchJob>(opts => opts.WithIdentity(jobKey));
+        if (!string.IsNullOrWhiteSpace(cronConfig.ReIndexSearchCron))
+        {
+            var jobKey = new JobKey("ReIndexSearchJob");
+            config.AddJob<ReIndexSearchJob>(opts => opts.WithIdentity(jobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("ReIndexSearchJob-trigger")
+                .WithCronSchedule(cronConfig.ReIndexSearchCron));
+        }
 
-        config.AddTrigger(opts => opts
-            .ForJob(jobKey)
-            .WithIdentity("ReIndexSearchJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["ReIndexSearchCron"]));
-        
-        var jobKeyPlayHistory = new JobKey("FixMissingPlayHistoryTracksJob");
-        config.AddJob<FixMissingPlayHistoryTracksJob>(opts => opts.WithIdentity(jobKeyPlayHistory));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKeyPlayHistory)
-            .WithIdentity("FixMissingPlayHistoryTracksJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlayHistoryFixTracksCron"]));
-        
-        var jobKeyRatedTracks = new JobKey("FixMissingRatedTracksJob");
-        config.AddJob<FixMissingRatedTracksJob>(opts => opts.WithIdentity(jobKeyRatedTracks));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKeyRatedTracks)
-            .WithIdentity("FixMissingRatedTracksJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["RatingsFixTracksCron"]));
+        if (!string.IsNullOrWhiteSpace(cronConfig.PlayHistoryFixTracksCron))
+        {
+            var jobKeyPlayHistory = new JobKey("FixMissingPlayHistoryTracksJob");
+            config.AddJob<FixMissingPlayHistoryTracksJob>(opts => opts.WithIdentity(jobKeyPlayHistory));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKeyPlayHistory)
+                .WithIdentity("FixMissingPlayHistoryTracksJob-trigger")
+                .WithCronSchedule(cronConfig.PlayHistoryFixTracksCron));
+        }
+
+        if (!string.IsNullOrWhiteSpace(cronConfig.PlayHistoryFixTracksCron))
+        {
+            var jobKeyRatedTracks = new JobKey("FixMissingRatedTracksJob");
+            config.AddJob<FixMissingRatedTracksJob>(opts => opts.WithIdentity(jobKeyRatedTracks));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKeyRatedTracks)
+                .WithIdentity("FixMissingRatedTracksJob-trigger")
+                .WithCronSchedule(cronConfig.PlayHistoryFixTracksCron));
+        }
         return config;
     }
 }

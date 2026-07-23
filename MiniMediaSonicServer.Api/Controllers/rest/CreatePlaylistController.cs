@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Entities;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
@@ -22,6 +23,12 @@ public class CreatePlaylistController : SonicControllerBase
     {
         var userModel = GetUserModel();
         var playlist = await _playlistService.CreatePlaylistAsync(User.UserId, request.Name);
+
+        if (playlist == null)
+        {
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Playlist not found");
+        }
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
             Playlist = new Playlist

@@ -6,7 +6,7 @@ namespace MiniMediaSonicServer.Api.Controllers;
 
 public abstract class SonicControllerBase : ControllerBase
 {
-    protected UserModel User => HttpContext.Items["user"] as UserModel;
+    protected UserModel User => (HttpContext.Items["user"] as UserModel)!;
     
     protected User GetUserModel()
     {

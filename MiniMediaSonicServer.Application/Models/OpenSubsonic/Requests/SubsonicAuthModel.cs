@@ -7,20 +7,20 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 public class SubsonicAuthModel
 {
     [JsonPropertyName("u")]
-    public string AuthUsername { get; set; }
+    public string? AuthUsername { get; set; }
     
     [JsonPropertyName("p")]
-    public string AuthPassword { get; set; }
+    public string? AuthPassword { get; set; }
     
     [JsonPropertyName("t")]
-    public string AuthToken { get; set; }
+    public string? AuthToken { get; set; }
     
     [JsonPropertyName("s")]
-    public string AuthSalt { get; set; }
+    public string? AuthSalt { get; set; }
     
     [JsonPropertyName("c")]
-    public string AuthAppName { get; set; }
+    public string? AuthAppName { get; set; }
     
     [JsonPropertyName("f")]
-    public string AuthOutputFormat { get; set; }
+    public string? AuthOutputFormat { get; set; }
 }

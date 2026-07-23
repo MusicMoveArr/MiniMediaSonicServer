@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.WebJob.Import.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Import.Application.Services;
 using Quartz;
@@ -14,16 +15,17 @@ public static class DependencyExtension
     
     public static IServiceCollectionQuartzConfigurator AddImportJobs(
         this IServiceCollectionQuartzConfigurator config,
-        WebApplicationBuilder builder)
+        CronConfiguration cronConfig)
     {
-        var jobKey = new JobKey("ImportLastFmScrobblesJob");
-        config.AddJob<ImportLastFmScrobblesJob>(opts => opts.WithIdentity(jobKey));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKey)
-            .WithIdentity("ImportLastFmScrobblesJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["ImportLastFmScrobblesCron"]));
-        
-        
+        if (!string.IsNullOrWhiteSpace(cronConfig.ImportLastFmScrobblesCron))
+        {
+            var jobKey = new JobKey("ImportLastFmScrobblesJob");
+            config.AddJob<ImportLastFmScrobblesJob>(opts => opts.WithIdentity(jobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("ImportLastFmScrobblesJob-trigger")
+                .WithCronSchedule(cronConfig.ImportLastFmScrobblesCron));
+        }
         return config;
     }
 }

@@ -7,9 +7,9 @@ public class Extension
 {
     [XmlAttribute("name")]
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [XmlElement("versions")]
     [JsonPropertyName("versions")]
-    public List<int> Versions { get; set; }
+    public required List<int> Versions { get; set; }
 }

@@ -37,7 +37,12 @@ public class NavidromeSmartPlaylistService
     {
         _parameters.Clear();
         FileInfo fileInfo = new FileInfo(playlistPath);
-        var nsp = JsonConvert.DeserializeObject<SmartPlaylistModel>(File.ReadAllText(playlistPath));
+        var nsp = JsonConvert.DeserializeObject<SmartPlaylistModel>(await File.ReadAllTextAsync(playlistPath));
+
+        if (nsp?.All == null)
+        {
+            return;
+        }
         
         StringBuilder filter = new StringBuilder();
         

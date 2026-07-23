@@ -7,19 +7,19 @@ public class Playlist
 {
     [XmlAttribute("id")]
     [JsonPropertyName("id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     [XmlAttribute("name")]
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [XmlAttribute("comment")]
     [JsonPropertyName("comment")]
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
     [XmlAttribute("owner")]
     [JsonPropertyName("owner")]
-    public string Owner { get; set; }
+    public required string Owner { get; set; }
 
     [XmlElement("public")]
     [JsonPropertyName("public")]
@@ -27,23 +27,23 @@ public class Playlist
 
     [XmlAttribute("songCount")]
     [JsonPropertyName("songCount")]
-    public int SongCount { get; set; }
+    public required int SongCount { get; set; }
 
     [JsonPropertyName("duration")]
     [XmlAttribute("duration")]
-    public int Duration { get; set; }
+    public required int Duration { get; set; }
 
     [XmlAttribute("created")]
     [JsonPropertyName("created")]
-    public DateTime Created { get; set; }
+    public required DateTime Created { get; set; }
 
     [XmlAttribute("changed")]
     [JsonPropertyName("changed")]
-    public DateTime Changed { get; set; }
+    public required DateTime Changed { get; set; }
 
     [XmlAttribute("coverArt")]
     [JsonPropertyName("coverArt")]
-    public string CoverArt { get; set; }
+    public string? CoverArt { get; set; }
 
     [XmlElement("readonly")]
     [JsonPropertyName("readonly")]
@@ -55,9 +55,9 @@ public class Playlist
 
     [XmlAttribute("allowedUser")]
     [JsonPropertyName("allowedUser")]
-    public List<string> AllowedUser { get; set; }
+    public List<string> AllowedUser { get; set; } = [];
     
     [XmlElement("entry")]
     [JsonPropertyName("entry")]
-    public List<TrackID3> Entry { get; set; }
+    public required List<TrackID3> Entry { get; set; } = [];
 }

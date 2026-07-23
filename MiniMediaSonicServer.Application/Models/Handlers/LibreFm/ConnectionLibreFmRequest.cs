@@ -6,6 +6,6 @@ namespace MiniMediaSonicServer.Application.Models.Handlers.LibreFm;
 [HybridBind]
 public class ConnectionLibreFmRequest : SubsonicAuthModel
 {
-    public string LibreFmApiKey { get; set; }
-    public string LibreFmApiSecret { get; set; }
+    public required string LibreFmApiKey { get; set; }
+    public required string LibreFmApiSecret { get; set; }
 }

@@ -19,7 +19,7 @@ public class FingerPrintService
     [DllImport("libchromaprint.so.1", CallingConvention = CallingConvention.Cdecl)]
     public static extern void chromaprint_dealloc(IntPtr ptr);
     
-    private static int[] DecodeFingerprint(byte[] encoded, bool base64, out int algorithm)
+    private static int[]? DecodeFingerprint(byte[] encoded, bool base64, out int algorithm)
     {
         var h = GCHandle.Alloc(encoded, GCHandleType.Pinned);
 
@@ -46,7 +46,7 @@ public class FingerPrintService
         }
     }
     
-    public int[] DecodeAcoustIdFingerprint(string base64)
+    public int[]? DecodeAcoustIdFingerprint(string base64)
     {
         // Convert URL-safe Base64 to standard Base64
         byte[] encoded = DecodeAcoustIdBase64(base64);

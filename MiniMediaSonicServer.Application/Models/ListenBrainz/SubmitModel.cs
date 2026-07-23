@@ -5,8 +5,8 @@ namespace MiniMediaSonicServer.Application.Models.ListenBrainz;
 public class SubmitModel
 {
     [JsonPropertyName("listen_type")]
-    public string ListenType { get; set; }
+    public required string ListenType { get; init; }
     
     [JsonPropertyName("payload")]
-    public List<SubmitPayloadModel> Payload { get; set; }
+    public required List<SubmitPayloadModel> Payload { get; init; }
 }

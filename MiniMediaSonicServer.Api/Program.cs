@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using DbUp;
 using FluentValidation;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 using MiniMediaSonicServer.Api.Binders;
 using MiniMediaSonicServer.Api.Certificates;
 using MiniMediaSonicServer.Api.Filters;
@@ -89,13 +90,15 @@ public class Program
                 options.ModelBinderProviders.Insert(0, new HybridBinderProvider());
             })
             .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); })
-            .Services.AddQuartz(q =>
+            .Services.AddQuartz((q, serviceCollection) =>
             {
-                q.AddAutoLikeJobs(builder);
-                q.AddPlaylistJobs(builder);
-                q.AddIndexingJobs(builder);
-                q.AddImportJobs(builder);
-                q.AddScrobblerJobs(builder);
+                var cronConfig = serviceCollection.GetRequiredService<IOptions<CronConfiguration>>().Value;
+
+                q.AddAutoLikeJobs(cronConfig);
+                q.AddPlaylistJobs(cronConfig);
+                q.AddIndexingJobs(cronConfig);
+                q.AddImportJobs(cronConfig);
+                q.AddScrobblerJobs(cronConfig);
                 q.UsePersistentStore(options =>
                 {
                     options.UsePostgres(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"]);
@@ -112,7 +115,8 @@ public class Program
             .Configure<RedisConfiguration>(builder.Configuration.GetSection("Redis"))
             .Configure<ShareConfiguration>(builder.Configuration.GetSection("Shares"))
             .Configure<MusicCacheConfiguration>(builder.Configuration.GetSection("MusicCache"))
-            .Configure<GlobalConfiguration>(builder.Configuration.GetSection("GlobalConfiguration"));
+            .Configure<GlobalConfiguration>(builder.Configuration.GetSection("GlobalConfiguration"))
+            .Configure<CronConfiguration>(builder.Configuration.GetSection("Jobs"));
 
         string redisConnectionString = builder.Configuration.GetSection("Redis")["ConnectionString"];
         if (!string.IsNullOrWhiteSpace(redisConnectionString))
@@ -197,6 +201,7 @@ public class Program
         using var scope = app.Services.CreateScope();
         var userService = scope.ServiceProvider.GetRequiredService<UserService>();
         await userService.CreateFirstUserAsync();
+        
 
         app.Run();
     }

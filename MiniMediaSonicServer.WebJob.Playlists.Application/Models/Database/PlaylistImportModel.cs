@@ -2,10 +2,10 @@ namespace MiniMediaSonicServer.WebJob.Playlists.Application.Models.Database;
 
 public class PlaylistImportModel
 {
-    public Guid ImportId { get; set; }
-    public string Path { get; set; }
-    public bool IsGlobal { get; set; }
-    public string Name { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public required Guid ImportId { get; init; }
+    public required string Path { get; init; }
+    public required bool IsGlobal { get; init; }
+    public required string Name { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required DateTime UpdatedAt { get; init; }
 }

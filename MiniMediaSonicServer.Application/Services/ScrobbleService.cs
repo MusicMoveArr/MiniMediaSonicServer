@@ -24,15 +24,14 @@ public class ScrobbleService
 
     public async Task ScrobbleTrackAsync(UserModel user, Guid trackId, long time)
     {
-        DateTime scrobbleAt = time > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime : DateTime.Now;
         TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId, user.UserId);
-        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
-        
         if (track == null)
         {
             return;
         }
-
+        
+        DateTime scrobbleAt = time > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(time).DateTime : DateTime.Now;
+        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {
@@ -47,13 +46,13 @@ public class ScrobbleService
     public async Task PlayingNowTrackAsync(UserModel user, Guid trackId, long time)
     {
         TrackID3? track = await _trackRepository.GetTrackByIdAsync(trackId, user.UserId);
-        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
-
+        
         if (track == null)
         {
             return;
         }
-
+        
+        DateTime timeFilter = DateTime.Now - TimeSpan.FromSeconds(track.Duration);
         var userPlayHistory = await _userPlayHistoryRepository.GetLastUserPlayByTrackIdAsync(user.UserId, trackId, timeFilter);
         if (userPlayHistory == null)
         {

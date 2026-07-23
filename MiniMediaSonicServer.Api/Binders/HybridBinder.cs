@@ -35,14 +35,14 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
             request.EnableBuffering();
             
             var body = await JsonSerializer.DeserializeAsync<T>(
-                request.Body,
+                request.Body!,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
             if (body != null)
             {
                 result = body;
             }
-            request.Body.Position = 0;
+            request.Body!.Position = 0;
         }
         
         if (queries.Any())
@@ -80,7 +80,7 @@ public class HybridBinder<T> : IModelBinder where T : class, new()
         bindingContext.Result = ModelBindingResult.Success(result);
     }
     
-    private object ConvertValue(string raw, Type targetType)
+    private object? ConvertValue(string raw, Type targetType)
     {
         if (string.IsNullOrEmpty(raw))
         {

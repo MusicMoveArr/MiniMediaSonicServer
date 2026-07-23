@@ -25,6 +25,11 @@ public class ConnectLibreFmController : SonicControllerBase
         await _userPropertyRepository.SetUserPropertyAsync(User.UserId, LibreFmScrobbleHandler.LibreFmApiSecretSettingName, request.LibreFmApiSecret);
 
         var token = await _libreFmScrobbleHandler.GetTokenAsync(request.LibreFmApiKey, request.LibreFmApiSecret);
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return BadRequest("Failed to get token from LibreFm");
+        }
         
         await _userPropertyRepository.SetUserPropertyAsync(User.UserId, LibreFmScrobbleHandler.LibreFmTokenSettingName, token);
         return Ok($"https://libre.fm/api/auth/?api_key={request.LibreFmApiKey}&token={token}");

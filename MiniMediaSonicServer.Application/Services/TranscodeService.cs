@@ -4,7 +4,7 @@ namespace MiniMediaSonicServer.Application.Services;
 
 public class TranscodeService
 {
-    public async Task<Stream> TranscodeAsync(string filePath, string targetFormat, int bitrate)
+    public async Task<Stream?> TranscodeAsync(string filePath, string targetFormat, int bitrate)
     {
         string parameters = string.Empty;
         switch (targetFormat)

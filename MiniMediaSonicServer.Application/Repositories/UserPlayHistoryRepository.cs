@@ -22,7 +22,7 @@ public class UserPlayHistoryRepository
 	    DateTime? scrobbleAt, 
 	    long playOffset, 
 	    DateTime currentDateTime,
-	    string importedBy = null)
+	    string? importedBy = null)
     {
 	    string query = @"INSERT INTO sonicserver_user_playhistory (HistoryId, UserId, TrackId, Scrobble, ScrobbleAt, 
                                           						   Artist, AlbumArtist, Artists, Album, Title, ISRC, 

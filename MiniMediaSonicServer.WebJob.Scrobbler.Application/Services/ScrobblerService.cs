@@ -78,7 +78,7 @@ public class ScrobblerService
         foreach (var scrobble in notSendScrobbles)
         {
             var track =  tracks.FirstOrDefault(t => t.TrackId == scrobble.TrackId);
-            if (track != null && track.Duration > 0)
+            if (track != null && track.Duration > 0 && scrobble.ScrobbleAt.HasValue)
             {
                 bool success = await _libreFmScrobbleHandler.ScrobbleAsync(track, user, scrobble.ScrobbleAt.Value);
                 if (success)
@@ -119,7 +119,7 @@ public class ScrobblerService
         foreach (var scrobble in notSendScrobbles)
         {
             var track =  tracks.FirstOrDefault(t => t.TrackId == scrobble.TrackId);
-            if (track != null)
+            if (track != null && scrobble.ScrobbleAt.HasValue)
             {
                 bool success = await _malojaScrobbleHandler.ScrobbleAsync(track, user, scrobble.ScrobbleAt.Value);
                 if (success)
@@ -160,7 +160,7 @@ public class ScrobblerService
         foreach (var scrobble in notSendScrobbles)
         {
             var track =  tracks.FirstOrDefault(t => t.TrackId == scrobble.TrackId);
-            if (track != null && track.Duration > 0)
+            if (track != null && track.Duration > 0 && scrobble.ScrobbleAt.HasValue)
             {
                 bool success = await _listenBrainzScrobbleHandler.ScrobbleAsync(track, user, scrobble.ScrobbleAt.Value);
                 if (success)

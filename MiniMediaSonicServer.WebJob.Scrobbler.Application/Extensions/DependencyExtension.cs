@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.WebJob.Scrobbler.Application.Handlers.Scrobblers;
 using MiniMediaSonicServer.WebJob.Scrobbler.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Scrobbler.Application.Services;
@@ -19,16 +20,17 @@ public static class DependencyExtension
     
     public static IServiceCollectionQuartzConfigurator AddScrobblerJobs(
         this IServiceCollectionQuartzConfigurator config,
-        WebApplicationBuilder builder)
+        CronConfiguration cronConfig)
     {
-        var jobKey = new JobKey("ScrobblerJob");
-        config.AddJob<ScrobblerJob>(opts => opts.WithIdentity(jobKey));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKey)
-            .WithIdentity("ScrobblerJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["ScrobblerCron"]));
-        
-        
+        if (!string.IsNullOrWhiteSpace(cronConfig.ScrobblerCron))
+        {
+            var jobKey = new JobKey("ScrobblerJob");
+            config.AddJob<ScrobblerJob>(opts => opts.WithIdentity(jobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("ScrobblerJob-trigger")
+                .WithCronSchedule(cronConfig.ScrobblerCron));
+        }
         return config;
     }
 }

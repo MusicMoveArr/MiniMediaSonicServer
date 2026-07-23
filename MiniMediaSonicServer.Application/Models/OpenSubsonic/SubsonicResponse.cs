@@ -8,41 +8,29 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic;
 [XmlRoot("subsonic-response")]
 public class SubsonicResponse
 {
-    public SubsonicResponse()
-    {
-        Xmlns = "http://subsonic.org/restapi";
-        Status = "ok";
-        Version = "1.16.1";
-        Type = "subsonic";
-        ServerVersion = "0.51.0";
-        OpenSubsonic = true;
-
-        License = new License();
-    }
-
     [XmlAttribute("xmlns")]
     [JsonIgnore]
-    public string Xmlns { get; set; }
+    public string Xmlns { get; set; } = "http://subsonic.org/restapi";
 
     [XmlAttribute("status")]
     [JsonPropertyName("status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = "ok";
 
     [XmlAttribute("version")]
     [JsonPropertyName("version")]
-    public string Version { get; set; }
+    public string Version { get; set; } = "1.16.1";
 
     [XmlAttribute("type")]
     [JsonPropertyName("type")]
-    public string? Type { get; set; }
+    public string? Type { get; set; } = "subsonic";
 
     [XmlAttribute("serverVersion")]
     [JsonPropertyName("serverVersion")]
-    public string? ServerVersion { get; set; }
+    public string? ServerVersion { get; set; } = "0.51.0";
 
     [XmlAttribute("openSubsonic")]
     [JsonPropertyName("openSubsonic")]
-    public bool OpenSubsonic { get; set; }
+    public bool OpenSubsonic { get; set; } = true;
 
     [XmlElement("error")]
     [JsonPropertyName("error")]
@@ -50,7 +38,7 @@ public class SubsonicResponse
 
     [XmlElement("license")]
     [JsonPropertyName("license")]
-    public License? License { get; set; }
+    public License? License { get; set; } = new();
 
     [XmlElement("openSubsonicExtensions")]
     [JsonPropertyName("openSubsonicExtensions")]
@@ -62,11 +50,11 @@ public class SubsonicResponse
     
     [XmlElement("albumList")]
     [JsonPropertyName("albumList")]
-    public AlbumListResponse AlbumList { get; set; }
+    public AlbumListResponse? AlbumList { get; set; }
 
     [XmlElement("albumList2")]
     [JsonPropertyName("albumList2")]
-    public AlbumList2Response AlbumList2 { get; set; }
+    public AlbumList2Response? AlbumList2 { get; set; }
 
     [XmlElement("album")]
     [JsonPropertyName("album")]

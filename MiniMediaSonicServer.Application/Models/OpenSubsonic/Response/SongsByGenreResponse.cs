@@ -8,5 +8,5 @@ public class SongsByGenreResponse
 {
     [XmlElement("song")]
     [JsonPropertyName("song")]
-    public List<TrackID3> Tracks { get; set; }
+    public List<TrackID3> Tracks { get; set; } = [];
 }

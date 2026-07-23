@@ -5,9 +5,9 @@ namespace MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 [HybridBind]
 public class CreateUserRequest : SubsonicAuthModel
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Email { get; set; }
+    public required string Username { get; set; }
+    public required string Password { get; set; }
+    public required string Email { get; set; }
     public bool? AdminRole { get; set; }
     public bool? SettingsRole { get; set; }
     public bool? StreamRole { get; set; }

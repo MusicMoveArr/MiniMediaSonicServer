@@ -9,5 +9,5 @@ public class RandomSongsResponse
 {
     [XmlElement("song")]
     [JsonPropertyName("song")]
-    public List<TrackID3> Tracks { get; set; }
+    public required List<TrackID3> Tracks { get; set; }
 }

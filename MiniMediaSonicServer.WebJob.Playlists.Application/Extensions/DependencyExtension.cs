@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using MiniMediaSonicServer.Application.Configurations;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Jobs;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
 using MiniMediaSonicServer.WebJob.Playlists.Application.Services;
@@ -20,30 +21,37 @@ public static class DependencyExtension
     
     public static IServiceCollectionQuartzConfigurator AddPlaylistJobs(
         this IServiceCollectionQuartzConfigurator config,
-        WebApplicationBuilder builder)
+        CronConfiguration cronConfig)
     {
-        var jobKey = new JobKey("PlaylistImportJob");
-        config.AddJob<PlaylistImportJob>(opts => opts.WithIdentity(jobKey));
-        config.AddTrigger(opts => opts
-            .ForJob(jobKey)
-            .WithIdentity("PlaylistImportJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlaylistImportCron"]));
+        if (!string.IsNullOrWhiteSpace(cronConfig.PlaylistImportCron))
+        {
+            var jobKey = new JobKey("PlaylistImportJob");
+            config.AddJob<PlaylistImportJob>(opts => opts.WithIdentity(jobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity("PlaylistImportJob-trigger")
+                .WithCronSchedule(cronConfig.PlaylistImportCron));
+        }
+
+        if (!string.IsNullOrWhiteSpace(cronConfig.PlaylistFixTracksCron))
+        {
+            var fixTracksjobKey = new JobKey("FixMissingPlaylistTracksJob");
+            config.AddJob<FixMissingPlaylistTracksJob>(opts => opts.WithIdentity(fixTracksjobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(fixTracksjobKey)
+                .WithIdentity("FixMissingPlaylistTracksJob-trigger")
+                .WithCronSchedule(cronConfig.PlaylistFixTracksCron));
+        }
         
-        
-        var fixTracksjobKey = new JobKey("FixMissingPlaylistTracksJob");
-        config.AddJob<FixMissingPlaylistTracksJob>(opts => opts.WithIdentity(fixTracksjobKey));
-        config.AddTrigger(opts => opts
-            .ForJob(fixTracksjobKey)
-            .WithIdentity("FixMissingPlaylistTracksJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["PlaylistFixTracksCron"]));
-        
-        
-        var refreshNavidromeSmartPlaylistjobKey = new JobKey("NavidromeSmartPlaylistRefreshJob");
-        config.AddJob<NavidromeSmartPlaylistRefreshJob>(opts => opts.WithIdentity(refreshNavidromeSmartPlaylistjobKey));
-        config.AddTrigger(opts => opts
-            .ForJob(refreshNavidromeSmartPlaylistjobKey)
-            .WithIdentity("NavidromeSmartPlaylistRefreshJob-trigger")
-            .WithCronSchedule(builder.Configuration.GetSection("Jobs")["NavidromeSmartPlaylistRefreshCron"]));
+        if (!string.IsNullOrWhiteSpace(cronConfig.NavidromeSmartPlaylistRefreshCron))
+        {
+            var refreshNavidromeSmartPlaylistjobKey = new JobKey("NavidromeSmartPlaylistRefreshJob");
+            config.AddJob<NavidromeSmartPlaylistRefreshJob>(opts => opts.WithIdentity(refreshNavidromeSmartPlaylistjobKey));
+            config.AddTrigger(opts => opts
+                .ForJob(refreshNavidromeSmartPlaylistjobKey)
+                .WithIdentity("NavidromeSmartPlaylistRefreshJob-trigger")
+                .WithCronSchedule(cronConfig.NavidromeSmartPlaylistRefreshCron));
+        }
         return config;
     }
 }

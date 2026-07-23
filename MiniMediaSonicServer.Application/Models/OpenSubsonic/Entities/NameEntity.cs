@@ -7,5 +7,5 @@ public class NameEntity
 {
     [XmlAttribute("name")]
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 }
