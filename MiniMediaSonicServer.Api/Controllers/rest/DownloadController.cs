@@ -27,6 +27,10 @@ public class DownloadController : SonicControllerBase
 
         if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
         {
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                Console.WriteLine($"Track not found on disk '{path}'");
+            }
             return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Track not found");
         }
         
