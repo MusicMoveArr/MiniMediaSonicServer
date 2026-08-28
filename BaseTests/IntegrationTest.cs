@@ -1,5 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using RestSharp.Serializers.Json;
 using BaseTests.Configurations;
 using RestSharp;
 using Xunit;
@@ -16,7 +19,20 @@ public abstract class IntegrationTest : IClassFixture<ApiWebApplicationFactory>
     public IntegrationTest(ApiWebApplicationFactory fixture)
     {
         _factory = fixture;
-        Client = new RestClient(_factory.CreateClient());
+        
+        var options = new JsonSerializerOptions
+        {
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers = { ti =>
+                {
+                    foreach (var prop in ti.Properties)
+                        prop.IsRequired = false;
+                }}
+            }
+        };
+        
+        Client = new RestClient(_factory.CreateClient(), configureSerialization: s => s.UseSystemTextJson(options));
         _authConfig = fixture.Configuration.GetSection("Authentication").Get<AuthenticationConfiguration>();
     }
 
@@ -27,6 +43,7 @@ public abstract class IntegrationTest : IClassFixture<ApiWebApplicationFactory>
         request.AddParameter("t", _authConfig.Token);
         request.AddParameter("s", _authConfig.Salt);
         request.AddParameter("f", "json");
+        
         return request;
     }
 }

@@ -38,7 +38,7 @@ public class SearchSyncRepository
 						     limit 1) as album_count on true
  						 left join sonicserver_artist_rated artist_rated on artist_rated.ArtistId = a.ArtistId and artist_rated.UserId = @userId
 					     where 
-						 	a.record_id >= @offset 
+						 	a.record_id > @offset 
 						 	and a.record_id <= @offset + @count";
 
         await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -94,7 +94,7 @@ public class SearchSyncRepository
 						     where m.albumid = al.albumid) as al_sum on true
 						     
 					     where 
-						 	al.record_id >= @offset 
+						 	al.record_id > @offset 
 						 	and al.record_id <= @offset + @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
@@ -190,7 +190,7 @@ public class SearchSyncRepository
  							) playhistory on true
  							    
 					     where 
-						 	m.record_id >= @offset 
+						 	m.record_id > @offset 
 						 	and m.record_id <= @offset + @count";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
