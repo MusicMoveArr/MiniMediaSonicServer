@@ -56,7 +56,7 @@ public class AlbumRepository
 						                WHEN @type = 'starred' THEN album_rated.Starred
 						                WHEN @type = 'byYear' THEN al.year between @toYear and @fromYear
 						                WHEN @type = 'alphabeticalByName' THEN al.record_title_asc_id >= @offset AND al.record_title_asc_id <= @offset + @limit
-						                ELSE al.record_id >= @offset AND al.record_id <= @offset + @limit
+						                ELSE al.record_id > @offset AND al.record_id <= @offset + @limit
 						            END)
 						     ORDER BY
 						         CASE WHEN @type = 'frequent' THEN playhistory.AlbumPlaycount END DESC,
