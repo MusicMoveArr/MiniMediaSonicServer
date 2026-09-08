@@ -19,6 +19,7 @@ using Quartz;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using StackExchange.Redis;
 using MiniMediaSonicServer.WebJob.Scrobbler.Application.Extensions;
+using Npgsql;
 
 namespace MiniMediaSonicServer.Api;
 
@@ -27,9 +28,10 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        string dbConnectionString = builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"];
 
         DeployChanges.To
-            .PostgresqlDatabase(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"])
+            .PostgresqlDatabase(dbConnectionString)
             .WithExecutionTimeout(TimeSpan.FromMinutes(15))
             .WithScriptsFromFileSystem("./DbScripts")
             .LogToConsole()
@@ -101,7 +103,7 @@ public class Program
                 q.AddScrobblerJobs(cronConfig);
                 q.UsePersistentStore(options =>
                 {
-                    options.UsePostgres(builder.Configuration.GetSection("DatabaseConfiguration")["ConnectionString"]);
+                    options.UsePostgres(dbConnectionString);
                     options.UseNewtonsoftJsonSerializer();
                 });
             })
@@ -128,6 +130,13 @@ public class Program
         {
             builder.Services.AddSingleton<IRedisCacheService, RedisCacheDisabledService>();
         }
+        
+        builder.Services.AddSingleton(sp =>
+        {
+            var builder = new NpgsqlDataSourceBuilder(dbConnectionString);
+            builder.UseVector();
+            return builder.Build();
+        });
 
         //repositories
         builder.Services.AddScoped<BookmarkRepository>();

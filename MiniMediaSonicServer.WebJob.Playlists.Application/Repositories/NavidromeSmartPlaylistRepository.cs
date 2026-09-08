@@ -8,12 +8,12 @@ namespace MiniMediaSonicServer.WebJob.Playlists.Application.Repositories;
 
 public class NavidromeSmartPlaylistRepository
 {
-    private readonly DatabaseConfiguration _databaseConfiguration;
+	private readonly NpgsqlDataSource _dataSource;
     private readonly int MaxQueryTimeout = (int)TimeSpan.FromMinutes(15).TotalSeconds;
     
-    public NavidromeSmartPlaylistRepository(IOptions<DatabaseConfiguration> databaseConfiguration)
+    public NavidromeSmartPlaylistRepository(NpgsqlDataSource dataSource)
     {
-        _databaseConfiguration = databaseConfiguration.Value;
+	    _dataSource = dataSource;
     }
 
     public async Task<List<NavidromeSmartPlaylistTrackModel>> GetTrackIdsForPlaylistAsync(
@@ -69,11 +69,7 @@ public class NavidromeSmartPlaylistRepository
 						 {ordering}
 						 limit @limit";
 
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(_databaseConfiguration.ConnectionString);
-        dataSourceBuilder.UseVector();
-        var dataSource = dataSourceBuilder.Build();
-
-        await using var conn = dataSource.CreateConnection();
+        await using var conn = _dataSource.CreateConnection();
         await conn.OpenAsync();
 
         return (await conn
