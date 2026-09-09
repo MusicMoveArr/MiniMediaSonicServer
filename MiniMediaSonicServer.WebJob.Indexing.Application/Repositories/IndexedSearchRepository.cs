@@ -169,66 +169,28 @@ public class IndexedSearchRepository
 	    //because record_id was deleted/cleaned up
 	    //then second query to reset the record_id sequence ordering for new records
 
-	    string outOfSyncCountQuery = @"WITH gaps AS (
-									  SELECT
-									    record_id AS gap_id,
-									    ROW_NUMBER() OVER (ORDER BY record_id) AS rn
-									  FROM (
-									    SELECT generate_series(1, MAX(record_id)) AS record_id
-									    FROM metadata
-									    EXCEPT
-									    SELECT record_id FROM metadata
-									  ) missing
-									),
-									highs AS (
-									  SELECT
-									    record_id AS high_id,
-									    ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
-									  FROM metadata
-									  ORDER BY record_id DESC
-									  LIMIT (SELECT COUNT(*) FROM gaps)
-									)
-									SELECT count(*)
-									FROM gaps g
-									JOIN highs h ON g.rn = h.rn";
-	    
-	    
-	    string resetRecordSeqId = @"SELECT setval('metadata_record_id_seq', 1, false)";
-	    string resetRecordId = @"UPDATE metadata
-								 SET record_id = sub.new_id
-								 FROM (
-								     SELECT record_id, row_number() OVER (ORDER BY record_id) + 1000000000 AS new_id
-								     FROM metadata
-								 ) sub
-								 WHERE metadata.record_id = sub.record_id";
-	    
-	    string setNewRecordId = @"UPDATE metadata
-								  SET record_id = nextval('metadata_record_id_seq')";
-	    
-	    string query = @"WITH gaps AS (
-						   SELECT
-						     record_id AS gap_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
-						   FROM (
-						     SELECT generate_series(1, MAX(record_id)) AS record_id
-						     FROM metadata
-						     EXCEPT
-						     SELECT record_id FROM metadata
-						   ) missing
-						 ),
-						 highs AS (
-						   SELECT
-						     record_id AS high_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
-						   FROM metadata
-						   ORDER BY record_id DESC
-						   LIMIT (SELECT COUNT(*) FROM gaps)
-						 )
-						 UPDATE metadata m
-						 SET record_id = g.gap_id
-						 FROM gaps g
-						 JOIN highs h ON g.rn = h.rn
-						 WHERE m.record_id = h.high_id";
+	    string query = @"
+			WITH boundary AS (
+			  SELECT COUNT(*)::bigint AS r FROM metadata
+			),
+			gaps AS (
+			  SELECT gap_id, ROW_NUMBER() OVER (ORDER BY gap_id) AS rn
+			  FROM (
+			    SELECT generate_series(1, (SELECT r FROM boundary)) AS gap_id
+			    EXCEPT
+			    SELECT record_id FROM metadata WHERE record_id <= (SELECT r FROM boundary)
+			  ) t
+			),
+			highs AS (
+			  SELECT record_id AS high_id, ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+			  FROM metadata
+			  WHERE record_id > (SELECT r FROM boundary)
+			)
+			UPDATE metadata m
+			SET record_id = g.gap_id
+			FROM gaps g
+			JOIN highs h ON g.rn = h.rn
+			WHERE m.record_id = h.high_id";
 
 	    string resetIdentityQuery = @"SELECT setval(
 									      'metadata_record_id_seq',
@@ -241,29 +203,9 @@ public class IndexedSearchRepository
 
 	    try
 	    {
-		    int outOfSync = await conn.ExecuteScalarAsync<int>(outOfSyncCountQuery,
+		    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout,
 			    transaction: transaction);
-		    if (outOfSync >= 100000)
-		    {
-			    //just too many records are out of sync, updating this
-			    //amount takes too long to update everything, lazy update works faster
 		    
-			    await conn.ExecuteAsync(resetRecordSeqId,
-				    transaction: transaction);
-		    
-			    await conn.ExecuteAsync(resetRecordId, 
-				    commandTimeout: MaxQueryTimeout,
-				    transaction: transaction);
-		    
-			    await conn.ExecuteAsync(setNewRecordId, 
-				    commandTimeout: MaxQueryTimeout,
-				    transaction: transaction);
-		    }
-		    else
-		    {
-			    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout,
-				    transaction: transaction);
-		    }
 		    await conn.ExecuteAsync(resetIdentityQuery,
 			    transaction: transaction);
 		    await transaction.CommitAsync();
@@ -284,30 +226,28 @@ public class IndexedSearchRepository
 	    //because record_id was deleted/cleaned up
 	    //then second query to reset the record_id sequence ordering for new records
 	    
-	    string query = @"WITH gaps AS (
-						   SELECT
-						     record_id AS gap_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
-						   FROM (
-						     SELECT generate_series(1, MAX(record_id)) AS record_id
-						     FROM artists
-						     EXCEPT
-						     SELECT record_id FROM artists
-						   ) missing
-						 ),
-						 highs AS (
-						   SELECT
-						     record_id AS high_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
-						   FROM artists
-						   ORDER BY record_id DESC
-						   LIMIT (SELECT COUNT(*) FROM gaps)
-						 )
-						 UPDATE artists m
-						 SET record_id = g.gap_id
-						 FROM gaps g
-						 JOIN highs h ON g.rn = h.rn
-						 WHERE m.record_id = h.high_id";
+	    string query = @"
+			WITH boundary AS (
+			  SELECT COUNT(*)::bigint AS r FROM artists
+			),
+			gaps AS (
+			  SELECT gap_id, ROW_NUMBER() OVER (ORDER BY gap_id) AS rn
+			  FROM (
+			    SELECT generate_series(1, (SELECT r FROM boundary)) AS gap_id
+			    EXCEPT
+			    SELECT record_id FROM artists WHERE record_id <= (SELECT r FROM boundary)
+			  ) t
+			),
+			highs AS (
+			  SELECT record_id AS high_id, ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+			  FROM artists
+			  WHERE record_id > (SELECT r FROM boundary)
+			)
+			UPDATE artists m
+			SET record_id = g.gap_id
+			FROM gaps g
+			JOIN highs h ON g.rn = h.rn
+			WHERE m.record_id = h.high_id";
 	    
 	    string resetIdentityQuery = @"SELECT setval(
 									      'artists_record_id_seq',
@@ -328,30 +268,28 @@ public class IndexedSearchRepository
 	    //because record_id was deleted/cleaned up
 	    //then second query to reset the record_id sequence ordering for new records
 	    
-	    string query = @"WITH gaps AS (
-						   SELECT
-						     record_id AS gap_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id) AS rn
-						   FROM (
-						     SELECT generate_series(1, MAX(record_id)) AS record_id
-						     FROM albums
-						     EXCEPT
-						     SELECT record_id FROM albums
-						   ) missing
-						 ),
-						 highs AS (
-						   SELECT
-						     record_id AS high_id,
-						     ROW_NUMBER() OVER (ORDER BY record_id DESC) AS rn
-						   FROM albums
-						   ORDER BY record_id DESC
-						   LIMIT (SELECT COUNT(*) FROM gaps)
-						 )
-						 UPDATE albums m
-						 SET record_id = g.gap_id
-						 FROM gaps g
-						 JOIN highs h ON g.rn = h.rn
-						 WHERE m.record_id = h.high_id";
+	    string query = @"
+			WITH boundary AS (
+			  SELECT COUNT(*)::bigint AS r FROM albums
+			),
+			gaps AS (
+			  SELECT gap_id, ROW_NUMBER() OVER (ORDER BY gap_id) AS rn
+			  FROM (
+			    SELECT generate_series(1, (SELECT r FROM boundary)) AS gap_id
+			    EXCEPT
+			    SELECT record_id FROM albums WHERE record_id <= (SELECT r FROM boundary)
+			  ) t
+			),
+			highs AS (
+			  SELECT record_id AS high_id, ROW_NUMBER() OVER (ORDER BY record_id) AS rn
+			  FROM albums
+			  WHERE record_id > (SELECT r FROM boundary)
+			)
+			UPDATE albums m
+			SET record_id = g.gap_id
+			FROM gaps g
+			JOIN highs h ON g.rn = h.rn
+			WHERE m.record_id = h.high_id";
 
 	    string resetIdentityQuery = @"SELECT setval(
 									      'albums_record_id_seq',
