@@ -14,6 +14,45 @@ public class IndexedSearchRepository
     {
         _databaseConfiguration = databaseConfiguration.Value;
     }
+    
+    public async Task CleanupAlbumsWithoutTracksAsync()
+    {
+	    string query = @"
+			delete from albums album
+			where not exists (
+				select 1 from metadata m 
+				where m.albumid = album.albumid
+			)";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+    }
+    
+    public async Task CleanupArtistsWithoutAlbumsAsync()
+    {
+	    string query = @"
+			delete from artists artist
+			where not exists (
+				select 1 from albums album
+				where album.artistid = artist.artistid
+			)";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+    }
+    
+    public async Task CleanupTracksWithoutAlbumsAsync()
+    {
+	    string query = @"
+			delete from metadata m
+			where not exists (
+				select 1 from albums album
+				where album.albumid = m.albumid
+			)";
+
+	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+	    await conn.ExecuteAsync(query, commandTimeout: MaxQueryTimeout);
+    }
 
     public async Task AddMissingTracks_TitleAsync()
     {

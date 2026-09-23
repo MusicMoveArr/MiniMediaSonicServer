@@ -12,6 +12,11 @@ public class ReIndexSearchService
 
     public async Task ReIndexSearchAsync()
     {
+        //cleanups
+        await _indexedSearchRepository.CleanupAlbumsWithoutTracksAsync();
+        await _indexedSearchRepository.CleanupArtistsWithoutAlbumsAsync();
+        await _indexedSearchRepository.CleanupTracksWithoutAlbumsAsync();
+        
         //tracks
         await _indexedSearchRepository.AddMissingTracks_TitleAsync();
         await _indexedSearchRepository.AddMissingTracks_ArtistTitleAsync();
