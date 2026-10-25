@@ -2,6 +2,8 @@ namespace MiniMediaSonicServer.Application.Interfaces;
 
 public interface IRedisCacheService
 {
+    Task SetNotFoundBytesAsync(string prefixKey, string key, byte[] data);
+    
     Task SetBytesAsync(string prefixKey, string key, byte[] data);
     Task<byte[]?> GetBytesAsync(string prefixKey, string key);
     
@@ -10,4 +12,5 @@ public interface IRedisCacheService
     
     Task<bool> KeyExistsAsync(string prefixKey, string key);
     Task<bool> KeyDeleteAsync(string prefixKey, string key);
+    Task<bool> SetExpiryAsync(string prefixKey, string key, TimeSpan expiry);
 }

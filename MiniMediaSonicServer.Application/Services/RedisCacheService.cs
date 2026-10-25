@@ -15,6 +15,11 @@ public class RedisCacheService : IRedisCacheService
         _db = redis.GetDatabase();
         _redisConfiguration = redisConfiguration.Value;
     }
+    
+    public async Task SetNotFoundBytesAsync(string prefixKey, string key, byte[] data)
+    {
+        await _db.StringSetAsync($"{prefixKey}{key}", data, _redisConfiguration.NotFoundExpiry, When.Always);
+    }
 
     public async Task SetBytesAsync(string prefixKey, string key, byte[] data)
     {
@@ -26,7 +31,7 @@ public class RedisCacheService : IRedisCacheService
         var value = await _db.StringGetAsync($"{prefixKey}{key}");
         if (value.HasValue)
         {
-            await _db.KeyExpireAsync($"{prefixKey}{key}", _redisConfiguration.SlidingExpiration);
+            await SetExpiryAsync(prefixKey, key, _redisConfiguration.SlidingExpiration);
         }
         return value;
     }
@@ -41,7 +46,7 @@ public class RedisCacheService : IRedisCacheService
         var value = await _db.StringGetAsync($"{prefixKey}{key}");
         if (value.HasValue)
         {
-            await _db.KeyExpireAsync($"{prefixKey}{key}", _redisConfiguration.SlidingExpiration);
+            await SetExpiryAsync(prefixKey, key, _redisConfiguration.SlidingExpiration);
         }
         return value;
     }
@@ -54,5 +59,10 @@ public class RedisCacheService : IRedisCacheService
     public async Task<bool> KeyDeleteAsync(string prefixKey, string key)
     {
         return await _db.KeyDeleteAsync(new RedisKey($"{prefixKey}{key}"));
+    }
+
+    public async Task<bool> SetExpiryAsync(string prefixKey, string key, TimeSpan expiry)
+    {
+        return await _db.KeyExpireAsync(new RedisKey($"{prefixKey}{key}"), expiry);
     }
 }

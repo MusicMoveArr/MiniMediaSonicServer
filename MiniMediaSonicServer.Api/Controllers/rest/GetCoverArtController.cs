@@ -27,15 +27,18 @@ public class GetCoverArtController : SonicControllerBase
     private static readonly byte[] webpMagicHeader = ASCIIEncoding.ASCII.GetBytes("RIFF");
     private static readonly byte[] webpMagicHeader2 = ASCIIEncoding.ASCII.GetBytes("WEBP");
     private readonly GlobalConfiguration _globalConfiguration;
+    private readonly RedisConfiguration _redisConfiguration;
     
     public GetCoverArtController(
         CoverService coverService,
         IRedisCacheService redisCacheService,
-        IOptions<GlobalConfiguration> globalConfiguration)
+        IOptions<GlobalConfiguration> globalConfiguration,
+        IOptions<RedisConfiguration> redisConfiguration)
     {
         _coverService = coverService;
         _redisCacheService = redisCacheService;
         _globalConfiguration = globalConfiguration.Value;
+        _redisConfiguration = redisConfiguration.Value;
     }
     
     [HttpGet, HttpPost]
@@ -52,6 +55,7 @@ public class GetCoverArtController : SonicControllerBase
             var cachedCover = await _redisCacheService.GetBytesAsync(RedisPrefixKey, genericId.ToString());
             if (cachedCover?.Length == NotFoundCoverData.Length)
             {
+                await _redisCacheService.SetExpiryAsync(RedisPrefixKey, genericId.ToString(), _redisConfiguration.NotFoundExpiry);
                 return Results.Bytes(_unknownCover, "image/png");
             }
             else if (cachedCover?.Length > 0 && 
@@ -116,7 +120,7 @@ public class GetCoverArtController : SonicControllerBase
                 return Results.Bytes(coverArt.CoverData, coverArt.ContentType);
             }
 
-            await _redisCacheService.SetBytesAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
+            await _redisCacheService.SetNotFoundBytesAsync(RedisPrefixKey, extractedGuid, Encoding.ASCII.GetBytes(NotFoundCoverData));
             return Results.Bytes(_unknownCover, "image/jpeg");
         }
         
