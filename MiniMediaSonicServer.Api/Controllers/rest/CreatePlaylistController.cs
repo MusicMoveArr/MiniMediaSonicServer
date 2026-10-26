@@ -29,6 +29,8 @@ public class CreatePlaylistController : SonicControllerBase
             return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.DataNotFound, "Playlist not found");
         }
         
+        await _playlistService.AddTracksToPlaylistAsync(request.SongId, playlist.PlaylistId);
+        
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
         {
             Playlist = new Playlist

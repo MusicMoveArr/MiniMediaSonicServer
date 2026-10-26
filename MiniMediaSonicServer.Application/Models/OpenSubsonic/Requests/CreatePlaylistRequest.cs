@@ -7,5 +7,5 @@ public class CreatePlaylistRequest : SubsonicAuthModel
 {
     public Guid? PlaylistId { get; set; }
     public required string Name { get; set; }
-    public Guid SongId { get; set; }
+    public List<Guid> SongId { get; set; }
 }

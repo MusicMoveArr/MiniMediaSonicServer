@@ -66,13 +66,18 @@ public class PlaylistService
             await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId, DateTime.Now);
         }
         
-        if (request.SongIdToAdd?.Any() == true)
+        await AddTracksToPlaylistAsync(request.SongIdToAdd, request.PlaylistId);
+    }
+
+    public async Task AddTracksToPlaylistAsync(List<Guid>? trackIds, Guid playlistId)
+    {
+        if (trackIds?.Any() == true)
         {
-            foreach (var trackId in request.SongIdToAdd)
+            foreach (var trackId in trackIds)
             {
-                await _playlistRepository.AddTrackToPlaylistAsync(request.PlaylistId, trackId);
+                await _playlistRepository.AddTrackToPlaylistAsync(playlistId, trackId);
             }
-            await _playlistRepository.UpdatePlaylistUpdatedAtAsync(request.PlaylistId, DateTime.Now);
+            await _playlistRepository.UpdatePlaylistUpdatedAtAsync(playlistId, DateTime.Now);
         }
     }
 
