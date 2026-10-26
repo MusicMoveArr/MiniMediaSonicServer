@@ -38,7 +38,7 @@ public class SubsonicResponse
 
     [XmlElement("license")]
     [JsonPropertyName("license")]
-    public License? License { get; set; } = new();
+    public License? License { get; set; }
 
     [XmlElement("openSubsonicExtensions")]
     [JsonPropertyName("openSubsonicExtensions")]

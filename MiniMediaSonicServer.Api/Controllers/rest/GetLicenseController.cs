@@ -12,6 +12,9 @@ public class GetLicenseController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] SubsonicAuthModel request)
     {
-        return SubsonicResults.Ok(HttpContext, new SubsonicResponse());
+        return SubsonicResults.Ok(HttpContext, new SubsonicResponse()
+        {
+            License = new License()
+        });
     }
 }
