@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Response;
@@ -23,12 +24,20 @@ public class GetTopSongsController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] GetTopSongsRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Artist) &&
+            (!request.Id.HasValue || request.Id == Guid.Empty))
+        {
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.RequiredParameter, "Artist or Id required");
+        }
+        
         if (request.Count <= 0)
         {
             request.Count = 20;
         }
 
-        var tracks = await _trackService.GetTopTracksByArtistNameAsync(request.Artist, request.Count, User.UserId);
+        var tracks = request.Id.HasValue 
+                                    ? await _trackService.GetTopTracksByArtistIdAsync(request.Id.Value, request.Count, User.UserId)
+                                    : await _trackService.GetTopTracksByArtistNameAsync(request.Artist, request.Count, User.UserId);
         if (_musicCacheService.IsCachedFilePathExposed)
         {
             foreach (var track in tracks)

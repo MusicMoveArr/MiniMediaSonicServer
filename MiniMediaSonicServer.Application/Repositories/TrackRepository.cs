@@ -728,6 +728,62 @@ public class TrackRepository
         return await GetTracksAsync(trackIds, userId);
     }
     
+    public async Task<List<TrackID3>> GetTopArtistTracksAsync(Guid artistId, int count, Guid userId)
+    {
+	    //similar to the query of "GetSimilarTracksAsync"
+	    //with extra popularity check
+        string query = @"SELECT sim_m.MetadataId
+						  FROM artists a
+						  JOIN albums al ON al.artistid = a.artistid
+						  JOIN metadata m on m.albumid = al.albumid
+ 							    
+						  --find track in tidal data
+						  join tidal_artist ta on lower(ta.name) = lower(a.name)
+						  join tidal_album ta2 on ta2.artistid = ta.artistid and lower(ta2.title) = lower(al.title)
+						  join tidal_track tt on tt.albumid = ta2.albumid 
+						                         and similarity((tt.title || ' ' || tt.version), m.title) > 0.90
+						      					 and tt.popularity != 0
+						  --find songs we have
+						  join lateral (
+  							select 	sim_m.MetadataId, 
+  									sim_m.path,
+		  							sim_m.Title, 
+ 									sim_m.Tag_Disc,
+		  							sim_m.Tag_Track, 
+		  							sim_m.Tag_Year, 
+		  							sim_m.Tag_Isrc, 
+		  							sim_m.computed_genre,
+		  							sim_m.File_Size,
+		  							sim_m.File_CreationTime,
+		  							sim_m.tag_alljsontags,
+		  							sim_al.AlbumId,
+		  							sim_al.Title as AlbumTitle,
+		  							sim_ta.ArtistId,
+		  							sim_ta.Name as ArtistName
+	  							from metadata sim_m
+	  							join artists sim_ta on lower(sim_ta.name) = lower(ta.name)
+	  							JOIN albums sim_al ON sim_al.artistid = sim_ta.artistid
+	  							where sim_m.albumid = sim_al.albumid 
+	  							and similarity((tt.title || ' ' || tt.version), sim_m.title) > 0.90
+	  							limit 1
+						  ) sim_m on true
+						  
+ 						 where a.ArtistId = @artistId
+ 						 order by tt.popularity desc
+                         limit @count";
+
+        await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
+
+        var trackIds = (await conn.QueryAsync<Guid>(query, 
+	        param: new
+	        {
+		        artistId,
+		        count
+	        })).ToList();
+
+        return await GetTracksAsync(trackIds, userId);
+    }
+    
     
     
     public async Task<List<TrackID3>> GetRandomTracksAsync(int count, Guid userId, string? genre)

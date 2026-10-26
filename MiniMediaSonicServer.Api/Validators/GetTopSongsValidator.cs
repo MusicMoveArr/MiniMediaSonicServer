@@ -7,8 +7,6 @@ public class GetTopSongsRequestValidator : AbstractValidator<GetTopSongsRequest>
 {
     public GetTopSongsRequestValidator()
     {
-        RuleFor(request => request.Artist)
-            .MinimumLength(1)
-            .NotEmpty();
+        
     }
 }
