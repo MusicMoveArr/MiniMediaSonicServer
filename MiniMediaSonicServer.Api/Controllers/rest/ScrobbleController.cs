@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MiniMediaSonicServer.Application.Enums;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic;
 using MiniMediaSonicServer.Application.Models.OpenSubsonic.Requests;
 using MiniMediaSonicServer.Application.Services;
@@ -19,13 +20,32 @@ public class ScrobbleController : SonicControllerBase
     [HttpGet, HttpPost]
     public async Task<IResult> Get([FromQuery] ScrobbleRequest request)
     {
-        if (request.Submission)
+        if (request.Id?.Count != request.Time?.Count || 
+            request.Id == null || 
+            request.Time == null)
         {
-            await _scrobbleService.ScrobbleTrackAsync(User, request.Id, request.Time);
+            return SubsonicResults.Fail(HttpContext, SubsonicErrorCode.GenericError, "Id and Time are incorrect.");
         }
-        else
+        
+        for (int i = 0; i < request.Id.Count; i++)
         {
-            await _scrobbleService.PlayingNowTrackAsync(User, request.Id, request.Time);
+            var id = request.Id[i];
+            long time = 0;
+            
+            if (!long.TryParse(request.Time[i],  out time))
+            {
+                Console.WriteLine($"Scrobble, Id='{id}' Incorrect Time, {request.Time[i]}");
+                continue;
+            }
+            
+            if (request.Submission)
+            {
+                await _scrobbleService.ScrobbleTrackAsync(User, id, time);
+            }
+            else
+            {
+                await _scrobbleService.PlayingNowTrackAsync(User, id, time);
+            }
         }
         
         return SubsonicResults.Ok(HttpContext, new SubsonicResponse());
