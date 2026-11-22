@@ -53,8 +53,8 @@ public class TrackRepository
  							playhistory.PlayCount as PlayCount,
  							    
  							EXTRACT(EPOCH FROM
-							    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
-							    ELSE m.Tag_Length END)::interval) AS Duration,
+							    (CASE WHEN length(sim_m.Tag_Length) = 5 THEN '00:' || sim_m.Tag_Length 
+							    ELSE sim_m.Tag_Length END)::interval) AS Duration,
  							    
 							sim_m.file_creationtime as Created,
 							t.tags->>'bitrate' AS BitRate,
@@ -100,6 +100,7 @@ public class TrackRepository
 		  							sim_m.File_CreationTime,
 		  							sim_m.tag_alljsontags,
 		  							sim_m.File_Size,
+		  							sim_m.Tag_Length,
 		  							sim_al.AlbumId,
 		  							sim_al.Title as AlbumTitle,
 		  							sim_ta.ArtistId,
