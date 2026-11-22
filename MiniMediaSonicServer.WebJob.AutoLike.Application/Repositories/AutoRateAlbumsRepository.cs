@@ -28,7 +28,7 @@ public class AutoRateAlbumsRepository
 								  avg(rated.Rating) as AvgRating, 
 								  (count(rated.TrackId)::float / count(m.MetadataId)::float) * 100 as TracksPercentage
 							  from metadata m
-							  left join sonicserver_track_rated rated on rated.TrackId = m.MetadataId
+							  left join sonicserver_track_rated rated on rated.TrackId = m.MetadataId and rated.userid = @userId
 							  where m.AlbumId = al.AlbumId
 						  ) avg_rating on 1=1
 						  where
