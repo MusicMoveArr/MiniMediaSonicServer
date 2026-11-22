@@ -54,7 +54,7 @@ public class AlbumRepository
 						                WHEN @type IN ('recent', 'frequent') THEN playhistory.AlbumId IS NOT NULL
 						                WHEN @type IN ('newest', 'random') THEN 1=1
 						                WHEN @type = 'starred' THEN album_rated.Starred
-						                WHEN @type = 'byYear' THEN al.year between @toYear and @fromYear
+						                WHEN @type = 'byYear' THEN al.year between SYMMETRIC @fromYear and @toYear
 						                WHEN @type = 'alphabeticalByName' THEN al.record_title_asc_id >= @offset AND al.record_title_asc_id <= @offset + @limit
 						                ELSE al.record_id > @offset AND al.record_id <= @offset + @limit
 						            END)
