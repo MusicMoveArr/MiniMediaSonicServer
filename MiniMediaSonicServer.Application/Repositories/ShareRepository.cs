@@ -38,7 +38,7 @@ public class ShareRepository
 	    
 	    string query = @"select *
 						 from sonicserver_user_share
-						 where shareName = @shareNameOrId or ShareId = @shareId
+						 where (shareName = @shareNameOrId or ShareId = @shareId)
 						 and IsDeleted = false";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
