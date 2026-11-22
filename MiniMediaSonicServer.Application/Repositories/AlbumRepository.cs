@@ -243,7 +243,7 @@ public class AlbumRepository
  							    else null 
  							 end) as Starred,
  							    
-							m.computed_bitrate as BPM,
+							m.computed_bpm as BPM,
 							m.computed_replaygain_track_gain as TrackGain,
 							m.computed_replaygain_album_gain as AlbumGain,
 							m.computed_replaygain_track_peak as TrackPeak,
