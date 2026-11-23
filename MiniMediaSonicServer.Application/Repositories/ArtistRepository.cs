@@ -76,7 +76,9 @@ public class ArtistRepository
 								    count(distinct(m.MetadataId)) as SongCount
 							 from metadata m 
 						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         select TrackId, 
+							            max(UpdatedAt) as UpdatedAt, 
+						         		count(*) FILTER (WHERE Scrobble = true) as PlayCount
 						         from sonicserver_user_playhistory
 						         where UserId = @userId
 						         group by TrackId

@@ -89,7 +89,7 @@ public class SearchSyncRepository
 						     left join lateral (
 						         select count(hist.*) as PlayCount
 						         from sonicserver_user_playhistory hist
-						         where hist.UserId = @userId and hist.TrackId = m.MetadataId
+						         where hist.UserId = @userId and hist.Scrobble = true and hist.TrackId = m.MetadataId
 						     ) hist on true
 						     where m.albumid = al.albumid) as al_sum on true
 						     

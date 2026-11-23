@@ -104,7 +104,7 @@ public class SearchRepository
 						     LEFT JOIN (
 						         SELECT TrackId,
 						                max(UpdatedAt)  AS UpdatedAt,
-						                count(*)        AS PlayCount
+						                count(*) FILTER (WHERE Scrobble = true) AS Playcount
 						         FROM sonicserver_user_playhistory
 						         WHERE UserId = @userId
 						           AND Scrobble = true

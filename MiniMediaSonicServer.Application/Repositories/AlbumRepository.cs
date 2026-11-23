@@ -167,7 +167,7 @@ public class AlbumRepository
 						    LEFT JOIN (
 						        SELECT TrackId,
 						               max(UpdatedAt) AS UpdatedAt,
-						               count(*)       AS PlayCount
+						               count(*) FILTER (WHERE Scrobble = true) AS PlayCount
 						        FROM sonicserver_user_playhistory
 						        WHERE UserId  = @userId
 						          AND Scrobble = true
@@ -378,13 +378,15 @@ public class AlbumRepository
 									    (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
 									    	ELSE m.Tag_Length END)::interval))::int as Duration,
 						     		max(hist.UpdatedAt) as LastPlayDate,
-									sum(hist.PlayCount) as AlbumPlaycount,
+									sum(hist.PlayCount)  as AlbumPlaycount,
 								    count(distinct(m.MetadataId)) as SongCount
 							 from metadata m 
 						     left join (
-						         select TrackId, max(UpdatedAt) as UpdatedAt, count(*) as PlayCount
+						         select TrackId, 
+										max(UpdatedAt) as UpdatedAt, 
+							     		count(*) FILTER (WHERE Scrobble = true) as PlayCount
 						         from sonicserver_user_playhistory
-						         where UserId = @userId and Scrobble = true
+						         where UserId = @userId
 						         group by TrackId
 						     ) hist on hist.TrackId = m.MetadataId
 						     where m.albumid = al.albumid
