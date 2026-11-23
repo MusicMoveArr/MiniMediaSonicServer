@@ -201,10 +201,12 @@ public class SearchRepository
 						),
 						 playhist as (
 							 select	max(hist.UpdatedAt) as LastPlayDate,
-									sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount
+									sum(case when hist.Scrobble = true then 1 else 0 end) as PlayCount,
+									track.Id as TrackId
 							 from sonicserver_user_playhistory hist
 							 join tracks track on track.Id = hist.TrackId
 							 where hist.UserId = @userId
+							 group by track.Id
 						)
 						SELECT 
 							 m.MetadataId as TrackId,
@@ -234,8 +236,8 @@ public class SearchRepository
 							 m.Path as Path,
 							 'music' AS Type,
 							 'song' AS MediaType,
-							 playhist.LastPlayDate as Played,
-							 playhist.PlayCount as PlayCount,
+							 hist.LastPlayDate as Played,
+							 hist.PlayCount as PlayCount,
 
 							 EXTRACT(EPOCH FROM
 							 (CASE WHEN length(m.Tag_Length) = 5 THEN '00:' || m.Tag_Length 
@@ -279,7 +281,7 @@ public class SearchRepository
 							 where lower(join_artist.name) = lower(all_artists.artist)
 							 limit 1) joined_artist on true
 
-						left join playhist on true ";
+						left join playhist hist on hist.TrackId = m.MetadataId";
 
 	    await using var conn = new NpgsqlConnection(_databaseConfiguration.ConnectionString);
 	    await conn.OpenAsync();
