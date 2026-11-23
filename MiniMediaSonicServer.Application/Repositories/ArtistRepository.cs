@@ -135,7 +135,6 @@ public class ArtistRepository
  							    else null 
  							 end) as Starred    						
 						 FROM artists a
-						 JOIN albums al ON al.artistid = a.artistid
  						 left join sonicserver_artist_rated artist_rated on 
  						     artist_rated.ArtistId = a.ArtistId 
  						         and artist_rated.UserId = @userId
